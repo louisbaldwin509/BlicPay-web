@@ -1516,15 +1516,6 @@ export default function BlicPayApp() {
               </>
             )}
 
-            <button onClick={enterDemoMode}
-              className="bp-btn mt-2.5 w-full py-3 rounded-xl font-semibold text-sm"
-              style={{ background: C.card, border: `1px solid ${C.border}`, color: C.navy }}>
-              {tr('demoBtn')}
-            </button>
-
-            <p className="mt-4 text-xs text-center" style={{ color: C.muted }}>
-              Konekte ak: {API_BASE_URL}
-            </p>
           </div>
         )}
 
