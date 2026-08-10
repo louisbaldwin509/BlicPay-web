@@ -8,7 +8,7 @@ import {
 
 // Coupe l'URL réelle de ton backend ici une fois qu'il est déployé
 // (Railway, Render, etc.) — ex: "https://blicpay-api.up.railway.app"
-const API_BASE_URL = 'https://blicpay-backend-production.up.railway.app';
+const API_BASE_URL = 'https://api.blicpayht.com';
 
 // Petit client HTTP partagé. Ajoute automatiquement le token JWT quand il
 // y en a un, et lève une erreur avec le message renvoyé par l'API en cas
