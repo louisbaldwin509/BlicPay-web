@@ -10,6 +10,13 @@ import {
 // (Railway, Render, etc.) — ex: "https://blicpay-api.up.railway.app"
 const API_BASE_URL = 'https://api.blicpayht.com';
 
+// Separe yon "data URL" (egzanp "data:image/jpeg;base64,xxxx") an de pati:
+// [mimeType, done base64 la san prefiks la] — sèvi pou voye foto KYC yo bay backend la.
+function splitDataUrl(dataUrl) {
+  const match = /^data:([^;]+);base64,(.+)$/.exec(dataUrl || '');
+  return match ? [match[1], match[2]] : ['image/jpeg', dataUrl || ''];
+}
+
 // Petit client HTTP partagé. Ajoute automatiquement le token JWT quand il
 // y en a un, et lève une erreur avec le message renvoyé par l'API en cas
 // d'échec pour que les écrans puissent l'afficher directement.
@@ -238,80 +245,52 @@ const T = {
   },
 };
 
-const initialSolGroups = [
-  {
-    id: 'basic',
-    tier: 'Basic',
-    name: 'Sòl Basic',
-    amount: 1000,
-    frequency: 'Chak mwa',
-    maxMembers: 10,
-    cycle: 3,
-    currentTurn: 0,
-    myPayments: [
-      { month: 'Jen 2026', status: 'peye' },
-      { month: 'Jiyè 2026', status: 'peye' },
-      { month: 'Out 2026', status: 'peye' },
-    ],
-    members: [
-      { id: 'm1', name: 'Jean Baptiste' },
-      { id: 'm2', name: 'Marie Joseph' },
-      { id: 'm3', name: 'Pierre Louis' },
-      { id: 'm4', name: 'Nadège Charles' },
-      { id: 'm5', name: 'Wilner Étienne' },
-    ],
-  },
-  {
-    id: 'standard',
-    tier: 'Standard',
-    name: 'Sòl Standard',
-    amount: 5000,
-    frequency: 'Chak mwa',
-    maxMembers: 10,
-    cycle: 4,
-    currentTurn: 1,
-    myPayments: [
-      { month: 'Me 2026', status: 'peye' },
-      { month: 'Jen 2026', status: 'peye' },
-      { month: 'Jiyè 2026', status: 'peye' },
-      { month: 'Out 2026', status: 'peye' },
-    ],
-    members: [
-      { id: 'm6', name: 'Roseline Fleurant' },
-      { id: 'm7', name: 'Samuel Augustin' },
-      { id: 'm8', name: 'Kettelie Dorsainvil' },
-      { id: 'm9', name: 'Fabiola Registre' },
-      { id: 'm10', name: 'Mackenson Jean' },
-      { id: 'm11', name: 'Guerline Noël' },
-    ],
-  },
-  {
-    id: 'premium',
-    tier: 'Premium',
-    name: 'Sòl Premium',
-    amount: 15000,
-    frequency: 'Chak mwa',
-    maxMembers: 10,
-    cycle: 2,
-    currentTurn: 3,
-    myPayments: [
-      { month: 'Jiyè 2026', status: 'peye' },
-      { month: 'Out 2026', status: 'annatant' },
-    ],
-    members: [
-      { id: 'm12', name: 'Ronald Michel' },
-      { id: 'm13', name: 'Stéphanie Volcy' },
-      { id: 'm14', name: 'Jimmy Prophète' },
-      { id: 'm15', name: 'Anaïse Sylvain' },
-      { id: 'm16', name: 'Yvenson Alcéus' },
-      { id: 'm17', name: 'Darline Métellus' },
-      { id: 'm18', name: 'Wisly Casséus' },
-      { id: 'm19', name: 'Chantale Beauvoir' },
-      { id: 'm20', name: 'Frantz Similien' },
-      { id: 'm21', name: 'Jean Baptiste' },
-    ],
-  },
+// 3 tier (Basic/Standard/Premium) × 3 frekans (semenn/15 jou/mwa) × 10 sòl chak, tout vid pou kòmanse.
+const SOL_TIERS = [
+  { id: 'basic', name: 'Basic' },
+  { id: 'standard', name: 'Standard' },
+  { id: 'premium', name: 'Premium' },
 ];
+
+const SOL_FREQUENCIES = [
+  { id: 'semenn', label: 'Chak semenn', amounts: { basic: 1000, standard: 2500, premium: 5000 } },
+  { id: 'kenzenn', label: 'Chak 15 jou', amounts: { basic: 4000, standard: 8000, premium: 10000 } },
+  { id: 'mwa', label: 'Chak mwa', amounts: { basic: 10000, standard: 15000, premium: 20000 } },
+];
+
+function generateSolGroups() {
+  const groups = [];
+  SOL_FREQUENCIES.forEach((freq) => {
+    SOL_TIERS.forEach((tier) => {
+      for (let i = 1; i <= 10; i++) {
+        groups.push({
+          id: `${freq.id}-${tier.id}-${i}`,
+          tierId: tier.id,
+          tier: tier.name,
+          frequencyId: freq.id,
+          frequency: freq.label,
+          name: `Sòl ${tier.name} #${i}`,
+          order: i,
+          amount: freq.amounts[tier.id],
+          maxMembers: 10,
+          cycle: 1,
+          currentTurn: 0,
+          myPayments: [],
+          members: [],
+        });
+      }
+    });
+  });
+  return groups;
+}
+// Yon Sòl fèmen pou nouvo manm toutotan tout Sòl anvan l (menm nivo, menm frekans) poko konplè.
+function isSolGroupOpen(allGroups, group) {
+  if (group.members.length >= group.maxMembers) return false;
+  return allGroups
+    .filter((g) => g.tierId === group.tierId && g.frequencyId === group.frequencyId && g.order < group.order)
+    .every((g) => g.members.length >= g.maxMembers);
+}
+const initialSolGroups = generateSolGroups();
 
 function money(n) {
   return n.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' HTG';
@@ -331,11 +310,6 @@ function nowLabel() {
     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
   });
 }
-function isSolPaymentWindowOpen() {
-  const day = new Date().getDate();
-  return day >= 25 && day <= 28;
-}
-
 // Mwa sikl an kou a — tout sòl yo senkronize sou menm mwa a nan demo a.
 const CURRENT_CYCLE_MONTH = 'Out 2026';
 const MONTHS_HT = ['Janvye', 'Fevriye', 'Mas', 'Avril', 'Me', 'Jen', 'Jiyè', 'Out', 'Septanm', 'Oktòb', 'Novanm', 'Desanm'];
@@ -351,6 +325,65 @@ function addMonths(monthLabel, offset) {
 // Chak manm gen pwòp mwa pa yo dapre pozisyon yo nan wotasyon an.
 function memberPayoutMonth(group, memberIndex) {
   return addMonths(CURRENT_CYCLE_MONTH, memberIndex - group.currentTurn);
+}
+
+// Vèsyon jeneral pou sòl ki gen frekans semenn / 15 jou / mwa (pa itilize CURRENT_CYCLE_MONTH,
+// li baze sou dat reyèl jodi a paske sòl yo kounye a kòmanse vid e ranpli nan tan reyèl).
+function addPeriod(date, frequencyId, offset) {
+  const d = new Date(date);
+  if (frequencyId === 'semenn') d.setDate(d.getDate() + 7 * offset);
+  else if (frequencyId === 'kenzenn') d.setDate(d.getDate() + 15 * offset);
+  else d.setMonth(d.getMonth() + offset);
+  return d;
+}
+function periodLabel(date, frequencyId) {
+  if (frequencyId === 'mwa') return `${MONTHS_HT[date.getMonth()]} ${date.getFullYear()}`;
+  return `${date.getDate()} ${MONTHS_HT[date.getMonth()]}`;
+}
+function memberPayoutPeriod(group, memberIndex) {
+  const offset = memberIndex - group.currentTurn;
+  if (group.frequencyId === 'semenn') {
+    // Kotizasyon yo fèt vandredi; lajan an vèse bay moun k ap resevwa a Lendi apre a.
+    const friday = new Date(currentPeriodKey('semenn'));
+    friday.setDate(friday.getDate() + 7 * offset + 3);
+    return `Lendi ${friday.getDate()} ${MONTHS_HT[friday.getMonth()]}`;
+  }
+  return periodLabel(addPeriod(new Date(), group.frequencyId, offset), group.frequencyId);
+}
+// Frè sèvis BLICPay pran sou chak vèsman — 2% sou total pòch la, prelve lè yon moun resevwa tou li.
+const SOL_FEE_RATE = 0.02;
+function solPayoutAmounts(group) {
+  const gross = group.amount * group.maxMembers;
+  const fee = Math.round(gross * SOL_FEE_RATE);
+  return { gross, fee, net: gross - fee };
+}
+function isSolPaymentWindowOpen(frequencyId) {
+  const now = new Date();
+  const day = now.getDate();
+  if (frequencyId === 'semenn') return now.getDay() === 5; // vandredi sèlman — se obligatwa
+  if (frequencyId === 'kenzenn') return (day >= 13 && day <= 15) || day >= 28;
+  return day >= 25 && day <= 28;
+}
+function solWindowMessage(frequencyId) {
+  if (frequencyId === 'semenn') return 'Pèman semèn nan dwe fèt obligatwa nan Vandredi.';
+  if (frequencyId === 'kenzenn') return 'Peman yo fèt ant 13-15 oswa apre 28 chak 15 jou.';
+  return 'Peman yo fèt ant 25 ak 28 chak mwa.';
+}
+
+// Idantifyan peryòd aktyèl la, pou nou ka swiv kiyès ki peye pou peryòd sa a.
+// Pou "semenn", peryòd la chanje chak vandredi (dat vandredi ki pi pre a sèvi kòm kle a).
+function currentPeriodKey(frequencyId) {
+  const now = new Date();
+  if (frequencyId === 'mwa') return `${now.getFullYear()}-${now.getMonth()}`;
+  if (frequencyId === 'kenzenn') return `${now.getFullYear()}-${now.getMonth()}-${now.getDate() <= 15 ? 'A' : 'B'}`;
+  const d = new Date(now);
+  const day = d.getDay();
+  const diffToFriday = day >= 5 ? day - 5 : day + 2;
+  d.setDate(d.getDate() - diffToFriday);
+  return d.toISOString().slice(0, 10);
+}
+function hasMemberPaid(member, frequencyId) {
+  return member?.lastPaidPeriod === currentPeriodKey(frequencyId);
 }
 
 function Logo({ size = 30 }) {
@@ -506,10 +539,12 @@ export default function BlicPayApp() {
   const [toast, setToast] = useState(null);
   const [navToast, setNavToast] = useState(false);
   const [solGroups, setSolGroups] = useState(initialSolGroups);
-  const [joinedSolIds, setJoinedSolIds] = useState(['premium']);
+  const [joinedSolIds, setJoinedSolIds] = useState([]);
   const [activeSolGroupId, setActiveSolGroupId] = useState(null);
   const [solSubView, setSolSubView] = useState('browse'); // 'browse' | 'mine' | 'detail'
   const [selectedSolMember, setSelectedSolMember] = useState(null);
+  const [solFreqFilter, setSolFreqFilter] = useState('semenn');
+  const [solTierFilter, setSolTierFilter] = useState('basic');
   const [transferId, setTransferId] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
   const [transferProcessing, setTransferProcessing] = useState(false);
@@ -548,9 +583,12 @@ export default function BlicPayApp() {
     if (authToken === DEMO_TOKEN) return; // handled directly by enterDemoMode
     setLoadingWallet(true);
     try {
-      const [{ balance: bal }, { transactions }] = await Promise.all([
+      const [{ balance: bal }, { transactions }, { pockets: p }, { goals }, { loans }] = await Promise.all([
         apiFetch('/wallet/balance', { token: authToken }),
         apiFetch('/wallet/transactions', { token: authToken }),
+        apiFetch('/pockets', { token: authToken }),
+        apiFetch('/goals', { token: authToken }),
+        apiFetch('/loans/my', { token: authToken }),
       ]);
       setBalance(bal);
       setTx(transactions.map((t) => ({
@@ -560,6 +598,18 @@ export default function BlicPayApp() {
         status: t.status === 'confirmed' ? 'konfime' : t.status === 'rejected' ? 'rejte' : 'annatant',
         date: new Date(t.createdAt).toLocaleDateString('fr-FR'),
       })));
+      setPockets(p);
+      setGoalDeposits(goals.map((g) => ({
+        id: g.id, name: g.title, target: g.target, current: g.saved,
+        status: g.status === 'completed' ? 'rive' : g.status === 'withdrawn' ? 'fini' : 'aktif',
+      })));
+      const activeLoan = loans.find((l) => l.status === 'pending' || l.status === 'active');
+      setLoan(activeLoan ? {
+        id: activeLoan.id, amount: activeLoan.amount, months: activeLoan.months, rate: activeLoan.rate,
+        totalDue: activeLoan.totalDue, installmentAmount: activeLoan.installmentAmount,
+        installments: (activeLoan.installments || []).map((i) => ({ n: i.n, amount: i.amount, status: i.status === 'paid' ? 'peye' : 'annatant' })),
+        ts: Date.now(), status: activeLoan.status === 'active' ? 'aktif' : 'annatant',
+      } : null);
     } catch (err) {
       flash(err.message);
     } finally {
@@ -698,13 +748,21 @@ export default function BlicPayApp() {
       }
       setSelectedMethod(m);
       setProcessing(true);
-      await new Promise((r) => setTimeout(r, 700));
-      const fakeRef = 'RET-' + Math.floor(Math.random() * 90000 + 10000);
-      setReference(fakeRef);
-      setBalance((b) => b - Number(amount));
-      setTx((t) => [{ id: 'wd-' + Date.now(), method: m.name, amount: Number(amount), ts: Date.now(), status: 'annatant', date: 'jodi a', type: 'retrè' }, ...t]);
-      setProcessing(false);
-      setView('confirm');
+      try {
+        const { withdrawal } = await apiFetch('/withdrawals', {
+          method: 'POST',
+          token,
+          body: { amount: Number(amount), method: m.id },
+        });
+        setReference(withdrawal.reference);
+        setBalance((b) => b - Number(amount));
+        setTx((t) => [{ id: withdrawal.id, method: m.name, amount: withdrawal.amount, ts: Date.now(), status: 'annatant', date: 'jodi a', type: 'retrè' }, ...t]);
+        setView('confirm');
+      } catch (err) {
+        flash(err.message);
+      } finally {
+        setProcessing(false);
+      }
       return;
     }
 
@@ -755,21 +813,30 @@ export default function BlicPayApp() {
       return;
     }
     setTransferProcessing(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setBalance((b) => b - Number(transferAmount));
-    setTx((t) => [{
-      id: 'tr-' + Date.now(),
-      method: `Transfè bay ${transferId}`,
-      amount: Number(transferAmount),
-      ts: Date.now(), status: 'konfime',
-      date: 'jodi a',
-      type: 'transfè',
-    }, ...t]);
-    setTransferProcessing(false);
-    flash('Transfè a fèt.');
-    setTransferId('');
-    setTransferAmount('');
-    setView('dashboard');
+    try {
+      await apiFetch('/transfers', {
+        method: 'POST',
+        token,
+        body: { clientId: transferId.trim(), amount: Number(transferAmount) },
+      });
+      setBalance((b) => b - Number(transferAmount));
+      setTx((t) => [{
+        id: 'tr-' + Date.now(),
+        method: `Transfè bay ${transferId}`,
+        amount: Number(transferAmount),
+        ts: Date.now(), status: 'konfime',
+        date: 'jodi a',
+        type: 'transfè',
+      }, ...t]);
+      flash('Transfè a fèt.');
+      setTransferId('');
+      setTransferAmount('');
+      setView('dashboard');
+    } catch (err) {
+      flash(err.message);
+    } finally {
+      setTransferProcessing(false);
+    }
   }
 
   function openPocket(id) {
@@ -785,12 +852,17 @@ export default function BlicPayApp() {
       flash('Bay pòch la yon non.');
       return;
     }
-    const id = 'p-' + Date.now();
-    setPockets((ps) => [...ps, { id, name: newPocketName.trim(), balance: 0, target: newPocketTarget ? Number(newPocketTarget) : null }]);
-    setNewPocketName('');
-    setNewPocketTarget('');
-    setShowNewPocket(false);
-    flash('Pòch la kreye.');
+    apiFetch('/pockets', {
+      method: 'POST',
+      token,
+      body: { name: newPocketName.trim(), target: newPocketTarget ? Number(newPocketTarget) : null },
+    }).then(({ pocket }) => {
+      setPockets((ps) => [...ps, pocket]);
+      setNewPocketName('');
+      setNewPocketTarget('');
+      setShowNewPocket(false);
+      flash('Pòch la kreye.');
+    }).catch((err) => flash(err.message));
   }
 
   async function addMoneyToPocket() {
@@ -809,14 +881,19 @@ export default function BlicPayApp() {
       return;
     }
     setAddMoneyProcessing(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setBalance((b) => b - amt);
-    setPockets((ps) => ps.map((p) => p.id === pocket.id ? { ...p, balance: p.balance + amt } : p));
-    setTx((t) => [{ id: 'pk-' + Date.now(), method: `Epay nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'epay' }, ...t]);
-    setAddMoneyProcessing(false);
-    setAddMoneyAmount('');
-    setShowAddMoney(false);
-    flash('Lajan an ajoute nan pòch la.');
+    try {
+      const { pocket: updated } = await apiFetch(`/pockets/${pocket.id}/deposit`, { method: 'POST', token, body: { amount: amt } });
+      setBalance((b) => b - amt);
+      setPockets((ps) => ps.map((p) => p.id === pocket.id ? updated : p));
+      setTx((t) => [{ id: 'pk-' + Date.now(), method: `Epay nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'epay' }, ...t]);
+      setAddMoneyAmount('');
+      setShowAddMoney(false);
+      flash('Lajan an ajoute nan pòch la.');
+    } catch (err) {
+      flash(err.message);
+    } finally {
+      setAddMoneyProcessing(false);
+    }
   }
 
   function createGoalDeposit() {
@@ -828,18 +905,17 @@ export default function BlicPayApp() {
       flash('Antre yon montan objektif valab.');
       return;
     }
-    const gd = {
-      id: 'gd-' + Date.now(),
-      name: newGoalName.trim(),
-      target: Number(newGoalTarget),
-      current: 0,
-      status: 'aktif',
-    };
-    setGoalDeposits((list) => [gd, ...list]);
-    setNewGoalName('');
-    setNewGoalTarget('');
-    setView('termdepo');
-    flash('Objektif kreye.');
+    apiFetch('/goals', {
+      method: 'POST',
+      token,
+      body: { title: newGoalName.trim(), target: Number(newGoalTarget) },
+    }).then(({ goal }) => {
+      setGoalDeposits((list) => [{ id: goal.id, name: goal.title, target: goal.target, current: goal.saved, status: goal.status === 'completed' ? 'rive' : 'aktif' }, ...list]);
+      setNewGoalName('');
+      setNewGoalTarget('');
+      setView('termdepo');
+      flash('Objektif kreye.');
+    }).catch((err) => flash(err.message));
   }
 
   function openGoal(id) {
@@ -862,36 +938,45 @@ export default function BlicPayApp() {
       return;
     }
     setGoalProcessing(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setBalance((b) => b - amt);
-    const newCurrent = gd.current + amt;
-    const reached = newCurrent >= gd.target;
-    setGoalDeposits((list) => list.map((g) => g.id === gd.id
-      ? { ...g, current: newCurrent, status: reached ? 'rive' : 'aktif' }
-      : g));
-    setTx((t) => [{
-      id: 'gd-tx-' + Date.now(), method: `Depo Ak Objektif — ${gd.name}`, amount: amt,
-      ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè',
-    }, ...t]);
-    setGoalProcessing(false);
-    setAddGoalAmount('');
-    flash(reached ? 'Objektif la atenn! Ou ka retire lajan an kounye a.' : 'Lajan an ajoute nan objektif la.');
+    try {
+      const { goal } = await apiFetch(`/goals/${gd.id}/deposit`, { method: 'POST', token, body: { amount: amt } });
+      setBalance((b) => b - amt);
+      const reached = goal.status === 'completed';
+      setGoalDeposits((list) => list.map((g) => g.id === gd.id
+        ? { ...g, current: goal.saved, status: reached ? 'rive' : 'aktif' }
+        : g));
+      setTx((t) => [{
+        id: 'gd-tx-' + Date.now(), method: `Depo Ak Objektif — ${gd.name}`, amount: amt,
+        ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè',
+      }, ...t]);
+      setAddGoalAmount('');
+      flash(reached ? 'Objektif la atenn! Ou ka retire lajan an kounye a.' : 'Lajan an ajoute nan objektif la.');
+    } catch (err) {
+      flash(err.message);
+    } finally {
+      setGoalProcessing(false);
+    }
   }
 
   async function withdrawGoal(id) {
     const gd = goalDeposits.find((g) => g.id === id);
     if (!gd || gd.status !== 'rive') return;
     setGoalProcessing(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setBalance((b) => b + gd.current);
-    setGoalDeposits((list) => list.filter((g) => g.id !== id));
-    setTx((t) => [{
-      id: 'gd-out-' + Date.now(), method: `Objektif fini — ${gd.name}`, amount: gd.current,
-      ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo',
-    }, ...t]);
-    setGoalProcessing(false);
-    setView('termdepo');
-    flash('Lajan an tounen nan kont prensipal ou.');
+    try {
+      const { goal } = await apiFetch(`/goals/${id}/withdraw`, { method: 'POST', token, body: {} });
+      setBalance((b) => b + gd.current);
+      setGoalDeposits((list) => list.filter((g) => g.id !== id));
+      setTx((t) => [{
+        id: 'gd-out-' + Date.now(), method: `Objektif fini — ${gd.name}`, amount: gd.current,
+        ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo',
+      }, ...t]);
+      setView('termdepo');
+      flash('Lajan an tounen nan kont prensipal ou.');
+    } catch (err) {
+      flash(err.message);
+    } finally {
+      setGoalProcessing(false);
+    }
   }
 
   const EMERGENCY_FEE_RATE = 0.045;
@@ -899,20 +984,23 @@ export default function BlicPayApp() {
   async function emergencyWithdrawGoal(id) {
     const gd = goalDeposits.find((g) => g.id === id);
     if (!gd || gd.current <= 0) return;
-    const fee = Math.round(gd.current * EMERGENCY_FEE_RATE);
-    const net = gd.current - fee;
     setGoalProcessing(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setBalance((b) => b + net);
-    setGoalDeposits((list) => list.filter((g) => g.id !== id));
-    setTx((t) => [{
-      id: 'gd-em-' + Date.now(), method: `Retrè ijans — ${gd.name} (frè 4.5%)`, amount: net,
-      ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo',
-    }, ...t]);
-    setGoalProcessing(false);
-    setShowEmergency(false);
-    setView('termdepo');
-    flash(`Retrè ijans fèt — ${money(fee)} kenbe kòm frè.`);
+    try {
+      const { fee, net } = await apiFetch(`/goals/${id}/withdraw`, { method: 'POST', token, body: { emergency: true } });
+      setBalance((b) => b + net);
+      setGoalDeposits((list) => list.filter((g) => g.id !== id));
+      setTx((t) => [{
+        id: 'gd-em-' + Date.now(), method: `Retrè ijans — ${gd.name} (frè 4.5%)`, amount: net,
+        ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo',
+      }, ...t]);
+      setShowEmergency(false);
+      setView('termdepo');
+      flash(`Retrè ijans fèt — ${money(fee)} kenbe kòm frè.`);
+    } catch (err) {
+      flash(err.message);
+    } finally {
+      setGoalProcessing(false);
+    }
   }
 
   async function requestLoan() {
@@ -921,45 +1009,62 @@ export default function BlicPayApp() {
       flash('Antre yon montan valab.');
       return;
     }
-    const plan = LOAN_PLANS[newLoanPlanIdx];
     setLoanProcessing(true);
-    await new Promise((r) => setTimeout(r, 900));
-    const totalDue = Math.round(amt * (1 + plan.rate));
-    const installmentAmount = Math.round(totalDue / plan.months);
-    const installments = Array.from({ length: plan.months }, (_, i) => ({
-      n: i + 1,
-      month: addMonths(CURRENT_CYCLE_MONTH, i + 1),
-      amount: installmentAmount,
-      ts: Date.now(), status: 'annatant',
-    }));
-    setLoan({
-      id: 'ln-' + Date.now(),
-      amount: amt,
-      months: plan.months,
-      rate: plan.rate,
-      totalDue,
-      installmentAmount,
-      installments,
-      ts: Date.now(), status: 'annatant',
-    });
-    setLoanProcessing(false);
-    setNewLoanAmount('');
-    setView('loan');
-    flash('Demand prè a voye — n ap egzamine li.');
+    try {
+      const { loan: created } = await apiFetch('/loans/request', {
+        method: 'POST', token, body: { amount: amt, planIdx: newLoanPlanIdx },
+      });
+      setLoan({
+        id: created.id,
+        amount: created.amount,
+        months: created.months,
+        rate: created.rate,
+        totalDue: created.totalDue,
+        installmentAmount: created.installmentAmount,
+        installments: [],
+        ts: Date.now(), status: 'annatant',
+      });
+      setNewLoanAmount('');
+      setView('loan');
+      flash('Demand prè a voye — n ap egzamine li.');
+    } catch (err) {
+      flash(err.message);
+    } finally {
+      setLoanProcessing(false);
+    }
   }
 
+  // Verifye vre estati prè a bò kote sèvè a — okenn admin ki apwouve l pa
+  // vle di li otomatikman aktif; nou jis li estati reyèl la.
   async function checkLoanStatus() {
     if (!loan || loan.status !== 'annatant') return;
     setCheckingLoan(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setCheckingLoan(false);
-    setLoan((l) => ({ ...l, status: 'aktif' }));
-    setBalance((b) => b + loan.amount);
-    setTx((t) => [{
-      id: 'ln-tx-' + Date.now(), method: 'Prè apwouve', amount: loan.amount,
-      ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo',
-    }, ...t]);
-    flash('Prè a apwouve — lajan an nan kont ou.');
+    try {
+      const { loans } = await apiFetch('/loans/my', { token });
+      const fresh = loans.find((l) => l.id === loan.id);
+      if (!fresh) { setCheckingLoan(false); return; }
+      if (fresh.status === 'active' && loan.status !== 'active') {
+        setBalance((b) => b + loan.amount);
+        setTx((t) => [{
+          id: 'ln-tx-' + Date.now(), method: 'Prè apwouve', amount: loan.amount,
+          ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo',
+        }, ...t]);
+        flash('Prè a apwouve — lajan an nan kont ou.');
+      } else if (fresh.status === 'rejected') {
+        flash('Demand prè a refize.');
+      } else {
+        flash('Pa gen chanjman — l ap tann toujou.');
+      }
+      setLoan((l) => ({
+        ...l,
+        status: fresh.status === 'active' ? 'aktif' : fresh.status === 'rejected' ? 'refize' : 'annatant',
+        installments: (fresh.installments || []).map((i) => ({ n: i.n, amount: i.amount, status: i.status === 'paid' ? 'peye' : 'annatant', ts: Date.now() })),
+      }));
+    } catch (err) {
+      flash(err.message);
+    } finally {
+      setCheckingLoan(false);
+    }
   }
 
   async function payLoanInstallment() {
@@ -971,22 +1076,27 @@ export default function BlicPayApp() {
       return;
     }
     setLoanProcessing(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setBalance((b) => b - next.amount);
-    setTx((t) => [{
-      id: 'ln-pay-' + Date.now(), method: `Vèsman prè ${next.n}/${loan.months}`, amount: next.amount,
-      ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'retrè',
-    }, ...t]);
-    setLoan((l) => {
-      const updated = {
-        ...l,
-        installments: l.installments.map((i) => i.n === next.n ? { ...i, status: 'peye' } : i),
-      };
-      updated.status = updated.installments.every((i) => i.status === 'peye') ? 'fini' : 'aktif';
-      return updated;
-    });
-    setLoanProcessing(false);
-    flash(next.n === loan.months ? 'Prè a peye nèt!' : 'Vèsman anrejistre.');
+    try {
+      const { finished } = await apiFetch(`/loans/${loan.id}/pay-installment`, { method: 'POST', token, body: {} });
+      setBalance((b) => b - next.amount);
+      setTx((t) => [{
+        id: 'ln-pay-' + Date.now(), method: `Vèsman prè ${next.n}/${loan.months}`, amount: next.amount,
+        ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'retrè',
+      }, ...t]);
+      setLoan((l) => {
+        const updated = {
+          ...l,
+          installments: l.installments.map((i) => i.n === next.n ? { ...i, status: 'peye' } : i),
+        };
+        updated.status = finished ? 'fini' : 'aktif';
+        return updated;
+      });
+      flash(finished ? 'Prè a peye nèt!' : 'Vèsman anrejistre.');
+    } catch (err) {
+      flash(err.message);
+    } finally {
+      setLoanProcessing(false);
+    }
   }
 
   async function confirmPocketAction() {
@@ -998,47 +1108,50 @@ export default function BlicPayApp() {
       return;
     }
 
-    if (pocketMode === 'deposit') {
-      if (amt > balance) { flash('Ou pa gen ase nan kont prensipal la.'); return; }
-      setPocketProcessing(true);
-      await new Promise((r) => setTimeout(r, 700));
-      setBalance((b) => b - amt);
-      setPockets((ps) => ps.map((p) => p.id === activePocketId ? { ...p, balance: p.balance + amt } : p));
-      setTx((t) => [{ id: 'pk-' + Date.now(), method: `Epay nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'epay' }, ...t]);
-      flash('Lajan an mete nan pòch la.');
-    } else if (pocketMode === 'spend') {
-      if (amt > pocket.balance) { flash('Pa gen ase lajan nan pòch sa a.'); return; }
-      setPocketProcessing(true);
-      await new Promise((r) => setTimeout(r, 700));
-      setPockets((ps) => ps.map((p) => p.id === activePocketId ? { ...p, balance: p.balance - amt } : p));
-      setTx((t) => [{ id: 'pk-' + Date.now(), method: `Retrè soti nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'retrè', pocketId: pocket.id, kind: 'depanse' }, ...t]);
-      flash('Depans anrejistre.');
-    } else if (pocketMode === 'transfer') {
-      if (amt > pocket.balance) { flash('Pa gen ase lajan nan pòch sa a.'); return; }
-      setPocketProcessing(true);
-      await new Promise((r) => setTimeout(r, 700));
-      if (pocketTransferTarget === 'main') {
-        setBalance((b) => b + amt);
-        setPockets((ps) => ps.map((p) => p.id === activePocketId ? { ...p, balance: p.balance - amt } : p));
-        setTx((t) => [{ id: 'pk-' + Date.now(), method: `Transfè soti nan ${pocket.name} bay Kont prensipal`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo', pocketId: pocket.id, kind: 'transfè-soti' }, ...t]);
-      } else {
-        const destName = pockets.find((p) => p.id === pocketTransferTarget)?.name;
-        setPockets((ps) => ps.map((p) => {
-          if (p.id === activePocketId) return { ...p, balance: p.balance - amt };
-          if (p.id === pocketTransferTarget) return { ...p, balance: p.balance + amt };
-          return p;
-        }));
-        setTx((t) => [
-          { id: 'pk-' + Date.now(), method: `Transfè soti nan ${pocket.name} bay ${destName}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'transfè-soti' },
-          { id: 'pk-' + Date.now() + '-r', method: `Transfè resevwa soti nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo', pocketId: pocketTransferTarget, kind: 'transfè-antre' },
-          ...t,
-        ]);
+    setPocketProcessing(true);
+    try {
+      if (pocketMode === 'deposit') {
+        if (amt > balance) { flash('Ou pa gen ase nan kont prensipal la.'); setPocketProcessing(false); return; }
+        const { pocket: updated } = await apiFetch(`/pockets/${pocket.id}/deposit`, { method: 'POST', token, body: { amount: amt } });
+        setBalance((b) => b - amt);
+        setPockets((ps) => ps.map((p) => p.id === activePocketId ? updated : p));
+        setTx((t) => [{ id: 'pk-' + Date.now(), method: `Epay nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'epay' }, ...t]);
+        flash('Lajan an mete nan pòch la.');
+      } else if (pocketMode === 'spend') {
+        if (amt > pocket.balance) { flash('Pa gen ase lajan nan pòch sa a.'); setPocketProcessing(false); return; }
+        const { pocket: updated } = await apiFetch(`/pockets/${pocket.id}/spend`, { method: 'POST', token, body: { amount: amt } });
+        setPockets((ps) => ps.map((p) => p.id === activePocketId ? updated : p));
+        setTx((t) => [{ id: 'pk-' + Date.now(), method: `Retrè soti nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'retrè', pocketId: pocket.id, kind: 'depanse' }, ...t]);
+        flash('Depans anrejistre.');
+      } else if (pocketMode === 'transfer') {
+        if (amt > pocket.balance) { flash('Pa gen ase lajan nan pòch sa a.'); setPocketProcessing(false); return; }
+        const { pocket: updated } = await apiFetch(`/pockets/${pocket.id}/transfer`, { method: 'POST', token, body: { amount: amt, to: pocketTransferTarget } });
+        if (pocketTransferTarget === 'main') {
+          setBalance((b) => b + amt);
+          setPockets((ps) => ps.map((p) => p.id === activePocketId ? updated : p));
+          setTx((t) => [{ id: 'pk-' + Date.now(), method: `Transfè soti nan ${pocket.name} bay Kont prensipal`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo', pocketId: pocket.id, kind: 'transfè-soti' }, ...t]);
+        } else {
+          const destName = pockets.find((p) => p.id === pocketTransferTarget)?.name;
+          setPockets((ps) => ps.map((p) => {
+            if (p.id === activePocketId) return updated;
+            if (p.id === pocketTransferTarget) return { ...p, balance: p.balance + amt };
+            return p;
+          }));
+          setTx((t) => [
+            { id: 'pk-' + Date.now(), method: `Transfè soti nan ${pocket.name} bay ${destName}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'transfè-soti' },
+            { id: 'pk-' + Date.now() + '-r', method: `Transfè resevwa soti nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo', pocketId: pocketTransferTarget, kind: 'transfè-antre' },
+            ...t,
+          ]);
+        }
+        flash('Transfè fèt.');
       }
-      flash('Transfè fèt.');
+      setPocketMode(null);
+      setPocketAmount('');
+    } catch (err) {
+      flash(err.message);
+    } finally {
+      setPocketProcessing(false);
     }
-    setPocketProcessing(false);
-    setPocketMode(null);
-    setPocketAmount('');
   }
 
   function openEditProfile() {
@@ -1160,22 +1273,36 @@ export default function BlicPayApp() {
       return;
     }
     setKycSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setKycSubmitting(false);
-    setKycStatus('annatant');
-    setView('dashboard');
-    flash('Dokiman ou voye — n ap verifye l.');
+    try {
+      const [docMimeType, docImage] = splitDataUrl(kycFile);
+      const [selfieMimeType, selfieImage] = splitDataUrl(kycSelfieFile);
+      await apiFetch('/kyc/submit', {
+        method: 'POST',
+        token,
+        body: { docType: kycDocType, docImage, docMimeType, selfieImage, selfieMimeType },
+      });
+      setKycStatus('annatant');
+      setView('dashboard');
+      flash('Dokiman ou voye — n ap verifye l.');
+    } catch (e) {
+      flash(e.message || 'Nou pa t ka voye dokiman yo.');
+    } finally {
+      setKycSubmitting(false);
+    }
   }
 
   async function checkKycStatus() {
     setRefreshing(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setRefreshing(false);
-    if (kycStatus === 'annatant') {
-      setKycStatus('verifye');
-      flash('Kont ou verifye kounye a.');
-    } else {
-      flash('Pa gen chanjman.');
+    try {
+      const data = await apiFetch('/kyc/status', { token });
+      setKycStatus(data.status === 'approved' ? 'verifye' : data.status === 'pending' ? 'annatant' : 'pa verifye');
+      if (data.status === 'approved') flash('Kont ou verifye kounye a.');
+      else if (data.status === 'rejected') flash(data.rejectionReason || 'Demand verifikasyon w refize — eseye ankò.');
+      else flash('Pa gen chanjman.');
+    } catch (e) {
+      flash(e.message || 'Nou pa t ka verifye estati a.');
+    } finally {
+      setRefreshing(false);
     }
   }
 
@@ -1217,14 +1344,26 @@ export default function BlicPayApp() {
       flash('Sòl sa a konplè.');
       return;
     }
+    if (target && !joinedSolIds.includes(gid) && !isSolGroupOpen(solGroups, target)) {
+      flash(`Sòl sa a fèmen pou kounye a — Sòl ${target.tier} #${target.order - 1} dwe ranpli anvan.`);
+      return;
+    }
     if (!joinedSolIds.includes(gid)) {
       setSolGroups((gs) => gs.map((g) => g.id === gid
-        ? { ...g, members: [...g.members, { id: 'me-' + Date.now(), name: user?.fullName || 'Ou' }] }
+        ? { ...g, members: [...g.members, { id: 'me-' + Date.now(), name: user?.fullName || 'Ou', lastPaidPeriod: null }] }
         : g));
       setJoinedSolIds((ids) => [...ids, gid]);
       flash('Ou antre nan sòl la.');
     }
     openSolDetail(gid);
+  }
+
+  function markSolPaid(gid, memberId) {
+    setSolGroups((gs) => gs.map((g) => g.id !== gid ? g : {
+      ...g,
+      members: g.members.map((m) => m.id === memberId ? { ...m, lastPaidPeriod: currentPeriodKey(g.frequencyId) } : m),
+    }));
+    flash('Peman ou anrejistre pou peryòd sa a.');
   }
 
   function openSolDetail(gid) {
@@ -1800,9 +1939,7 @@ export default function BlicPayApp() {
                   </button>
                 </div>
                 <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Ou fè pati {joinedSolIds.length} sòl.</p>
-                <p className="mt-1 text-xs font-medium" style={{ color: isSolPaymentWindowOpen() ? C.mint : C.amber }}>
-                  {isSolPaymentWindowOpen() ? 'Fenèt peman an louvri kounye a.' : 'Peman yo fèt ant 25 ak 28 chak mwa.'}
-                </p>
+                <p className="mt-1 text-xs" style={{ color: C.muted }}>Chak sòl gen pwòp orè peman li dapre frekans li.</p>
                 <div className="mt-5 space-y-3">
                   {solGroups.filter((g) => joinedSolIds.includes(g.id)).map((g) => {
                     const myIdx = g.members.findIndex((m) => m.name === user?.fullName);
@@ -1820,7 +1957,7 @@ export default function BlicPayApp() {
                           </p>
                           {myIdx !== -1 && (
                             <p className="mt-1 text-xs font-semibold" style={{ color: C.navy }}>
-                              Ou ap resevwa: {memberPayoutMonth(g, myIdx)}
+                              Ou ap resevwa: {memberPayoutPeriod(g, myIdx)}
                             </p>
                           )}
                         </div>
@@ -1838,13 +1975,42 @@ export default function BlicPayApp() {
                 <p className="mt-1.5 text-sm" style={{ color: C.muted }}>
                   {joinedSolIds.length > 0 ? 'Ou ka antre nan plizyè sòl an menm tan.' : 'Ou poko manm okenn sòl. Chwazi youn pou kòmanse.'}
                 </p>
-                <div className="mt-5 space-y-3">
-                  {solGroups.map((g) => {
+
+                <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+                  {SOL_FREQUENCIES.map((f) => (
+                    <button key={f.id} onClick={() => setSolFreqFilter(f.id)}
+                      className="bp-btn shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold"
+                      style={solFreqFilter === f.id
+                        ? { background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, color: '#fff' }
+                        : { background: C.card, color: C.muted, border: `1px solid ${C.border}` }}>
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+                  {SOL_TIERS.map((t) => (
+                    <button key={t.id} onClick={() => setSolTierFilter(t.id)}
+                      className="bp-btn shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold"
+                      style={solTierFilter === t.id
+                        ? { background: C.ink, color: '#fff' }
+                        : { background: C.card, color: C.muted, border: `1px solid ${C.border}` }}>
+                      {t.name}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-3 text-xs font-medium" style={{ color: C.navy }}>
+                  {money(SOL_FREQUENCIES.find((f) => f.id === solFreqFilter)?.amounts[solTierFilter] || 0)} pa moun · {SOL_FREQUENCIES.find((f) => f.id === solFreqFilter)?.label}
+                </p>
+
+                <div className="mt-4 space-y-3">
+                  {solGroups.filter((g) => g.frequencyId === solFreqFilter && g.tierId === solTierFilter).map((g) => {
                     const spotsLeft = g.maxMembers - g.members.length;
                     const isFull = spotsLeft <= 0;
                     const alreadyIn = joinedSolIds.includes(g.id);
+                    const isOpen = isSolGroupOpen(solGroups, g);
+                    const isLocked = !isFull && !isOpen && !alreadyIn;
                     return (
-                      <div key={g.id} className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                      <div key={g.id} className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}`, opacity: isLocked ? 0.65 : 1 }}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-sm">{g.name}</h3>
@@ -1854,8 +2020,10 @@ export default function BlicPayApp() {
                         </div>
                         <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{g.frequency} · {money(g.amount)} pa moun</p>
                         {!alreadyIn && (
-                          <p className="mt-1 text-xs font-medium" style={{ color: isFull ? C.mint : C.amber }}>
-                            {isFull ? 'Sòl la konplè — li ka demare' : `${spotsLeft} plas ki rete pou l demare`}
+                          <p className="mt-1 text-xs font-medium" style={{ color: isFull ? C.mint : isLocked ? C.muted : C.amber }}>
+                            {isFull ? 'Sòl la konplè — li ka demare'
+                              : isLocked ? <><Lock size={11} className="inline mr-1" />Ap louvri lè Sòl {g.tier} #{g.order - 1} fin ranpli</>
+                              : `${spotsLeft} plas ki rete pou l demare`}
                           </p>
                         )}
                         {alreadyIn ? (
@@ -1865,10 +2033,10 @@ export default function BlicPayApp() {
                             Deja manm — wè detay <ChevronRight size={14} />
                           </button>
                         ) : (
-                          <button onClick={() => joinSolGroup(g.id)} disabled={isFull}
+                          <button onClick={() => joinSolGroup(g.id)} disabled={isFull || isLocked}
                             className="bp-btn mt-3 w-full py-2.5 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-1.5"
-                            style={{ background: isFull ? C.border : `linear-gradient(135deg, ${C.navy}, ${C.sky})`, color: isFull ? C.muted : '#fff', cursor: isFull ? 'not-allowed' : 'pointer' }}>
-                            {isFull ? 'Pa gen plas ankò' : <>Antre nan sòl la <ChevronRight size={14} /></>}
+                            style={{ background: (isFull || isLocked) ? C.border : `linear-gradient(135deg, ${C.navy}, ${C.sky})`, color: (isFull || isLocked) ? C.muted : '#fff', cursor: (isFull || isLocked) ? 'not-allowed' : 'pointer' }}>
+                            {isFull ? 'Pa gen plas ankò' : isLocked ? <><Lock size={13} /> Fèmen pou kounye a</> : <>Antre nan sòl la <ChevronRight size={14} /></>}
                           </button>
                         )}
                       </div>
@@ -1911,8 +2079,8 @@ export default function BlicPayApp() {
                         {isNow
                           ? ' ap resevwa pòch la sikl sa a.'
                           : hasReceived
-                            ? <> deja resevwa pòch li an <span style={{ color: C.mint, fontWeight: 600 }}>{memberPayoutMonth(userSolGroup, idx)}</span>.</>
-                            : ` ap resevwa pòch li an ${memberPayoutMonth(userSolGroup, idx)}.`}
+                            ? <> deja resevwa pòch li an <span style={{ color: C.mint, fontWeight: 600 }}>{memberPayoutPeriod(userSolGroup, idx)}</span>.</>
+                            : ` ap resevwa pòch li an ${memberPayoutPeriod(userSolGroup, idx)}.`}
                       </p>
                     );
                   })()}
@@ -1921,14 +2089,42 @@ export default function BlicPayApp() {
                 {(() => {
                   const myIdx = userSolGroup.members.findIndex((m) => m.name === user?.fullName);
                   if (myIdx === -1) return null;
+                  const { gross, fee, net } = solPayoutAmounts(userSolGroup);
                   return (
                     <div className="mt-4 p-4 rounded-xl flex items-center gap-3" style={{ background: '#E6F0FB', border: `1px solid #C7DEF5` }}>
                       <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: C.navy }}>
                         <Wallet size={17} color="#fff" />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold" style={{ color: C.navy }}>MWA OU AP RESEVWA MEN PAW LA</p>
-                        <p className="text-sm font-bold mt-0.5" style={{ color: C.navy }}>{memberPayoutMonth(userSolGroup, myIdx)}</p>
+                        <p className="text-xs font-semibold" style={{ color: C.navy }}>DAT OU AP RESEVWA MEN PAW LA</p>
+                        <p className="text-sm font-bold mt-0.5" style={{ color: C.navy }}>{memberPayoutPeriod(userSolGroup, myIdx)}</p>
+                        <p className="mt-1 text-xs" style={{ color: C.navy }}>
+                          Ou pral resevwa <span className="font-bold">{money(net)}</span>
+                          <span style={{ color: '#6B94BE' }}> ({money(gross)} − 2% frè sèvis = {money(fee)})</span>
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {(() => {
+                  if (userSolGroup.frequencyId !== 'semenn') return null;
+                  const myIdx = userSolGroup.members.findIndex((m) => m.name === user?.fullName);
+                  const myMember = userSolGroup.members[myIdx];
+                  if (!myMember) return null;
+                  const paid = hasMemberPaid(myMember, 'semenn');
+                  if (!isSolPaymentWindowOpen('semenn') || paid) return null;
+                  return (
+                    <div className="mt-4 p-4 rounded-xl flex items-start gap-3" style={{ background: '#FBEAEA', border: `1px solid #F3C4C4` }}>
+                      <AlertCircle size={18} color={C.danger} className="shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold" style={{ color: C.danger }}>Jodi a se Vandredi — se pou ou peye!</p>
+                        <p className="mt-0.5 text-xs" style={{ color: C.danger }}>Pèman semèn nan dwe fèt obligatwa nan Vandredi. Peye kounya pou evite tout reta.</p>
+                        <button onClick={() => markSolPaid(userSolGroup.id, myMember.id)}
+                          className="bp-btn mt-2.5 px-4 py-2 rounded-lg text-xs font-semibold text-white"
+                          style={{ background: C.danger }}>
+                          Make peman fèt
+                        </button>
                       </div>
                     </div>
                   );
@@ -1948,6 +2144,30 @@ export default function BlicPayApp() {
                       )}
                     </p>
                   </div>
+                </div>
+
+                <div className="mt-6 flex items-center justify-between">
+                  <h3 className="font-semibold text-sm" style={{ color: C.muted }}>ESTATI PEMAN MANM YO</h3>
+                </div>
+                <div className="mt-3 rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+                  {userSolGroup.members.length === 0 ? (
+                    <p className="text-sm p-4" style={{ color: C.muted, background: C.card }}>Pa gen manm poko.</p>
+                  ) : userSolGroup.members.map((m, i) => {
+                    const paid = hasMemberPaid(m, userSolGroup.frequencyId);
+                    return (
+                      <div key={m.id} className="flex items-center justify-between px-4 py-3"
+                        style={{ background: C.card, borderTop: i ? `1px solid ${C.border}` : 'none' }}>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold"
+                            style={{ background: C.bg, color: C.navy }}>
+                            {initials(m.name)}
+                          </div>
+                          <span className="text-sm font-medium">{m.name}{m.name === user?.fullName ? ' (ou)' : ''}</span>
+                        </div>
+                        <Badge tone={paid ? 'mint' : 'danger'}>{paid ? 'Peye' : 'Pa peye'}</Badge>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="mt-6 flex items-center justify-between">
@@ -1978,11 +2198,14 @@ export default function BlicPayApp() {
                 </div>
 
                 <div className="mt-4 flex items-start gap-2 text-xs p-3 rounded-lg"
-                  style={{ background: isSolPaymentWindowOpen() ? '#E4F5EF' : '#FBF0DE', color: isSolPaymentWindowOpen() ? C.mint : '#946115' }}>
+                  style={{
+                    background: isSolPaymentWindowOpen(userSolGroup.frequencyId) ? '#E4F5EF' : '#FBF0DE',
+                    color: isSolPaymentWindowOpen(userSolGroup.frequencyId) ? C.mint : '#946115',
+                  }}>
                   <Calendar size={15} className="shrink-0 mt-0.5" />
-                  {isSolPaymentWindowOpen()
-                    ? 'Fenèt peman an louvri kounye a — peye anvan 28 la.'
-                    : 'Peman yo fèt sèlman ant 25 ak 28 chak mwa.'}
+                  {isSolPaymentWindowOpen(userSolGroup.frequencyId)
+                    ? 'Fenèt peman an louvri kounye a.'
+                    : solWindowMessage(userSolGroup.frequencyId)}
                 </div>
 
                 <button onClick={startDeposit}
@@ -2052,7 +2275,10 @@ export default function BlicPayApp() {
               <input type="file" accept="image/*" className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) setKycFile(URL.createObjectURL(file));
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = () => setKycFile(reader.result);
+                  reader.readAsDataURL(file);
                 }} />
             </label>
 
@@ -2076,7 +2302,10 @@ export default function BlicPayApp() {
               <input type="file" accept="image/*" capture="user" className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) setKycSelfieFile(URL.createObjectURL(file));
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = () => setKycSelfieFile(reader.result);
+                  reader.readAsDataURL(file);
                 }} />
             </label>
 
