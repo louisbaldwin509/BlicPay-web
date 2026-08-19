@@ -3,7 +3,7 @@ import {
   Bell, Wallet, ArrowUpRight, ArrowDownLeft, Clock, Settings, Home,
   ArrowLeftRight, Plus, Check, Copy, ChevronRight, ArrowLeft, ShieldCheck,
   DollarSign, Smartphone, Banknote, X, AlertCircle, Building2, Eye, EyeOff, RefreshCw, Users, BadgeCheck, PiggyBank,
-  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search
+  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star
 } from 'lucide-react';
 
 // Coupe l'URL réelle de ton backend ici une fois qu'il est déployé
@@ -15,6 +15,35 @@ const API_BASE_URL = 'https://api.blicpayht.com';
 function splitDataUrl(dataUrl) {
   const match = /^data:([^;]+);base64,(.+)$/.exec(dataUrl || '');
   return match ? [match[1], match[2]] : ['image/jpeg', dataUrl || ''];
+}
+
+// Redwi ak konprese yon foto (egzanp: yon selfi telefòn ki ka fè 5-10Mo)
+// anvan nou konvèti l an data URL — sa anpeche demand KYC a echwe an silans
+// akoz yon foto ki twò gwo pou sèvè a aksepte.
+function compressImageFile(file, maxDim = 1280, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Nou pa t ka li foto a.'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Foto a domaje oswa nan yon fòma nou pa sipòte.'));
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          const scale = maxDim / Math.max(width, height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 // Petit client HTTP partagé. Ajoute automatiquement le token JWT quand il
@@ -144,6 +173,54 @@ const T = {
     errFullName: 'Antre non ou.', errPhone: 'Antre yon nimewo telefòn.',
     errPasswordShort: 'Modpas la dwe gen omwen 6 karaktè.', errPasswordMatch: 'Modpas yo pa menm.',
     errTerms: 'Ou dwe aksepte kondisyon yo pou kontinye.',
+    lp_badge: 'Platfòm Finans Pèsonèl', lp_h1a: 'Platfòm Modèn Pou', lp_h1b: 'Jesyon Lajan Ou.',
+    lp_sub: 'Depo, retrè, transfè, prè, epay ak sistèm sòl tradisyonèl la — tout nan yon sèl aplikasyon, kèlkeswa kote w ye.',
+    lp_start: 'Kòmanse kounye a', lp_login: 'Konekte', lp_signup: 'Kreye kont',
+    lp_methods: 'Metòd Depo Ki Sipòte',
+    lp_stat1: 'gwoup BLIC Sòl', lp_stat2: 'fason pou depoze', lp_stat3: 'plan prè disponib', lp_stat4: 'nivo Sòl (Basic/Standard/Premium)',
+    lp_featEyebrow: 'FONKSYONALITE', lp_featTitle: 'Tout Sa Ou Bezwen, Nan Yon Sèl Kote', lp_featSub: 'Yon platfòm pou chak aspè lajan ou — pou ou menm oswa fanmi w.',
+    lp_f1t: 'BLIC Sòl', lp_f1d: '90 gwoup nan 3 nivo (Basic, Standard, Premium) ak 3 frekans (semenn, 15 jou, mwa) pou ekonomize an gwoup.',
+    lp_f2t: 'Depo Objektif', lp_f2d: 'Fikse yon sib epay epi swiv pwogrè w chak fwa ou mete lajan.',
+    lp_f3t: 'Prè', lp_f3d: 'Mande yon prè ak plan 3, 6 oswa 12 mwa, ak vèsman klè chak peryòd.',
+    lp_f4t: 'Transfè', lp_f4d: 'Voye lajan bay yon lòt kliyan BLICPay dirèkteman ak ID kliyan li.',
+    lp_f5t: 'BLIC Depo', lp_f5d: 'Kreye plizyè "pòch" pou separe lajan w — Ijans, Vwayaj, elatriye.',
+    lp_f6t: 'Verifikasyon KYC', lp_f6d: 'Konte idantite w verifye pou plis sekirite ak plis limit sou kont ou.',
+    lp_howEyebrow: 'KIJAN LI MACHE', lp_howTitle: 'Tou Pare An Kèk Minit', lp_howSub: 'Twa etap senp pou kòmanse jere lajan w.',
+    lp_s1t: 'Kreye kont ou', lp_s1d: 'Antre non w, telefòn ou, ak yon modpas. Sa pran mwens pase 2 minit.',
+    lp_s2t: 'Depoze lajan', lp_s2d: 'Chwazi MonCash, NatCash, USDT, Zelle, oswa yon depo nan biwo pou mete lajan nan kont ou.',
+    lp_s3t: 'Jere lajan w', lp_s3d: 'Voye, resevwa, epay, mande yon prè, oswa antre nan yon gwoup BLIC Sòl — tout nan yon sèl kote.',
+    lp_solEyebrow: 'BLIC SÒL', lp_solTitle: 'Chwazi Nivo Ki Fè W Byen', lp_solSub: 'Twa nivo, twa frekans — chwazi sa ki fè w byen.',
+    lp_solNivo: 'Nivo', lp_solSemenn: 'Chak semenn', lp_solKenzenn: 'Chak 15 jou', lp_solMwa: 'Chak mwa',
+    lp_solNote: 'Chak gwoup gen 10 plas. Yon frè sèvis 2% aplike sou chak vèsman lè yon manm resevwa tou li.',
+    lp_reachH1a: 'Aksè', lp_reachH1b: 'Kèlkeswa Kote Ou Ye', lp_reachSub: 'Yon sèl aplikasyon web, aksesib sou telefòn ak òdinatè, san limit orè.',
+    lp_reachStat1: '90', lp_reachLabel1: 'gwoup BLIC Sòl',
+    lp_reachStat2: '5', lp_reachLabel2: 'metòd depo',
+    lp_reachStat3: '24/7', lp_reachLabel3: 'aksè an liy',
+    lp_reachStat4: '3', lp_reachLabel4: 'lang disponib',
+    lp_testiEyebrow: 'TEMWAYAJ', lp_testiTitle: 'Bati Pou Kwasans, Pwouve Pa Kliyan Nou Yo',
+    lp_testiQuote: '[Kòmantè kliyan an ap parèt isit la]', lp_testiName: '[Non Kliyan]', lp_testiRole: 'Kliyan BLICPay',
+    lp_secEyebrow: 'SEKIRITE', lp_secTitle: 'Sekirize e Fyab, Chak Etap', lp_secSub: 'Nou pran pwoteksyon kont ou oserye, ak plizyè kouch verifikasyon pou chak aksyon ki enplike lajan.',
+    lp_sec1t: 'Modpas Chifre', lp_sec1d: 'Chak kont pwoteje ak yon sistèm chifreman modèn.',
+    lp_sec2t: 'Verifikasyon KYC', lp_sec2d: 'Idantite verifye pou plis limit ak sekirite.',
+    lp_sec3t: 'Depo Egzamine', lp_sec3d: 'Chak depo revize anvan li konte nan balans ou.',
+    lp_sec4t: 'Sipèvizyon Admin', lp_sec4d: 'Yon ekip veye sou operasyon sansib yo.',
+    lp_faqEyebrow: 'FAQ', lp_faqTitle: 'Kesyon Moun Poze Souvan',
+    lp_q1: 'Kisa BLICPay ye?', lp_a1: 'BLICPay se yon aplikasyon pou jere lajan w — depo, retrè, transfè, epay, ak sistèm sòl tradisyonèl la, tout nan yon sèl kote, sou telefòn oswa òdinatè w.',
+    lp_q2: 'Kijan pou m kreye yon kont?', lp_a2: 'Klike sou "Kreye kont", antre non w, telefòn ou, ak yon modpas. Kont ou pare pou itilize imedyatman — ou ka verifye idantite w apre pou plis limit.',
+    lp_q3: 'Ki jan pou m depoze lajan?', lp_a3: 'Ou ka depoze via MonCash, NatCash, USDT, Zelle, oswa dirèkteman nan yon biwo BLICPay. Chak depo verifye anvan li konte nan balans ou.',
+    lp_q4: 'Kisa BLIC Sòl ye?', lp_a4: 'Se yon vèsyon dijital sistèm sòl tradisyonèl la — ou antre nan yon gwoup, chak moun kontribye regilyèman, epi chak moun resevwa tou li nan wotasyon an.',
+    lp_q5: 'Èske lajan m an sekirite?', lp_a5: 'Chak kont pwoteje ak modpas ak yon sistèm otantifikasyon sekirize. Nou rekòmande verifye idantite w (KYC) pou plis pwoteksyon.',
+    lp_ctaTitle: 'Sote Etap Long Bank Tradisyonèl Yo.', lp_ctaSub: 'Kreye kont ou gratis an mwens pase 2 minit.', lp_ctaBtn: 'Kreye kont mwen',
+    lp_footDesc: 'Yon aplikasyon pou jere lajan w — depo, transfè, epay, prè ak sistèm sòl tradisyonèl la, tout nan yon sèl kote.',
+    lp_footMadeIn: '🇭🇹 Fèt an Ayiti',
+    lp_footProduits: 'Pwodwi', lp_footCompany: 'Konpayi', lp_footLegal: 'Legal',
+    lp_footAbout: 'Apwopo nou', lp_footSupport: 'Sipò', lp_footEmailPh: '[imèl sipò isit la]',
+    lp_footTerms: 'Kondisyon Sèvis', lp_footPrivacy: 'Politik Konfidansyalite',
+    lp_footRights: 'Tout dwa rezève.',
+    lp_navFeatures: 'Fonksyonalite', lp_navSol: 'BLIC Sòl', lp_navHow: 'Kijan li mache', lp_navFaq: 'FAQ',
+    lp_cardBadge: 'PWOCHÈNMAN', lp_cardTitle: 'Kat BLICPay ap vini', lp_cardSub: 'N ap travay sou yon patenarya pou ofri kat vityèl ak fizik — pou peye online ak nenpòt kote kat aksepte.',
+    lp_trust1: 'Kont pwoteje', lp_trust2: 'Verifikasyon KYC', lp_trust3: 'Sipò rapid',
+    lp_footDisclaimer: 'BLICPay LLC se yon platfòm finansye rekonèt e anrejistre nan Ministè Kòmès ak Endistri Ayiti. Kesyon? Kontakte ekip sipò nou an.',
   },
   fr: {
     welcome: 'Bienvenue,',
@@ -193,6 +270,54 @@ const T = {
     errFullName: 'Entrez votre nom.', errPhone: 'Entrez un numéro de téléphone.',
     errPasswordShort: 'Le mot de passe doit contenir au moins 6 caractères.', errPasswordMatch: 'Les mots de passe ne correspondent pas.',
     errTerms: 'Vous devez accepter les conditions pour continuer.',
+    lp_badge: 'Plateforme Finance Personnelle', lp_h1a: 'La Plateforme Moderne Pour', lp_h1b: 'Gérer Votre Argent.',
+    lp_sub: 'Dépôt, retrait, transfert, prêt, épargne et le système sòl traditionnel — tout dans une seule application, où que vous soyez.',
+    lp_start: 'Commencer maintenant', lp_login: 'Connexion', lp_signup: 'Créer un compte',
+    lp_methods: 'Méthodes de dépôt prises en charge',
+    lp_stat1: 'groupes BLIC Sòl', lp_stat2: 'moyens de dépôt', lp_stat3: 'plans de prêt disponibles', lp_stat4: 'niveaux Sòl (Basic/Standard/Premium)',
+    lp_featEyebrow: 'FONCTIONNALITÉS', lp_featTitle: 'Tout Ce Dont Vous Avez Besoin, En Un Seul Endroit', lp_featSub: 'Une plateforme pour chaque aspect de votre argent — pour vous ou votre famille.',
+    lp_f1t: 'BLIC Sòl', lp_f1d: '90 groupes répartis en 3 niveaux (Basic, Standard, Premium) et 3 fréquences (semaine, 15 jours, mois) pour épargner en groupe.',
+    lp_f2t: 'Dépôt Objectif', lp_f2d: 'Fixez un objectif d\'épargne et suivez votre progression à chaque dépôt.',
+    lp_f3t: 'Prêt', lp_f3d: 'Demandez un prêt avec un plan de 3, 6 ou 12 mois, et des versements clairs à chaque échéance.',
+    lp_f4t: 'Transfert', lp_f4d: 'Envoyez de l\'argent directement à un autre client BLICPay avec son ID client.',
+    lp_f5t: 'BLIC Dépôt', lp_f5d: 'Créez plusieurs "poches" pour organiser votre argent — Urgence, Voyage, etc.',
+    lp_f6t: 'Vérification KYC', lp_f6d: 'Vérifiez votre identité pour plus de sécurité et des limites plus élevées sur votre compte.',
+    lp_howEyebrow: 'COMMENT ÇA MARCHE', lp_howTitle: 'Prêt En Quelques Minutes', lp_howSub: 'Trois étapes simples pour commencer à gérer votre argent.',
+    lp_s1t: 'Créez votre compte', lp_s1d: 'Entrez votre nom, votre téléphone et un mot de passe. Cela prend moins de 2 minutes.',
+    lp_s2t: 'Déposez de l\'argent', lp_s2d: 'Choisissez MonCash, NatCash, USDT, Zelle, ou un dépôt en agence pour approvisionner votre compte.',
+    lp_s3t: 'Gérez votre argent', lp_s3d: 'Envoyez, recevez, épargnez, demandez un prêt, ou rejoignez un groupe BLIC Sòl — tout au même endroit.',
+    lp_solEyebrow: 'BLIC SÒL', lp_solTitle: 'Choisissez Le Niveau Qui Vous Convient', lp_solSub: 'Trois niveaux, trois fréquences — choisissez ce qui vous convient.',
+    lp_solNivo: 'Niveau', lp_solSemenn: 'Chaque semaine', lp_solKenzenn: 'Tous les 15 jours', lp_solMwa: 'Chaque mois',
+    lp_solNote: 'Chaque groupe compte 10 places. Des frais de service de 2% s\'appliquent à chaque versement lorsqu\'un membre reçoit sa part.',
+    lp_reachH1a: 'Accès', lp_reachH1b: 'Où Que Vous Soyez', lp_reachSub: 'Une seule application web, accessible sur téléphone et ordinateur, sans limite d\'horaire.',
+    lp_reachStat1: '90', lp_reachLabel1: 'groupes BLIC Sòl',
+    lp_reachStat2: '5', lp_reachLabel2: 'méthodes de dépôt',
+    lp_reachStat3: '24/7', lp_reachLabel3: 'accès en ligne',
+    lp_reachStat4: '3', lp_reachLabel4: 'langues disponibles',
+    lp_testiEyebrow: 'TÉMOIGNAGES', lp_testiTitle: 'Conçu Pour Grandir, Approuvé Par Nos Clients',
+    lp_testiQuote: '[Le commentaire du client apparaîtra ici]', lp_testiName: '[Nom du client]', lp_testiRole: 'Client BLICPay',
+    lp_secEyebrow: 'SÉCURITÉ', lp_secTitle: 'Sécurisé Et Fiable, À Chaque Étape', lp_secSub: 'Nous prenons la protection de votre compte au sérieux, avec plusieurs niveaux de vérification pour chaque action impliquant de l\'argent.',
+    lp_sec1t: 'Mot de passe chiffré', lp_sec1d: 'Chaque compte est protégé par un système de chiffrement moderne.',
+    lp_sec2t: 'Vérification KYC', lp_sec2d: 'Identité vérifiée pour plus de limites et de sécurité.',
+    lp_sec3t: 'Dépôts examinés', lp_sec3d: 'Chaque dépôt est vérifié avant d\'être crédité.',
+    lp_sec4t: 'Supervision admin', lp_sec4d: 'Une équipe surveille les opérations sensibles.',
+    lp_faqEyebrow: 'FAQ', lp_faqTitle: 'Questions Fréquemment Posées',
+    lp_q1: 'Qu\'est-ce que BLICPay ?', lp_a1: 'BLICPay est une application pour gérer votre argent — dépôt, retrait, transfert, épargne, et le système sòl traditionnel, tout en un seul endroit, sur téléphone ou ordinateur.',
+    lp_q2: 'Comment créer un compte ?', lp_a2: 'Cliquez sur "Créer un compte", entrez votre nom, votre téléphone et un mot de passe. Votre compte est prêt immédiatement — vous pouvez vérifier votre identité ensuite pour plus de limites.',
+    lp_q3: 'Comment déposer de l\'argent ?', lp_a3: 'Vous pouvez déposer via MonCash, NatCash, USDT, Zelle, ou directement dans une agence BLICPay. Chaque dépôt est vérifié avant d\'être crédité.',
+    lp_q4: 'Qu\'est-ce que BLIC Sòl ?', lp_a4: 'C\'est une version numérique du système sòl traditionnel — vous rejoignez un groupe, chacun contribue régulièrement, et chacun reçoit sa part à tour de rôle.',
+    lp_q5: 'Mon argent est-il en sécurité ?', lp_a5: 'Chaque compte est protégé par un mot de passe et un système d\'authentification sécurisé. Nous recommandons de vérifier votre identité (KYC) pour plus de protection.',
+    lp_ctaTitle: 'Sautez L\'Étape De La Négociation Bancaire.', lp_ctaSub: 'Créez votre compte gratuitement en moins de 2 minutes.', lp_ctaBtn: 'Créer mon compte',
+    lp_footDesc: 'Une application pour gérer votre argent — dépôt, transfert, épargne, prêt et le système sòl traditionnel, tout en un seul endroit.',
+    lp_footMadeIn: '🇭🇹 Fait en Haïti',
+    lp_footProduits: 'Produits', lp_footCompany: 'Entreprise', lp_footLegal: 'Légal',
+    lp_footAbout: 'À propos', lp_footSupport: 'Support', lp_footEmailPh: '[email de support ici]',
+    lp_footTerms: 'Conditions d\'utilisation', lp_footPrivacy: 'Politique de confidentialité',
+    lp_footRights: 'Tous droits réservés.',
+    lp_navFeatures: 'Fonctionnalités', lp_navSol: 'BLIC Sòl', lp_navHow: 'Comment ça marche', lp_navFaq: 'FAQ',
+    lp_cardBadge: 'À VENIR', lp_cardTitle: 'La carte BLICPay arrive', lp_cardSub: 'Nous travaillons sur un partenariat pour offrir des cartes virtuelles et physiques — pour payer en ligne et partout où les cartes sont acceptées.',
+    lp_trust1: 'Compte protégé', lp_trust2: 'Vérification KYC', lp_trust3: 'Support rapide',
+    lp_footDisclaimer: 'BLICPay LLC est une plateforme financière reconnue et enregistrée auprès du Ministère du Commerce et de l\'Industrie d\'Haïti. Des questions ? Contactez notre équipe de support.',
   },
   en: {
     welcome: 'Welcome,',
@@ -242,6 +367,54 @@ const T = {
     errFullName: 'Enter your name.', errPhone: 'Enter a phone number.',
     errPasswordShort: 'Password must be at least 6 characters.', errPasswordMatch: 'Passwords do not match.',
     errTerms: 'You must accept the terms to continue.',
+    lp_badge: 'Personal Finance Platform', lp_h1a: 'The Modern Platform For', lp_h1b: 'Managing Your Money.',
+    lp_sub: 'Deposits, withdrawals, transfers, loans, savings, and the traditional sòl system — all in one app, wherever you are.',
+    lp_start: 'Get started now', lp_login: 'Log in', lp_signup: 'Sign up',
+    lp_methods: 'Supported Deposit Methods',
+    lp_stat1: 'BLIC Sòl groups', lp_stat2: 'deposit methods', lp_stat3: 'loan plans available', lp_stat4: 'Sòl tiers (Basic/Standard/Premium)',
+    lp_featEyebrow: 'FEATURES', lp_featTitle: 'Everything You Need, All In One Place', lp_featSub: 'A platform for every part of your money — for you or your family.',
+    lp_f1t: 'BLIC Sòl', lp_f1d: '90 groups across 3 tiers (Basic, Standard, Premium) and 3 frequencies (weekly, every 15 days, monthly) to save together.',
+    lp_f2t: 'Goal Savings', lp_f2d: 'Set a savings target and track your progress every time you deposit.',
+    lp_f3t: 'Loans', lp_f3d: 'Request a loan with a 3, 6, or 12-month plan, with clear installments each period.',
+    lp_f4t: 'Transfers', lp_f4d: 'Send money directly to another BLICPay customer using their client ID.',
+    lp_f5t: 'BLIC Depo', lp_f5d: 'Create multiple "pockets" to organize your money — Emergency, Travel, and more.',
+    lp_f6t: 'KYC Verification', lp_f6d: 'Verify your identity for more security and higher limits on your account.',
+    lp_howEyebrow: 'HOW IT WORKS', lp_howTitle: 'Go Live in Minutes', lp_howSub: 'Three simple steps to start managing your money.',
+    lp_s1t: 'Create your account', lp_s1d: 'Enter your name, phone number, and a password. It takes less than 2 minutes.',
+    lp_s2t: 'Deposit money', lp_s2d: 'Choose MonCash, NatCash, USDT, Zelle, or an in-branch deposit to fund your account.',
+    lp_s3t: 'Manage your money', lp_s3d: 'Send, receive, save, request a loan, or join a BLIC Sòl group — all in one place.',
+    lp_solEyebrow: 'BLIC SÒL', lp_solTitle: 'Choose the Tier That Fits You', lp_solSub: 'Three tiers, three frequencies — choose what works for you.',
+    lp_solNivo: 'Tier', lp_solSemenn: 'Weekly', lp_solKenzenn: 'Every 15 days', lp_solMwa: 'Monthly',
+    lp_solNote: 'Each group has 10 spots. A 2% service fee applies to each payout when a member receives their share.',
+    lp_reachH1a: 'Access', lp_reachH1b: 'Wherever You Are', lp_reachSub: 'A single web app, accessible on phone and computer, with no time limits.',
+    lp_reachStat1: '90', lp_reachLabel1: 'BLIC Sòl groups',
+    lp_reachStat2: '5', lp_reachLabel2: 'deposit methods',
+    lp_reachStat3: '24/7', lp_reachLabel3: 'online access',
+    lp_reachStat4: '3', lp_reachLabel4: 'languages available',
+    lp_testiEyebrow: 'TESTIMONIALS', lp_testiTitle: 'Built for Growth, Proven by Customers',
+    lp_testiQuote: '[Customer comment will appear here]', lp_testiName: '[Customer Name]', lp_testiRole: 'BLICPay Customer',
+    lp_secEyebrow: 'SECURITY', lp_secTitle: 'Secure and Reliable, Every Step', lp_secSub: 'We take protecting your account seriously, with multiple layers of verification for every money-related action.',
+    lp_sec1t: 'Encrypted Password', lp_sec1d: 'Every account is protected with modern encryption.',
+    lp_sec2t: 'KYC Verification', lp_sec2d: 'Verified identity for higher limits and more security.',
+    lp_sec3t: 'Reviewed Deposits', lp_sec3d: 'Every deposit is reviewed before it counts toward your balance.',
+    lp_sec4t: 'Admin Oversight', lp_sec4d: 'A team monitors sensitive operations.',
+    lp_faqEyebrow: 'FAQ', lp_faqTitle: 'Frequently Asked Questions',
+    lp_q1: 'What is BLICPay?', lp_a1: 'BLICPay is an app for managing your money — deposits, withdrawals, transfers, savings, and the traditional sòl system, all in one place, on your phone or computer.',
+    lp_q2: 'How do I create an account?', lp_a2: 'Click "Sign up", enter your name, phone number, and a password. Your account is ready to use immediately — you can verify your identity afterward for higher limits.',
+    lp_q3: 'How do I deposit money?', lp_a3: 'You can deposit via MonCash, NatCash, USDT, Zelle, or directly at a BLICPay branch. Every deposit is verified before it counts toward your balance.',
+    lp_q4: 'What is BLIC Sòl?', lp_a4: 'It\'s a digital version of the traditional sòl system — you join a group, everyone contributes regularly, and each member receives their payout in turn.',
+    lp_q5: 'Is my money safe?', lp_a5: 'Every account is protected by a password and a secure authentication system. We recommend verifying your identity (KYC) for additional protection.',
+    lp_ctaTitle: 'Skip the Traditional Bank Negotiation.', lp_ctaSub: 'Create your account for free in less than 2 minutes.', lp_ctaBtn: 'Create my account',
+    lp_footDesc: 'An app for managing your money — deposits, transfers, savings, loans, and the traditional sòl system, all in one place.',
+    lp_footMadeIn: '🇭🇹 Made in Haiti',
+    lp_footProduits: 'Products', lp_footCompany: 'Company', lp_footLegal: 'Legal',
+    lp_footAbout: 'About us', lp_footSupport: 'Support', lp_footEmailPh: '[support email here]',
+    lp_footTerms: 'Terms of Service', lp_footPrivacy: 'Privacy Policy',
+    lp_footRights: 'All rights reserved.',
+    lp_navFeatures: 'Features', lp_navSol: 'BLIC Sòl', lp_navHow: 'How it works', lp_navFaq: 'FAQ',
+    lp_cardBadge: 'COMING SOON', lp_cardTitle: 'The BLICPay Card is coming', lp_cardSub: 'We\'re working on a partnership to offer virtual and physical cards — for online payments and anywhere cards are accepted.',
+    lp_trust1: 'Protected account', lp_trust2: 'KYC verification', lp_trust3: 'Fast support',
+    lp_footDisclaimer: 'BLICPay LLC is a financial platform recognized and registered with the Haitian Ministry of Commerce and Industry. Questions? Contact our support team.',
   },
 };
 
@@ -479,8 +652,676 @@ function Badge({ children, tone = 'muted' }) {
   );
 }
 
+// Hook senp ki fè yon eleman "parèt" ak yon ti animasyon lè li antre nan ekran an pandan defile.
+function useReveal() {
+  const ref = React.useRef(null);
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold: 0.15 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, visible];
+}
+
+function Reveal({ children, delay = 0, className = '' }) {
+  const [ref, visible] = useReveal();
+  return (
+    <div ref={ref} className={className} style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0)' : 'translateY(24px)',
+      transition: `opacity .7s ease ${delay}ms, transform .7s cubic-bezier(.22,1,.36,1) ${delay}ms`,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+// Chif ki konte pou rive nan valè final li lè seksyon an vizib.
+function CountUp({ target, suffix = '' }) {
+  const [ref, visible] = useReveal();
+  const [val, setVal] = React.useState(0);
+  React.useEffect(() => {
+    if (!visible) return;
+    const num = Number(target);
+    const duration = 900;
+    const start = performance.now();
+    let raf;
+    function tick(now) {
+      const p = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setVal(Math.round(num * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [visible, target]);
+  return <span ref={ref}>{val}{suffix}</span>;
+}
+
+function LandingPage({ onStart, lang, setLang, tr }) {
+  const [openFaq, setOpenFaq] = useState(null);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+
+  const FEATURES = [
+    { icon: Users, title: tr('lp_f1t'), desc: tr('lp_f1d') },
+    { icon: PiggyBank, title: tr('lp_f2t'), desc: tr('lp_f2d') },
+    { icon: HandCoins, title: tr('lp_f3t'), desc: tr('lp_f3d') },
+    { icon: ArrowLeftRight, title: tr('lp_f4t'), desc: tr('lp_f4d') },
+    { icon: Wallet, title: tr('lp_f5t'), desc: tr('lp_f5d') },
+    { icon: ShieldCheck, title: tr('lp_f6t'), desc: tr('lp_f6d') },
+  ];
+
+  const DEPOSIT_METHODS = [
+    { name: 'MonCash', color: '#E4032E', logo: '/logos/moncash.jpg' },
+    { name: 'NatCash', color: '#0072BC', logo: '/logos/natcash.jpg' },
+    { name: 'USDT', color: '#26A17B', logo: '/logos/usdt.jpg' },
+    { name: 'Zelle', color: '#6D1ED4', logo: '/logos/zelle.png' },
+    { name: 'Depo Biwo', color: C.navy, logo: null },
+  ];
+
+  const FAQS = [
+    { q: tr('lp_q1'), a: tr('lp_a1') },
+    { q: tr('lp_q2'), a: tr('lp_a2') },
+    { q: tr('lp_q3'), a: tr('lp_a3') },
+    { q: tr('lp_q4'), a: tr('lp_a4') },
+    { q: tr('lp_q5'), a: tr('lp_a5') },
+  ];
+
+  const currentLang = LANGS.find((l) => l.code === lang) || LANGS[1];
+
+  return (
+    <div style={{ background: '#FFFFFF', color: C.ink, overflow: 'hidden' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap');
+        html { scroll-behavior: smooth; }
+        .lp-btn { transition: all .18s ease; }
+        .lp-btn:hover { filter: brightness(1.05); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(12,68,124,0.22); }
+        .lp-btn:active { transform: translateY(0) scale(0.98); }
+        .lp-btn:hover .lp-arrow { transform: translateX(3px); }
+        .lp-arrow { transition: transform .18s ease; display: inline-block; }
+        .lp-card { transition: all .25s ease; }
+        .lp-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(11,27,51,0.09); border-color: transparent !important; }
+        @keyframes lpFloat { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-14px) rotate(3deg); } }
+        @keyframes lpFloatSlow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(18px); } }
+        @keyframes lpPulse { 0%,100% { opacity: .5; transform: scale(1); } 50% { opacity: .8; transform: scale(1.08); } }
+        @keyframes lpTicker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .lp-blob1 { animation: lpFloat 7s ease-in-out infinite; }
+        .lp-blob2 { animation: lpFloatSlow 9s ease-in-out infinite; }
+        .lp-badge-pill { animation: lpPulse 3.5s ease-in-out infinite; }
+        .lp-mock { animation: lpFloatSlow 6s ease-in-out infinite; }
+        .lp-faq-body { animation: fadein .25s ease; }
+        .lp-nav-link { position: relative; }
+        .lp-nav-link::after { content: ''; position: absolute; left: 0; bottom: -3px; width: 0; height: 2px; background: ${C.sky}; transition: width .2s ease; }
+        .lp-nav-link:hover::after { width: 100%; }
+      `}</style>
+
+      {/* Nav */}
+      <div className="sticky top-0 z-30" style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(10px)', borderBottom: `1px solid ${C.border}` }}>
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Logo size={28} />
+            <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 18 }}>BLIC<span style={{ color: C.sky }}>Pay</span></span>
+          </div>
+          <div className="hidden md:flex items-center gap-7">
+            <a href="#features" className="lp-nav-link text-sm font-medium" style={{ color: C.ink }}>{tr('lp_navFeatures')}</a>
+            <a href="#sol" className="lp-nav-link text-sm font-medium" style={{ color: C.ink }}>{tr('lp_navSol')}</a>
+            <a href="#how" className="lp-nav-link text-sm font-medium" style={{ color: C.ink }}>{tr('lp_navHow')}</a>
+            <a href="#faq" className="lp-nav-link text-sm font-medium" style={{ color: C.ink }}>{tr('lp_navFaq')}</a>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <button onClick={() => setLangMenuOpen((v) => !v)}
+                className="flex items-center gap-1.5 text-sm font-semibold px-3 py-2 rounded-lg" style={{ color: C.ink }}>
+                <span>{currentLang.flag}</span>
+                <ChevronRight size={13} color={C.muted} style={{ transform: langMenuOpen ? 'rotate(90deg)' : 'rotate(90deg)', transition: 'transform .2s' }} />
+              </button>
+              {langMenuOpen && (
+                <div className="absolute right-0 mt-1 rounded-xl overflow-hidden z-40" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: '0 8px 24px rgba(11,27,51,0.12)', minWidth: 160 }}>
+                  {LANGS.map((l) => (
+                    <button key={l.code} onClick={() => { setLang(l.code); setLangMenuOpen(false); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left"
+                      style={{ background: lang === l.code ? C.bg : 'transparent', color: C.ink }}>
+                      <span>{l.flag}</span> {l.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button onClick={onStart} className="lp-nav-link text-sm font-semibold px-4 py-2" style={{ color: C.navy }}>{tr('lp_login')}</button>
+            <button onClick={onStart} className="lp-btn text-sm font-semibold px-5 py-2.5 rounded-full text-white"
+              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+              {tr('lp_signup')}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero */}
+      <div className="relative max-w-6xl mx-auto px-6 pt-16 pb-10 grid md:grid-cols-2 gap-12 items-center">
+        <div className="lp-blob1" style={{ position: 'absolute', top: -40, right: 40, width: 140, height: 140, borderRadius: '50%', background: `radial-gradient(circle, ${C.sky}22, transparent 70%)`, zIndex: 0 }} />
+        <div className="lp-blob2" style={{ position: 'absolute', bottom: -20, left: -20, width: 180, height: 180, borderRadius: '50%', background: `radial-gradient(circle, ${C.navy}18, transparent 70%)`, zIndex: 0 }} />
+
+        <Reveal className="relative">
+          <span className="lp-badge-pill inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-6" style={{ background: '#E6F0FB', color: C.navy, letterSpacing: 0.2 }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: C.mint }} />
+            {tr('lp_badge')}
+          </span>
+          <h1 style={{ ...fontDisplay, fontWeight: 800, fontSize: 44, lineHeight: 1.08, letterSpacing: -0.5 }}>
+            {tr('lp_h1a')} <span style={{ color: C.sky }}>{tr('lp_h1b')}</span>
+          </h1>
+          <p className="mt-5 text-base leading-relaxed" style={{ color: C.muted, maxWidth: 440 }}>
+            {tr('lp_sub')}
+          </p>
+          <div className="mt-9 flex items-center gap-3">
+            <button onClick={onStart} className="lp-btn px-6 py-3.5 rounded-xl font-semibold text-white text-sm flex items-center gap-1.5"
+              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+              {tr('lp_start')} <ChevronRight size={15} className="lp-arrow" />
+            </button>
+            <button onClick={onStart} className="lp-btn px-6 py-3.5 rounded-xl font-semibold text-sm" style={{ border: `1px solid ${C.border}`, color: C.ink, background: C.card }}>
+              {tr('lp_login')}
+            </button>
+          </div>
+
+          <div className="mt-5 flex items-center gap-4 flex-wrap">
+            {[[Lock, tr('lp_trust1')], [ShieldCheck, tr('lp_trust2')], [Clock, tr('lp_trust3')]].map(([Icon, label]) => (
+              <span key={label} className="inline-flex items-center gap-1.5 text-xs" style={{ color: C.muted }}>
+                <Icon size={13} color={C.mint} /> {label}
+              </span>
+            ))}
+          </div>
+          <div className="mt-10">
+            <p className="text-[11px] font-bold uppercase mb-3" style={{ color: C.muted, letterSpacing: 0.6 }}>{tr('lp_methods')}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              {DEPOSIT_METHODS.map((m) => (
+                <span key={m.name} className="inline-flex items-center gap-2 text-xs font-semibold pl-2 pr-3.5 py-1.5 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, color: C.ink }}>
+                  {m.logo ? (
+                    <img src={m.logo} alt={m.name} className="rounded" style={{ height: 18, width: 'auto', maxWidth: 46, objectFit: 'contain' }} />
+                  ) : (
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: m.color, display: 'inline-block' }} />
+                  )}
+                  {m.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal delay={150} className="relative">
+          <div className="lp-mock mx-auto rounded-3xl p-5" style={{ maxWidth: 300, background: C.card, border: `1px solid ${C.border}`, boxShadow: '0 20px 50px rgba(11,27,51,0.12)' }}>
+            <div className="rounded-2xl p-5" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.75)' }}>{tr('balanceLabel')}</p>
+              <p style={{ ...fontDisplay, fontWeight: 800, fontSize: 28, color: '#fff', marginTop: 4 }}>45,200 HTG</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>{tr('accountLabel')} · •••• 8455</p>
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              {[
+                { icon: ArrowDownLeft, label: tr('tileDeposit') },
+                { icon: ArrowLeftRight, label: tr('tileTransfer') },
+                { icon: Users, label: tr('tileSol') },
+              ].map((a) => (
+                <div key={a.label} className="flex flex-col items-center gap-1.5 p-3 rounded-xl" style={{ background: C.bg }}>
+                  <a.icon size={16} color={C.navy} />
+                  <span className="text-[10px] font-medium" style={{ color: C.muted }}>{a.label}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 space-y-2">
+              {[{ n: 'MonCash', a: '+2,500 HTG' }, { n: 'BLIC Sòl', a: '−1,000 HTG' }].map((t) => (
+                <div key={t.n} className="flex items-center justify-between px-3 py-2.5 rounded-lg" style={{ background: C.bg }}>
+                  <span className="text-xs font-medium">{t.n}</span>
+                  <span className="text-xs font-semibold" style={{ color: t.a[0] === '+' ? C.mint : C.ink }}>{t.a}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+      </div>
+
+
+
+      <div style={{ background: '#FAFBFC', borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
+      <Reveal>
+        <div className="max-w-5xl mx-auto px-6 py-14">
+          <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${C.border}`, boxShadow: '0 20px 50px rgba(11,27,51,0.10)' }}>
+            {/* browser chrome */}
+            <div className="flex items-center gap-2 px-4 py-3" style={{ background: '#1A2B45' }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F57', display: 'inline-block' }} />
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#FEBC2E', display: 'inline-block' }} />
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#28C840', display: 'inline-block' }} />
+              <div className="mx-auto px-4 py-1 rounded-md text-[10px]" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
+                blicpayht.com
+              </div>
+              <div style={{ width: 30 }} />
+            </div>
+            {/* app nav — dark bar (logo + notifications + avatar) then light icon nav row, matching the reference */}
+            <div className="flex items-center justify-between px-6 py-3" style={{ background: '#0F2038' }}>
+              <div className="flex items-center gap-2">
+                <Logo size={20} />
+                <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 13, color: '#fff' }}>BLIC<span style={{ color: C.sky }}>Pay</span></span>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Bell size={16} color="rgba(255,255,255,0.75)" />
+                  <span className="absolute -top-1.5 -right-1.5 text-[8px] font-bold flex items-center justify-center rounded-full" style={{ width: 13, height: 13, background: '#E4032E', color: '#fff' }}>3</span>
+                </div>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold" style={{ background: C.sky, color: '#fff' }}>BL</div>
+              </div>
+            </div>
+            <div className="flex items-center justify-around px-4 py-2.5" style={{ background: C.card, borderBottom: `1px solid ${C.border}` }}>
+              {[
+                { icon: Home, label: 'Akèy', active: false },
+                { icon: Users, label: 'BLIC Sòl', active: true },
+                { icon: ArrowLeftRight, label: 'Transfè', active: false },
+                { icon: HandCoins, label: 'Prè', active: false },
+                { icon: Settings, label: 'Paramèt', active: false },
+              ].map((n) => (
+                <div key={n.label} className="flex flex-col items-center gap-1 px-1" style={{ borderBottom: n.active ? `2px solid ${C.navy}` : '2px solid transparent', paddingBottom: 4 }}>
+                  <n.icon size={15} color={n.active ? C.navy : C.muted} />
+                  <span className="text-[9px] font-medium" style={{ color: n.active ? C.navy : C.muted }}>{n.label}</span>
+                </div>
+              ))}
+            </div>
+            {/* dashboard body */}
+            <div className="p-5 md:p-6 grid md:grid-cols-2 gap-5" style={{ background: C.bg }}>
+              {/* wallet card */}
+              <div className="rounded-2xl p-5" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.75)' }}>SOLDE KONT</p>
+                <p style={{ ...fontDisplay, fontWeight: 800, fontSize: 26, color: '#fff', marginTop: 4 }}>45,200 HTG</p>
+                <div className="mt-4 flex gap-2">
+                  <span className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>Depo</span>
+                  <span className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>Retrè</span>
+                </div>
+              </div>
+              {/* quick links */}
+              <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                <p className="text-xs font-bold" style={{ color: C.muted }}>AKSÈ RAPID</p>
+                <div className="mt-3 grid grid-cols-4 gap-3">
+                  {[
+                    { icon: ArrowLeftRight, label: 'Transfè' },
+                    { icon: Users, label: 'Sòl' },
+                    { icon: PiggyBank, label: 'Objektif' },
+                    { icon: HandCoins, label: 'Prè' },
+                  ].map((a) => (
+                    <div key={a.label} className="flex flex-col items-center gap-1.5">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E6F0FB' }}>
+                        <a.icon size={15} color={C.navy} />
+                      </div>
+                      <span className="text-[10px] font-medium" style={{ color: C.muted }}>{a.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* recent activity */}
+              <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                <p className="text-xs font-bold" style={{ color: C.muted }}>AKTIVITE RESAN</p>
+                <div className="mt-3 space-y-2">
+                  {[{ n: 'Depo MonCash', a: '+2,500 HTG', pos: true }, { n: 'Kotizasyon Sòl Basic #3', a: '−1,000 HTG', pos: false }].map((t) => (
+                    <div key={t.n} className="flex items-center justify-between px-3 py-2.5 rounded-lg" style={{ background: C.bg }}>
+                      <span className="text-xs font-medium">{t.n}</span>
+                      <span className="text-xs font-semibold" style={{ color: t.pos ? C.mint : C.ink }}>{t.a}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* BLIC Sòl panel — showcasing the real 90-group structure */}
+              <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold" style={{ color: C.muted }}>BLIC SÒL</p>
+                  <span className="text-[10px] font-semibold" style={{ color: C.sky }}>{tr('lp_stat1')}: 90</span>
+                </div>
+                <div className="mt-3 p-3 rounded-xl" style={{ background: C.bg }}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold">Sòl Basic #3</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#E4F5EF', color: C.mint }}>7/10</span>
+                  </div>
+                  <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: C.border }}>
+                    <div style={{ width: '70%', height: '100%', background: `linear-gradient(90deg, ${C.navy}, ${C.sky})` }} />
+                  </div>
+                  <p className="mt-2 text-[10px]" style={{ color: C.muted }}>Chak semenn · 1,000 HTG pa moun</p>
+                </div>
+              </div>
+              {/* Upcoming card feature — closely matches the reference layout, Mastercard-style mark blurred */}
+              <div className="rounded-2xl p-5 md:col-span-2" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                <div className="grid md:grid-cols-2 gap-6 items-center">
+                  <div>
+                    <span className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full mb-2" style={{ background: '#FBF0DE', color: '#946115', letterSpacing: 0.5 }}>
+                      {tr('lp_cardBadge')}
+                    </span>
+                    <p className="text-sm font-bold">{tr('lp_cardTitle')}</p>
+                    <p className="mt-1.5 text-xs leading-relaxed" style={{ color: C.muted }}>{tr('lp_cardSub')}</p>
+                  </div>
+
+                  <div className="relative mx-auto" style={{
+                    maxWidth: 320, aspectRatio: '1.586', borderRadius: 16, padding: 22,
+                    background: `linear-gradient(135deg, ${C.navy} 0%, ${C.sky} 100%)`,
+                    boxShadow: '0 16px 32px rgba(11,27,51,0.28)', overflow: 'hidden',
+                  }}>
+                    <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.12)' }} />
+
+                    {/* top row: logo icon (with chip stacked below it) + wordmark/tagline, matching the reference layout */}
+                    <div className="flex items-start gap-2.5 relative">
+                      <div>
+                        <svg width="30" height="30" viewBox="0 0 48 48">
+                          <path d="M24 3 L42 10 V22 C42 33 34.5 41.5 24 45 C13.5 41.5 6 33 6 22 V10 Z" fill="rgba(255,255,255,0.25)" />
+                          <path d="M13 30 L33 15" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+                          <path d="M27 15 H33 V21" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                        </svg>
+                        {/* EMV chip, stacked under the logo like the reference */}
+                        <div className="mt-2" style={{ width: 28, height: 21, borderRadius: 4, background: 'linear-gradient(135deg, #E9D28C, #C9A857)' }}>
+                          <div style={{ margin: 2.5, border: '1px solid rgba(0,0,0,0.25)', borderRadius: 2, height: 16 }} />
+                        </div>
+                      </div>
+                      <div className="pt-0.5">
+                        <p style={{ ...fontDisplay, fontWeight: 800, fontSize: 17, color: '#fff', lineHeight: 1 }}>BLIC<span style={{ fontStyle: 'italic' }}>Pay</span></p>
+                        <p className="mt-1" style={{ fontSize: 7, color: 'rgba(255,255,255,0.8)', letterSpacing: 0.8 }}>| GLOBAL | SEKIRIZE | DIJITAL |</p>
+                      </div>
+                    </div>
+
+                    {/* card number, spaced like a real card */}
+                    <p className="mt-6 relative" style={{ color: '#fff', letterSpacing: 2, fontFamily: 'monospace', fontSize: 16, fontWeight: 500 }}>
+                      1234 5678 9012 3456
+                    </p>
+
+                    <div className="mt-4 flex items-end justify-between relative">
+                      <div>
+                        <p className="flex items-baseline gap-1.5">
+                          <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.75)' }}>EXRID</span>
+                          <span style={{ fontSize: 11, color: '#fff', fontFamily: 'monospace' }}>12/99</span>
+                        </p>
+                        <p className="mt-1" style={{ fontSize: 10, color: '#fff', letterSpacing: 0.5 }}>KLIYAN BLICPAY</p>
+                      </div>
+                      {/* Mastercard-style dual-circle mark, deliberately blurred to avoid reproducing the trademark clearly */}
+                      <div className="text-right">
+                        <div style={{ filter: 'blur(3.5px)', opacity: 0.85, position: 'relative', width: 34, height: 20, marginLeft: 'auto' }}>
+                          <div style={{ position: 'absolute', left: 0, width: 20, height: 20, borderRadius: '50%', background: '#EB5757' }} />
+                          <div style={{ position: 'absolute', left: 12, width: 20, height: 20, borderRadius: '50%', background: '#F2A93B' }} />
+                        </div>
+                        <p className="mt-1" style={{ fontSize: 7, color: 'rgba(255,255,255,0.7)', letterSpacing: 0.5 }}>DEBIT</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+      </div>
+
+      <div id="features" className="max-w-6xl mx-auto px-6 py-20">
+        <Reveal className="text-center max-w-xl mx-auto">
+          <span className="text-xs font-bold tracking-wide" style={{ color: C.sky }}>{tr('lp_featEyebrow')}</span>
+          <h2 className="mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 30 }}>{tr('lp_featTitle')}</h2>
+          <p className="mt-3 text-sm" style={{ color: C.muted }}>{tr('lp_featSub')}</p>
+        </Reveal>
+        <div className="mt-10 grid md:grid-cols-3 gap-5">
+          {FEATURES.map((f, i) => (
+            <Reveal key={f.title} delay={i * 80}>
+              <div className="lp-card p-6 rounded-2xl h-full" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style={{ background: '#E6F0FB' }}>
+                  <f.icon size={20} color={C.navy} />
+                </div>
+                <h3 className="font-bold text-sm">{f.title}</h3>
+                <p className="mt-2 text-xs leading-relaxed" style={{ color: C.muted }}>{f.desc}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+
+      {/* Scrolling partner strip — real authorized partner logos in white chips for contrast */}
+      <div className="overflow-hidden py-4" style={{ background: '#0F2038' }}>
+        <div className="flex items-center gap-6" style={{ width: 'max-content', animation: 'lpTicker 24s linear infinite' }}>
+          {[...Array(2)].flatMap((_, dup) =>
+            [
+              { name: 'MonCash', logo: '/logos/moncash.jpg' },
+              { name: 'NatCash', logo: '/logos/natcash.jpg' },
+              { name: 'USDT', logo: '/logos/usdt.jpg' },
+              { name: 'Zelle', logo: '/logos/zelle.png' },
+              { name: 'BLICPay', logo: null },
+            ].map((p, i) => (
+              <span key={dup + '-' + i} className="inline-flex items-center gap-2.5 px-3">
+                {p.logo ? (
+                  <span className="rounded-md flex items-center justify-center px-2 py-1.5" style={{ background: '#fff' }}>
+                    <img src={p.logo} alt={p.name} style={{ height: 16, width: 'auto', maxWidth: 52, objectFit: 'contain', display: 'block' }} />
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5">
+                    <Logo size={16} />
+                    <span className="text-xs font-bold" style={{ color: '#fff' }}>BLICPay</span>
+                  </span>
+                )}
+              </span>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* How it works */}
+      <div style={{ background: '#FAFBFC', borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
+      <div id="how" className="max-w-6xl mx-auto px-6 py-20">
+        <Reveal className="text-center max-w-xl mx-auto">
+          <span className="text-xs font-bold tracking-wide" style={{ color: C.sky }}>{tr('lp_howEyebrow')}</span>
+          <h2 className="mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 30 }}>{tr('lp_howTitle')}</h2>
+          <p className="mt-3 text-sm" style={{ color: C.muted }}>{tr('lp_howSub')}</p>
+        </Reveal>
+        <div className="mt-10 grid md:grid-cols-3 gap-6">
+          {[
+            { n: '01', title: tr('lp_s1t'), desc: tr('lp_s1d') },
+            { n: '02', title: tr('lp_s2t'), desc: tr('lp_s2d') },
+            { n: '03', title: tr('lp_s3t'), desc: tr('lp_s3d') },
+          ].map((s, i) => (
+            <Reveal key={s.n} delay={i * 100}>
+              <div className="relative p-6 rounded-2xl h-full" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 34, color: '#E6F0FB' }}>{s.n}</span>
+                <h3 className="font-bold text-sm mt-1">{s.title}</h3>
+                <p className="mt-2 text-xs leading-relaxed" style={{ color: C.muted }}>{s.desc}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+      </div>
+
+      {/* Sòl tier comparison table */}
+      <div id="sol" className="max-w-4xl mx-auto px-6 py-20">
+        <Reveal className="text-center max-w-xl mx-auto">
+          <span className="text-xs font-bold tracking-wide" style={{ color: C.sky }}>{tr('lp_solEyebrow')}</span>
+          <h2 className="mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 30 }}>{tr('lp_solTitle')}</h2>
+          <p className="mt-3 text-sm" style={{ color: C.muted }}>{tr('lp_solSub')}</p>
+        </Reveal>
+        <Reveal delay={100}>
+          <div className="mt-10 rounded-2xl overflow-hidden" style={{ border: `1px solid ${C.border}`, background: C.card }}>
+            <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: C.bg }}>
+                  <th className="text-left text-xs font-bold px-5 py-3.5" style={{ color: C.muted }}>{tr('lp_solNivo')}</th>
+                  <th className="text-center text-xs font-bold px-5 py-3.5" style={{ color: C.muted }}>{tr('lp_solSemenn')}</th>
+                  <th className="text-center text-xs font-bold px-5 py-3.5" style={{ color: C.muted }}>{tr('lp_solKenzenn')}</th>
+                  <th className="text-center text-xs font-bold px-5 py-3.5" style={{ color: C.muted }}>{tr('lp_solMwa')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { tier: 'Basic', semenn: '1,000', kenzenn: '4,000', mwa: '10,000' },
+                  { tier: 'Standard', semenn: '2,500', kenzenn: '8,000', mwa: '15,000' },
+                  { tier: 'Premium', semenn: '5,000', kenzenn: '10,000', mwa: '20,000' },
+                ].map((row) => (
+                  <tr key={row.tier} style={{ borderTop: `1px solid ${C.border}` }}>
+                    <td className="px-5 py-3.5 text-sm font-semibold">{row.tier}</td>
+                    <td className="px-5 py-3.5 text-sm text-center" style={{ color: C.muted }}>{row.semenn} HTG</td>
+                    <td className="px-5 py-3.5 text-sm text-center" style={{ color: C.muted }}>{row.kenzenn} HTG</td>
+                    <td className="px-5 py-3.5 text-sm text-center" style={{ color: C.muted }}>{row.mwa} HTG</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-xs text-center" style={{ color: C.muted }}>{tr('lp_solNote')}</p>
+        </Reveal>
+      </div>
+
+      <div style={{ background: '#FAFBFC', borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
+      <div className="max-w-6xl mx-auto px-6 py-16">
+        <Reveal className="text-center max-w-xl mx-auto">
+          <span className="text-xs font-bold tracking-wide" style={{ color: C.sky }}>{tr('lp_testiEyebrow')}</span>
+          <h2 className="mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 30 }}>{tr('lp_testiTitle')}</h2>
+        </Reveal>
+        <div className="mt-10 grid md:grid-cols-3 gap-5">
+          {[1, 2, 3].map((i) => (
+            <Reveal key={i} delay={i * 100}>
+              <div className="lp-card p-7 rounded-2xl h-full flex flex-col" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                <div className="flex items-center gap-0.5 mb-4">
+                  {Array.from({ length: 5 }).map((_, si) => (
+                    <Star key={si} size={13} color={C.amber} fill={C.amber} />
+                  ))}
+                </div>
+                <p className="text-sm leading-relaxed flex-1" style={{ color: C.ink }}>"{tr('lp_testiQuote')}"</p>
+                <div className="mt-5 pt-5 flex items-center gap-3" style={{ borderTop: `1px solid ${C.border}` }}>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: '#E6F0FB', color: C.navy }}>?</div>
+                  <div>
+                    <p className="text-xs font-bold">{tr('lp_testiName')}</p>
+                    <p className="text-[11px]" style={{ color: C.muted }}>{tr('lp_testiRole')}</p>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+      </div>
+
+      {/* Security / trust — honest claims only */}
+      <div className="max-w-6xl mx-auto px-6 py-16">
+        <Reveal>
+          <div className="rounded-3xl p-10 md:p-12" style={{ background: `linear-gradient(180deg, ${C.card}, #FAFBFD)`, border: `1px solid ${C.border}` }}>
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div>
+                <span className="text-xs font-bold tracking-wide" style={{ color: C.sky, letterSpacing: 0.6 }}>{tr('lp_secEyebrow')}</span>
+                <h2 className="mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 28, letterSpacing: -0.3 }}>{tr('lp_secTitle')}</h2>
+                <p className="mt-4 text-sm leading-relaxed" style={{ color: C.muted, maxWidth: 380 }}>
+                  {tr('lp_secSub')}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon: Lock, t: tr('lp_sec1t'), d: tr('lp_sec1d') },
+                  { icon: ShieldCheck, t: tr('lp_sec2t'), d: tr('lp_sec2d') },
+                  { icon: BadgeCheck, t: tr('lp_sec3t'), d: tr('lp_sec3d') },
+                  { icon: Users, t: tr('lp_sec4t'), d: tr('lp_sec4d') },
+                ].map((s) => (
+                  <div key={s.t} className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: '#E6F0FB' }}>
+                      <s.icon size={16} color={C.navy} />
+                    </div>
+                    <p className="text-xs font-bold">{s.t}</p>
+                    <p className="mt-1 text-[11px] leading-relaxed" style={{ color: C.muted }}>{s.d}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+
+      <div id="faq" className="max-w-3xl mx-auto px-6 py-20">
+        <Reveal>
+          <span className="block text-center text-xs font-bold tracking-wide" style={{ color: C.sky }}>{tr('lp_faqEyebrow')}</span>
+          <h2 className="text-center mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 30 }}>{tr('lp_faqTitle')}</h2>
+        </Reveal>
+        <div className="mt-8 space-y-3">
+          {FAQS.map((f, i) => (
+            <Reveal key={i} delay={i * 60}>
+              <div className="rounded-xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between px-5 py-4 text-left">
+                  <span className="text-sm font-semibold">{f.q}</span>
+                  <ChevronRight size={16} color={C.muted} style={{ transform: openFaq === i ? 'rotate(90deg)' : 'none', transition: 'transform .25s ease' }} />
+                </button>
+                {openFaq === i && (
+                  <p className="lp-faq-body px-5 pb-4 text-sm" style={{ color: C.muted }}>{f.a}</p>
+                )}
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+
+      <Reveal>
+        <div className="max-w-6xl mx-auto px-6 pb-16">
+          <div className="rounded-3xl p-10 text-center relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+            <div className="lp-blob1" style={{ position: 'absolute', top: -30, left: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+            <div className="lp-blob2" style={{ position: 'absolute', bottom: -40, right: -20, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
+            <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 26, color: '#fff', position: 'relative' }}>{tr('lp_ctaTitle')}</h2>
+            <p className="mt-2 text-sm" style={{ color: 'rgba(255,255,255,0.85)', position: 'relative' }}>{tr('lp_ctaSub')}</p>
+            <button onClick={onStart} className="lp-btn mt-6 px-7 py-3.5 rounded-xl font-semibold text-sm flex items-center gap-1.5 mx-auto" style={{ background: '#fff', color: C.navy, position: 'relative' }}>
+              {tr('lp_ctaBtn')} <ChevronRight size={15} className="lp-arrow" />
+            </button>
+          </div>
+        </div>
+      </Reveal>
+
+      <div style={{ borderTop: `1px solid ${C.border}`, background: C.card }}>
+        <div className="max-w-6xl mx-auto px-6 py-14 grid md:grid-cols-5 gap-10">
+          <div className="md:col-span-2">
+            <div className="flex items-center gap-2">
+              <Logo size={26} />
+              <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 16 }}>BLIC<span style={{ color: C.sky }}>Pay</span></span>
+            </div>
+            <p className="mt-3 text-xs leading-relaxed" style={{ color: C.muted, maxWidth: 260 }}>
+              {tr('lp_footDesc')}
+            </p>
+            <p className="mt-4 text-xs font-semibold" style={{ color: C.navy }}>{tr('lp_footMadeIn')}</p>
+          </div>
+          <div>
+            <p className="text-[11px] font-bold uppercase" style={{ color: C.muted, letterSpacing: 0.6 }}>{tr('lp_footProduits')}</p>
+            <div className="mt-3.5 flex flex-col gap-2.5">
+              {['BLIC Sòl', tr('tileGoal'), tr('tileLoan'), tr('navTransfer'), tr('tileDepo')].map((l) => (
+                <button key={l} onClick={onStart} className="text-xs text-left" style={{ color: C.ink, background: 'none', border: 'none', cursor: 'pointer' }}>{l}</button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] font-bold uppercase" style={{ color: C.muted, letterSpacing: 0.6 }}>{tr('lp_footCompany')}</p>
+            <div className="mt-3.5 flex flex-col gap-2.5">
+              {[tr('lp_footAbout'), tr('lp_footSupport')].map((l) => (
+                <span key={l} className="text-xs" style={{ color: C.ink }}>{l}</span>
+              ))}
+              <span className="text-xs" style={{ color: C.muted }}>{tr('lp_footEmailPh')}</span>
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] font-bold uppercase" style={{ color: C.muted, letterSpacing: 0.6 }}>{tr('lp_footLegal')}</p>
+            <div className="mt-3.5 flex flex-col gap-2.5">
+              {[tr('lp_footTerms'), tr('lp_footPrivacy')].map((l) => (
+                <span key={l} className="text-xs" style={{ color: C.ink }}>{l}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div style={{ borderTop: `1px solid ${C.border}` }}>
+          <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+            <p className="text-xs" style={{ color: C.muted }}>© {new Date().getFullYear()} BLICPay. {tr('lp_footRights')}</p>
+          </div>
+          <div className="max-w-6xl mx-auto px-6 pb-6">
+            <p className="text-[11px] leading-relaxed" style={{ color: C.muted, maxWidth: 640 }}>
+              {tr('lp_footDisclaimer')}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
 export default function BlicPayApp() {
-  const [view, setView] = useState('auth');
+  const [view, setView] = useState('landing');
   const [lang, setLang] = useState('ht');
   const [showLangPicker, setShowLangPicker] = useState(false);
   const tr = (key) => T[lang]?.[key] ?? T.ht[key] ?? key;
@@ -528,6 +1369,35 @@ export default function BlicPayApp() {
   const [kycSubmitting, setKycSubmitting] = useState(false);
   const [balance, setBalance] = useState(0);
   const [hideBalance, setHideBalance] = useState(true);
+  const [promoIndex, setPromoIndex] = useState(0);
+  const PROMO_SLIDES = [
+    {
+      icon: Users, title: 'Envite yon zanmi, genyen',
+      desc: 'Chak zanmi ki ouvri yon kont BLICPay ba w yon bonis sou pwochen depo w.',
+      action: () => flash('Fonksyon envitasyon ap vini.'), cta: 'Wè plis',
+    },
+    {
+      icon: Users, title: '90 gwoup BLIC Sòl louvri',
+      desc: 'Antre nan yon gwoup Sòl nan nivo Basic, Standard oswa Premium jodi a.',
+      action: () => openSolSection(), cta: 'Gade gwoup yo',
+    },
+    {
+      icon: Lock, title: 'Kat BLICPay ap vini',
+      desc: 'N ap travay sou yon patenarya pou ofri kat vityèl ak fizik pou peye nenpòt kote.',
+      action: () => flash('Detay kat la ap vini talè.'), cta: 'Aprann plis',
+    },
+    {
+      icon: PiggyBank, title: 'Fikse yon objektif epay',
+      desc: 'Kreye yon objektif e swiv pwogrè w chak fwa ou mete lajan.',
+      action: () => setView('termdepo'), cta: 'Kòmanse',
+    },
+  ];
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setPromoIndex((i) => (i + 1) % PROMO_SLIDES.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
   const [tx, setTx] = useState([]);
   const [loadingWallet, setLoadingWallet] = useState(false);
   const [amount, setAmount] = useState('');
@@ -1285,7 +2155,8 @@ export default function BlicPayApp() {
       setView('dashboard');
       flash('Dokiman ou voye — n ap verifye l.');
     } catch (e) {
-      flash(e.message || 'Nou pa t ka voye dokiman yo.');
+      console.error('KYC submit error:', e);
+      flash(e.message || 'Nou pa t ka voye dokiman yo. Verifye koneksyon entènèt ou epi eseye ankò.');
     } finally {
       setKycSubmitting(false);
     }
@@ -1400,7 +2271,11 @@ export default function BlicPayApp() {
         </div>
       )}
 
-      <div className="max-w-md mx-auto min-h-full" style={{ background: C.bg }}>
+      <div className={view === 'landing' ? 'w-full min-h-full' : 'max-w-md mx-auto min-h-full'} style={{ background: C.bg }}>
+        {view === 'landing' ? (
+          <LandingPage onStart={() => setView('auth')} lang={lang} setLang={setLang} tr={tr} />
+        ) : (
+        <>
 
         {/* HEADER */}
         {view !== 'auth' && view !== 'forgotpassword' && (
@@ -1783,6 +2658,16 @@ export default function BlicPayApp() {
                   </button>
                 </div>
                 <p className="mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>{tr('accountLabel')} · •••• 8455</p>
+                <div className="mt-4 flex gap-2.5">
+                  <button onClick={startDeposit} className="bp-btn flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold"
+                    style={{ background: '#fff', color: C.navy }}>
+                    <ArrowDownLeft size={14} /> {tr('tileDeposit')}
+                  </button>
+                  <button onClick={startWithdraw} className="bp-btn flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold"
+                    style={{ background: 'rgba(255,255,255,0.18)', color: '#fff' }}>
+                    <ArrowUpRight size={14} /> {tr('tileWithdraw')}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1867,22 +2752,35 @@ export default function BlicPayApp() {
               </div>
             )}
 
-            {/* promo banner */}
-            <div className="mt-4 rounded-2xl p-5 relative overflow-hidden" style={{ background: C.navy }}>
-              <ShieldCheck size={100} style={{ position: 'absolute', right: -14, bottom: -18, opacity: 0.14 }} color="#fff" />
-              <p className="font-extrabold text-white" style={{ ...fontDisplay, fontSize: 17 }}>Envite yon zanmi, genyen</p>
-              <p className="mt-1.5 text-sm max-w-[75%]" style={{ color: 'rgba(255,255,255,0.75)' }}>
-                Chak zanmi ki ouvri yon kont BLICPay ba w yon bonis sou pwochen depo w.
-              </p>
-              <button onClick={() => flash('Fonksyon envitasyon ap vini.')}
-                className="bp-btn mt-3.5 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5"
-                style={{ background: '#fff', color: C.navy }}>
-                Wè plis <ChevronRight size={14} />
-              </button>
+            {/* promo carousel — cycles automatically through several ads/services */}
+            <div className="mt-4 rounded-2xl p-5 relative overflow-hidden" style={{ background: C.navy, transition: 'background 0.3s' }}>
+              {(() => {
+                const slide = PROMO_SLIDES[promoIndex];
+                const Icon = slide.icon;
+                return (
+                  <>
+                    <Icon size={100} style={{ position: 'absolute', right: -14, bottom: -18, opacity: 0.14 }} color="#fff" />
+                    <p className="font-extrabold text-white" style={{ ...fontDisplay, fontSize: 17 }}>{slide.title}</p>
+                    <p className="mt-1.5 text-sm max-w-[75%]" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                      {slide.desc}
+                    </p>
+                    <button onClick={slide.action}
+                      className="bp-btn mt-3.5 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5"
+                      style={{ background: '#fff', color: C.navy }}>
+                      {slide.cta} <ChevronRight size={14} />
+                    </button>
+                  </>
+                );
+              })()}
             </div>
             <div className="mt-3 flex items-center justify-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: C.border }} />
-              <span className="w-4 h-1.5 rounded-full" style={{ background: C.navy }} />
+              {PROMO_SLIDES.map((_, i) => (
+                <button key={i} onClick={() => setPromoIndex(i)} aria-label={`Wè ofr ${i + 1}`}
+                  className="rounded-full transition-all" style={{
+                    width: i === promoIndex ? 16 : 6, height: 6,
+                    background: i === promoIndex ? C.navy : C.border,
+                  }} />
+              ))}
             </div>
 
             {/* transactions */}
@@ -2276,9 +3174,9 @@ export default function BlicPayApp() {
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = () => setKycFile(reader.result);
-                  reader.readAsDataURL(file);
+                  compressImageFile(file)
+                    .then((dataUrl) => setKycFile(dataUrl))
+                    .catch((err) => flash(err.message || 'Nou pa t ka trete foto a.'));
                 }} />
             </label>
 
@@ -2303,9 +3201,9 @@ export default function BlicPayApp() {
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = () => setKycSelfieFile(reader.result);
-                  reader.readAsDataURL(file);
+                  compressImageFile(file)
+                    .then((dataUrl) => setKycSelfieFile(dataUrl))
+                    .catch((err) => flash(err.message || 'Nou pa t ka trete foto a.'));
                 }} />
             </label>
 
@@ -3033,7 +3931,7 @@ export default function BlicPayApp() {
             <p className="mt-6 text-xs font-semibold" style={{ color: C.muted }}>{tr('aboutSection')}</p>
             <div className="mt-2 p-4 rounded-xl flex items-center justify-between" style={{ background: C.card, border: `1px solid ${C.border}` }}>
               <span className="text-sm" style={{ color: C.muted }}>BLICPay</span>
-              <span className="text-sm" style={{ ...fontMono, color: C.muted }}>v1.0.0 (Pwototip)</span>
+              <span className="text-sm" style={{ ...fontMono, color: C.muted }}>v1.0.0</span>
             </div>
 
             <button onClick={logout}
@@ -3553,6 +4451,8 @@ export default function BlicPayApp() {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }
