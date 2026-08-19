@@ -4450,9 +4450,9 @@ export default function BlicPayApp() {
             </button>
           </div>
         )}
-      </div>
       </>
       )}
+      </div>
     </div>
   );
 }
