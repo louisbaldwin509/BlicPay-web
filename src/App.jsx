@@ -3044,8 +3044,9 @@ export default function BlicPayApp() {
                 </div>
                 <span className="text-xs font-semibold">{tr('tileGoal')}</span>
               </button>
-              <button onClick={() => setView('loan')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
+              <button onClick={() => setView('loan')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center relative"
                 style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold" style={{ background: C.amber, color: '#fff' }}>Talè</span>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E6F0FB' }}>
                   <HandCoins size={16} color={C.navy} fill={C.navy} strokeWidth={1.4} />
                 </div>
@@ -4116,65 +4117,18 @@ export default function BlicPayApp() {
             </button>
 
             {!loan && (
-              <>
-                <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>Mande yon <em style={{ fontStyle: 'italic', color: C.sky }}>Prè</em></h2>
-                <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Chwazi konbyen tan pou peye prè a.</p>
-
-                <p className="text-xs font-semibold mt-6 mb-2" style={{ color: C.muted }}>DIRE</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {LOAN_PLANS.map((plan, i) => (
-                    <button key={plan.months} onClick={() => setNewLoanPlanIdx(i)}
-                      className="bp-btn py-3 rounded-lg text-center"
-                      style={{
-                        background: newLoanPlanIdx === i ? C.navy : C.card,
-                        border: `1px solid ${newLoanPlanIdx === i ? C.navy : C.border}`,
-                      }}>
-                      <p className="text-sm font-bold" style={{ color: newLoanPlanIdx === i ? '#fff' : C.ink }}>{plan.months} mwa</p>
-                      <p className="text-xs mt-0.5" style={{ color: newLoanPlanIdx === i ? 'rgba(255,255,255,0.8)' : C.muted }}>
-                        {Math.round(plan.rate * 100)}%
-                      </p>
-                    </button>
-                  ))}
+              <div className="flex flex-col items-center text-center pt-10">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: '#E6F0FB' }}>
+                  <HandCoins size={28} color={C.navy} />
                 </div>
-
-                <p className="text-xs font-semibold mt-6 mb-2" style={{ color: C.muted }}>MONTAN PRÈ A</p>
-                <div className="relative">
-                  <input value={newLoanAmount} onChange={(e) => setNewLoanAmount(e.target.value.replace(/[^0-9.]/g, ''))}
-                    placeholder="0.00" inputMode="decimal"
-                    className="w-full pl-4 pr-16 py-3.5 rounded-xl text-lg font-semibold"
-                    style={{ background: C.card, border: `1px solid ${C.border}`, ...fontMono }} />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-sm" style={{ color: C.muted }}>HTG</span>
-                </div>
-
-                {newLoanAmount && Number(newLoanAmount) > 0 && (() => {
-                  const plan = LOAN_PLANS[newLoanPlanIdx];
-                  const total = Math.round(Number(newLoanAmount) * (1 + plan.rate));
-                  const inst = Math.round(total / plan.months);
-                  return (
-                    <div className="mt-4 p-4 rounded-xl" style={{ background: '#E6F0FB' }}>
-                      <div className="flex items-center justify-between text-sm">
-                        <span style={{ color: C.navy }}>Total pou peye</span>
-                        <span style={{ ...fontMono, fontWeight: 700, color: C.navy }}>{money(total)}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm mt-1.5">
-                        <span style={{ color: C.navy }}>Vèsman chak mwa</span>
-                        <span style={{ ...fontMono, fontWeight: 600, color: C.navy }}>{money(inst)}</span>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                <div className="mt-4 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#FBF0DE', color: '#946115' }}>
-                  <AlertCircle size={15} className="shrink-0 mt-0.5" />
-                  Demand lan ap egzamine anvan lajan an antre nan kont ou.
-                </div>
-
-                <button onClick={requestLoan} disabled={loanProcessing}
-                  className="bp-btn mt-5 w-full py-3.5 rounded-xl font-semibold text-white"
-                  style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: loanProcessing ? 0.7 : 1 }}>
-                  {loanProcessing ? 'Ap voye...' : 'Mande prè a'}
-                </button>
-              </>
+                <h2 className="mt-4" style={{ ...fontDisplay, fontWeight: 800, fontSize: 20 }}>
+                  BLIC Prè <em style={{ fontStyle: 'italic', color: C.sky }}>ap vini talè</em>
+                </h2>
+                <p className="mt-2 text-sm max-w-xs" style={{ color: C.muted }}>
+                  N ap travay pou mete fonksyonalite sa a disponib. Rete branche — n ap avize w lè li pare.
+                </p>
+                <Badge tone="amber">Talè</Badge>
+              </div>
             )}
 
             {loan && loan.status === 'annatant' && (
