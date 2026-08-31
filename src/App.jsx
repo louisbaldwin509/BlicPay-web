@@ -46,9 +46,69 @@ function compressImageFile(file, maxDim = 1280, quality = 0.82) {
   });
 }
 
-// Petit client HTTP partagé. Ajoute automatiquement le token JWT quand il
-// y en a un, et lève une erreur avec le message renvoyé par l'API en cas
-// d'échec pour que les écrans puissent l'afficher directement.
+// Analize yon dataURL pou detekte foto ki twò flou oswa ki gen move limyè
+// (twò fè nwa oswa twò klere/eksponaj). Sèvi ak yon vèsyon piti gri nan
+// imaj la pou rezilta a rapid, san pa gen depandans deyò.
+function analyzeImageQuality(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onerror = () => resolve({ ok: true }); // pa bloke si nou pa ka analize l
+    img.onload = () => {
+      const w = 160;
+      const h = Math.max(1, Math.round((img.height / img.width) * w));
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      let data;
+      try {
+        data = ctx.getImageData(0, 0, w, h).data;
+      } catch {
+        resolve({ ok: true });
+        return;
+      }
+
+      const gray = new Float32Array(w * h);
+      let sumBrightness = 0;
+      for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+        const g = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        gray[p] = g;
+        sumBrightness += g;
+      }
+      const brightness = sumBrightness / gray.length;
+
+      // Varyans Laplasyen — yon foto klè gen anpil kontras bò kwen yo (varyans
+      // segondè); yon foto flou gen tras plis lis, kidonk varyans ba.
+      let sum = 0, sumSq = 0, n = 0;
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const idx = y * w + x;
+          const lap =
+            gray[idx - 1] + gray[idx + 1] + gray[idx - w] + gray[idx + w] - 4 * gray[idx];
+          sum += lap;
+          sumSq += lap * lap;
+          n++;
+        }
+      }
+      const mean = sum / n;
+      const variance = sumSq / n - mean * mean;
+
+      if (brightness < 45) {
+        resolve({ ok: false, reason: 'Foto a twò fè nwa. Al nan yon kote ki gen plis limyè epi eseye ankò.' });
+      } else if (brightness > 235) {
+        resolve({ ok: false, reason: 'Foto a twò klere (twòp limyè/flach). Eseye ankò san flach dirèk.' });
+      } else if (variance < 18) {
+        resolve({ ok: false, reason: 'Foto a two flou. Kenbe telefòn nan fiks epi eseye ankò.' });
+      } else {
+        resolve({ ok: true });
+      }
+    };
+    img.src = dataUrl;
+  });
+}
+
+
 async function apiFetch(path, { method = 'GET', body, token } = {}) {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method,
@@ -1508,7 +1568,11 @@ export default function BlicPayApp() {
   const [user, setUser] = useState(null);
   const [kycStatus, setKycStatus] = useState('pa verifye'); // 'pa verifye' | 'annatant' | 'verifye'
   const [kycDocType, setKycDocType] = useState('paspò');
+  const [kycStep, setKycStep] = useState('entwo'); // 'entwo' | 'fòm' — montre egzanp anvan telechajman
   const [kycFile, setKycFile] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [kycSelfieFile, setKycSelfieFile] = useState(null);
   const [profile, setProfile] = useState({
     firstName: '', lastName: '', email: '', address: '', city: '', country: '', department: '',
@@ -1613,9 +1677,9 @@ export default function BlicPayApp() {
   const [loanProcessing, setLoanProcessing] = useState(false);
   const [checkingLoan, setCheckingLoan] = useState(false);
 
-  function flash(msg) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2600);
+  function flash(msg, type = 'success') {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3200);
   }
 
   async function loadWallet(authToken) {
@@ -1650,7 +1714,7 @@ export default function BlicPayApp() {
         ts: Date.now(), status: activeLoan.status === 'active' ? 'aktif' : 'annatant',
       } : null);
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setLoadingWallet(false);
     }
@@ -1683,10 +1747,11 @@ export default function BlicPayApp() {
       });
       setToken(newToken);
       setUser(newUser);
-      setKycStatus('pa verifye'); // backend pa gen vre KYC ankò — kòmanse toujou pa verifye
       setBalance(newUser.balance);
       setView('dashboard');
       await loadWallet(newToken);
+      await loadKycStatusSilently(newToken);
+      await loadNotifications(newToken);
     } catch (err) {
       setAuthError(err.message);
     } finally {
@@ -1798,7 +1863,7 @@ export default function BlicPayApp() {
         setTx((t) => [{ id: withdrawal.id, method: m.name, amount: withdrawal.amount, ts: Date.now(), status: 'annatant', date: 'jodi a', type: 'retrè' }, ...t]);
         setView('confirm');
       } catch (err) {
-        flash(err.message);
+        flash(err.message, 'error');
       } finally {
         setProcessing(false);
       }
@@ -1832,7 +1897,7 @@ export default function BlicPayApp() {
       }, ...t]);
       setView('confirm');
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setProcessing(false);
     }
@@ -1872,7 +1937,7 @@ export default function BlicPayApp() {
       setTransferAmount('');
       setView('dashboard');
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setTransferProcessing(false);
     }
@@ -1901,7 +1966,7 @@ export default function BlicPayApp() {
       setNewPocketTarget('');
       setShowNewPocket(false);
       flash('Pòch la kreye.');
-    }).catch((err) => flash(err.message));
+    }).catch((err) => flash(err.message, 'error'));
   }
 
   async function addMoneyToPocket() {
@@ -1929,7 +1994,7 @@ export default function BlicPayApp() {
       setShowAddMoney(false);
       flash('Lajan an ajoute nan pòch la.');
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setAddMoneyProcessing(false);
     }
@@ -1954,7 +2019,7 @@ export default function BlicPayApp() {
       setNewGoalTarget('');
       setView('termdepo');
       flash('Objektif kreye.');
-    }).catch((err) => flash(err.message));
+    }).catch((err) => flash(err.message, 'error'));
   }
 
   function openGoal(id) {
@@ -1991,7 +2056,7 @@ export default function BlicPayApp() {
       setAddGoalAmount('');
       flash(reached ? 'Objektif la atenn! Ou ka retire lajan an kounye a.' : 'Lajan an ajoute nan objektif la.');
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setGoalProcessing(false);
     }
@@ -2012,7 +2077,7 @@ export default function BlicPayApp() {
       setView('termdepo');
       flash('Lajan an tounen nan kont prensipal ou.');
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setGoalProcessing(false);
     }
@@ -2036,7 +2101,7 @@ export default function BlicPayApp() {
       setView('termdepo');
       flash(`Retrè ijans fèt — ${money(fee)} kenbe kòm frè.`);
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setGoalProcessing(false);
     }
@@ -2067,7 +2132,7 @@ export default function BlicPayApp() {
       setView('loan');
       flash('Demand prè a voye — n ap egzamine li.');
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setLoanProcessing(false);
     }
@@ -2100,7 +2165,7 @@ export default function BlicPayApp() {
         installments: (fresh.installments || []).map((i) => ({ n: i.n, amount: i.amount, status: i.status === 'paid' ? 'peye' : 'annatant', ts: Date.now() })),
       }));
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setCheckingLoan(false);
     }
@@ -2132,7 +2197,7 @@ export default function BlicPayApp() {
       });
       flash(finished ? 'Prè a peye nèt!' : 'Vèsman anrejistre.');
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setLoanProcessing(false);
     }
@@ -2187,7 +2252,7 @@ export default function BlicPayApp() {
       setPocketMode(null);
       setPocketAmount('');
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setPocketProcessing(false);
     }
@@ -2304,11 +2369,11 @@ export default function BlicPayApp() {
 
   async function submitKyc() {
     if (!kycFile) {
-      flash('Ajoute yon foto dokiman ou anvan.');
+      flash('Ajoute yon foto dokiman ou anvan.', 'error');
       return;
     }
     if (!kycSelfieFile) {
-      flash('Pran yon selfi anvan.');
+      flash('Pran yon selfi anvan.', 'error');
       return;
     }
     setKycSubmitting(true);
@@ -2321,14 +2386,63 @@ export default function BlicPayApp() {
         body: { docType: kycDocType, docImage, docMimeType, selfieImage, selfieMimeType },
       });
       setKycStatus('annatant');
-      setView('dashboard');
-      flash('Dokiman ou voye — n ap verifye l.');
+      setKycStep('siksè');
     } catch (e) {
       console.error('KYC submit error:', e);
-      flash(e.message || 'Nou pa t ka voye dokiman yo. Verifye koneksyon entènèt ou epi eseye ankò.');
+      flash(e.message || 'Nou pa t ka voye dokiman yo. Verifye koneksyon entènèt ou epi eseye ankò.', 'error');
     } finally {
       setKycSubmitting(false);
     }
+  }
+
+  // Chaje estati KYC an silans — sèvi apre konneksyon oswa restorasyon sesyon,
+  // san mesaj flash paske se pa yon aksyon kliyan te mande dirèkteman.
+  async function loadKycStatusSilently(tok) {
+    try {
+      const data = await apiFetch('/kyc/status', { token: tok });
+      setKycStatus(data.status === 'approved' ? 'verifye' : data.status === 'pending' ? 'annatant' : 'pa verifye');
+    } catch (e) {
+      console.error('KYC status load error:', e);
+      // Kite estati a jan li te ye a olye fè kliyan an panse li bezwen resoumèt.
+    }
+  }
+
+  async function loadNotifications(tok = token) {
+    try {
+      const data = await apiFetch('/notifications', { token: tok });
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unreadCount || 0);
+    } catch (e) {
+      console.error('Notifications load error:', e);
+    }
+  }
+
+  async function openNotifPanel() {
+    const next = !showNotifPanel;
+    setShowNotifPanel(next);
+    if (next) {
+      await loadNotifications();
+      if (unreadCount > 0) {
+        try {
+          await apiFetch('/notifications/read-all', { method: 'PATCH', token });
+          setUnreadCount(0);
+          setNotifications((ns) => ns.map((n) => ({ ...n, read: true })));
+        } catch (e) {
+          console.error('Notifications read-all error:', e);
+        }
+      }
+    }
+  }
+
+  function timeAgo(dateStr) {
+    const diffMs = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return 'kounye a';
+    if (mins < 60) return `sa gen ${mins} min`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `sa gen ${hours}h`;
+    const days = Math.floor(hours / 24);
+    return `sa gen ${days}j`;
   }
 
   async function checkKycStatus() {
@@ -2340,7 +2454,7 @@ export default function BlicPayApp() {
       else if (data.status === 'rejected') flash(data.rejectionReason || 'Demand verifikasyon w refize — eseye ankò.');
       else flash('Pa gen chanjman.');
     } catch (e) {
-      flash(e.message || 'Nou pa t ka verifye estati a.');
+      flash(e.message || 'Nou pa t ka verifye estati a.', 'error');
     } finally {
       setRefreshing(false);
     }
@@ -2372,7 +2486,7 @@ export default function BlicPayApp() {
         flash('Estati depo yo mizajou.');
       }
     } catch (err) {
-      flash(err.message);
+      flash(err.message, 'error');
     } finally {
       setRefreshing(false);
     }
@@ -2434,9 +2548,21 @@ export default function BlicPayApp() {
       `}</style>
 
       {toast && (
-        <div className="fixed top-4 right-4 z-50 fadein px-4 py-3 rounded-xl text-sm flex items-center gap-2 shadow-lg"
-          style={{ background: C.card, border: `1px solid ${C.border}`, color: C.ink }}>
-          <Check size={16} color={C.mint} /> {toast}
+        <div className="fixed top-4 left-4 right-4 z-50 fadein px-4 py-3.5 rounded-xl text-sm flex items-center gap-2.5 shadow-lg mx-auto"
+          style={{
+            background: toast.type === 'error' ? '#FBEAEA' : toast.type === 'info' ? '#E6F0FB' : '#E4F5EF',
+            border: `1px solid ${toast.type === 'error' ? '#F3C9C9' : toast.type === 'info' ? '#BFDBF7' : '#BFE7D8'}`,
+            color: toast.type === 'error' ? '#8C3535' : toast.type === 'info' ? C.navy : '#2E6B57',
+            maxWidth: 420,
+          }}>
+          {toast.type === 'error' ? (
+            <AlertCircle size={17} color={C.danger} className="shrink-0" />
+          ) : toast.type === 'info' ? (
+            <Bell size={16} color={C.navy} className="shrink-0" />
+          ) : (
+            <Check size={17} color={C.mint} className="shrink-0" />
+          )}
+          <span className="flex-1">{toast.msg}</span>
         </div>
       )}
 
@@ -2464,9 +2590,42 @@ export default function BlicPayApp() {
                 className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                 <Settings size={15} color={C.muted} />
               </button>
-              <button className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <Bell size={16} color={C.muted} />
-              </button>
+              <div className="relative">
+                <button onClick={openNotifPanel} aria-label="Notifikasyon"
+                  className="w-9 h-9 rounded-full flex items-center justify-center relative" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                  <Bell size={16} color={C.muted} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 text-[9px] font-bold flex items-center justify-center rounded-full"
+                      style={{ width: 15, height: 15, background: C.danger, color: '#fff' }}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+                {showNotifPanel && (
+                  <>
+                    <div onClick={() => setShowNotifPanel(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
+                    <div className="fadein" style={{
+                      position: 'absolute', right: 0, top: 44, width: 300, maxHeight: 360, overflowY: 'auto',
+                      background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, zIndex: 41,
+                      boxShadow: '0 8px 24px rgba(11,27,51,0.15)',
+                    }}>
+                      <p className="text-xs font-bold uppercase px-4 pt-3.5 pb-2" style={{ color: C.muted }}>Notifikasyon</p>
+                      {notifications.length === 0 ? (
+                        <p className="text-sm px-4 pb-4" style={{ color: C.muted }}>Ou pa gen notifikasyon.</p>
+                      ) : notifications.map((n, i) => (
+                        <div key={n.id} className="px-4 py-3" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm font-semibold">{n.title}</p>
+                            {!n.read && <span className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ background: C.sky }} />}
+                          </div>
+                          <p className="mt-0.5 text-xs" style={{ color: C.muted }}>{n.body}</p>
+                          <p className="mt-1 text-[11px]" style={{ color: C.muted }}>{timeAgo(n.createdAt)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -2785,7 +2944,7 @@ export default function BlicPayApp() {
                 <Badge tone="amber">Annatant</Badge>
               )}
               {kycStatus === 'pa verifye' && (
-                <button onClick={() => setView('kyc')} className="text-xs font-semibold underline" style={{ color: C.navy }}>
+                <button onClick={() => { setKycStep('entwo'); setView('kyc'); }} className="text-xs font-semibold underline" style={{ color: C.navy }}>
                   Verifye kont ou
                 </button>
               )}
@@ -2913,7 +3072,7 @@ export default function BlicPayApp() {
                     <RefreshCw size={14} color="#946115" style={refreshing ? { animation: 'spin 0.8s linear infinite' } : undefined} />
                   </button>
                 ) : (
-                  <button onClick={() => setView('kyc')}
+                  <button onClick={() => { setKycStep('entwo'); setView('kyc'); }}
                     className="text-xs font-semibold px-3 py-2 rounded-lg shrink-0" style={{ background: '#946115', color: '#fff' }}>
                     Kòmanse
                   </button>
@@ -3285,9 +3444,86 @@ export default function BlicPayApp() {
           </div>
         )}
 
-        {view === 'kyc' && (
+        {view === 'kyc' && kycStep === 'entwo' && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('dashboard')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
+              <ArrowLeft size={15} /> Retounen
+            </button>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+                <ShieldCheck size={28} color="#fff" />
+              </div>
+              <h2 className="mt-3" style={{ ...fontDisplay, fontWeight: 800, fontSize: 20 }}>Kòman pou <em style={{ fontStyle: 'italic', color: C.sky }}>pran bon foto</em></h2>
+              <p className="mt-1.5 text-sm max-w-xs" style={{ color: C.muted }}>
+                Kèk segond sèlman — men sa ki fè yon demand ale pi vit.
+              </p>
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="rounded-xl p-3" style={{ background: '#E4F5EF', border: `1px solid #BFE7D8` }}>
+                <div className="rounded-lg flex items-center justify-center" style={{ background: '#fff', height: 96 }}>
+                  <svg width="72" height="50" viewBox="0 0 72 50" fill="none">
+                    <rect x="1" y="1" width="70" height="48" rx="4" fill="#fff" stroke={C.mint} strokeWidth="2" />
+                    <rect x="8" y="9" width="16" height="16" rx="8" fill="#CDEFE1" />
+                    <rect x="30" y="11" width="34" height="4" rx="2" fill="#CDEFE1" />
+                    <rect x="30" y="19" width="26" height="4" rx="2" fill="#CDEFE1" />
+                    <rect x="8" y="32" width="56" height="4" rx="2" fill="#CDEFE1" />
+                    <rect x="8" y="40" width="34" height="4" rx="2" fill="#CDEFE1" />
+                  </svg>
+                </div>
+                <div className="mt-2 flex items-center gap-1.5">
+                  <Check size={13} color={C.mint} />
+                  <span className="text-xs font-bold" style={{ color: C.mint }}>Byen</span>
+                </div>
+                <p className="mt-0.5 text-xs" style={{ color: '#2E6B57' }}>Tout dokiman an vizib, plat, byen kadre.</p>
+              </div>
+
+              <div className="rounded-xl p-3" style={{ background: '#FBEAEA', border: `1px solid #F3C9C9` }}>
+                <div className="rounded-lg flex items-center justify-center overflow-hidden" style={{ background: '#fff', height: 96 }}>
+                  <svg width="72" height="50" viewBox="0 0 72 50" fill="none" style={{ transform: 'rotate(-14deg) scale(1.5) translate(6px, 4px)' }}>
+                    <rect x="1" y="1" width="70" height="48" rx="4" fill="#fff" stroke={C.danger} strokeWidth="2" />
+                    <rect x="8" y="9" width="16" height="16" rx="8" fill="#F6D3D3" />
+                    <rect x="30" y="11" width="34" height="4" rx="2" fill="#F6D3D3" />
+                    <rect x="30" y="19" width="26" height="4" rx="2" fill="#F6D3D3" />
+                    <rect x="8" y="32" width="56" height="4" rx="2" fill="#F6D3D3" />
+                    <rect x="8" y="40" width="34" height="4" rx="2" fill="#F6D3D3" />
+                  </svg>
+                </div>
+                <div className="mt-2 flex items-center gap-1.5">
+                  <X size={13} color={C.danger} />
+                  <span className="text-xs font-bold" style={{ color: C.danger }}>Evite sa</span>
+                </div>
+                <p className="mt-0.5 text-xs" style={{ color: '#8C3535' }}>Dokiman kwochi, koupe, oswa flou.</p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-col gap-3">
+              {[
+                'Poze dokiman an byen plat sou yon sifas klere, san limyè k ap reflete sou li.',
+                'Asire w kat kwen dokiman an vizib nan foto a — pa koupe okenn pati.',
+                'Pou selfi a: figi w dwe klere, san linèt solèy ni chapo.',
+              ].map((tip, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: C.bg }}>
+                    <span className="text-xs font-bold" style={{ color: C.navy }}>{i + 1}</span>
+                  </div>
+                  <p className="text-sm" style={{ color: C.ink }}>{tip}</p>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={() => setKycStep('fòm')}
+              className="bp-btn mt-7 w-full py-3.5 rounded-xl font-semibold text-white"
+              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+              Kontinye
+            </button>
+          </div>
+        )}
+
+        {view === 'kyc' && kycStep === 'fòm' && (
+          <div className="fadein px-5 pb-10 pt-2">
+            <button onClick={() => setKycStep('entwo')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
               <ArrowLeft size={15} /> Retounen
             </button>
 
@@ -3332,7 +3568,7 @@ export default function BlicPayApp() {
             <label className="mt-2 flex flex-col items-center justify-center gap-2 rounded-xl cursor-pointer"
               style={{ background: C.card, border: `1.5px dashed ${C.border}`, padding: kycFile ? 0 : '32px 16px', overflow: 'hidden' }}>
               {kycFile ? (
-                <img src={kycFile} alt="Dokiman" className="w-full max-h-48 object-cover" />
+                <img src={kycFile} alt="Dokiman" className="w-full max-h-64 object-contain" style={{ background: C.bg }} />
               ) : (
                 <>
                   <Building2 size={22} color={C.muted} />
@@ -3344,8 +3580,15 @@ export default function BlicPayApp() {
                   const file = e.target.files?.[0];
                   if (!file) return;
                   compressImageFile(file)
-                    .then((dataUrl) => setKycFile(dataUrl))
-                    .catch((err) => flash(err.message || 'Nou pa t ka trete foto a.'));
+                    .then(async (dataUrl) => {
+                      const quality = await analyzeImageQuality(dataUrl);
+                      if (!quality.ok) {
+                        flash(quality.reason, 'error');
+                        return;
+                      }
+                      setKycFile(dataUrl);
+                    })
+                    .catch((err) => flash(err.message || 'Nou pa t ka trete foto a.', 'error'));
                 }} />
             </label>
 
@@ -3371,8 +3614,15 @@ export default function BlicPayApp() {
                   const file = e.target.files?.[0];
                   if (!file) return;
                   compressImageFile(file)
-                    .then((dataUrl) => setKycSelfieFile(dataUrl))
-                    .catch((err) => flash(err.message || 'Nou pa t ka trete foto a.'));
+                    .then(async (dataUrl) => {
+                      const quality = await analyzeImageQuality(dataUrl);
+                      if (!quality.ok) {
+                        flash(quality.reason, 'error');
+                        return;
+                      }
+                      setKycSelfieFile(dataUrl);
+                    })
+                    .catch((err) => flash(err.message || 'Nou pa t ka trete foto a.', 'error'));
                 }} />
             </label>
 
@@ -3380,6 +3630,38 @@ export default function BlicPayApp() {
               className="bp-btn mt-6 w-full py-3.5 rounded-xl font-semibold text-white"
               style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: kycSubmitting ? 0.7 : 1 }}>
               {kycSubmitting ? 'Ap voye...' : 'Voye pou verifikasyon'}
+            </button>
+          </div>
+        )}
+
+        {view === 'kyc' && kycStep === 'siksè' && (
+          <div className="fadein px-5 pb-10 pt-10 flex flex-col items-center text-center">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: C.mint }}>
+              <Check size={38} color="#fff" />
+            </div>
+            <h2 className="mt-5" style={{ ...fontDisplay, fontWeight: 800, fontSize: 21 }}>
+              Demand ou <em style={{ fontStyle: 'italic', color: C.mint }}>voye avèk siksè</em>
+            </h2>
+            <p className="mt-2 text-sm max-w-xs" style={{ color: C.muted }}>
+              Nou resevwa dokiman w yo. Ekip nou an ap egzamine yo, sa ka pran kèk moman jiska kèk èdtan.
+            </p>
+
+            <div className="mt-7 w-full max-w-xs p-4 rounded-xl text-left" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+              <p className="text-xs font-bold uppercase" style={{ color: C.muted }}>Pwochèn etap</p>
+              <div className="mt-3 flex items-start gap-2.5">
+                <Badge tone="amber">1</Badge>
+                <p className="text-sm mt-0.5">N ap konpare foto dokiman w ak selfi a.</p>
+              </div>
+              <div className="mt-2.5 flex items-start gap-2.5">
+                <Badge tone="amber">2</Badge>
+                <p className="text-sm mt-0.5">W ap resevwa yon notifikasyon lè estati w chanje.</p>
+              </div>
+            </div>
+
+            <button onClick={() => setView('dashboard')}
+              className="bp-btn mt-8 w-full max-w-xs py-3.5 rounded-xl font-semibold text-white"
+              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+              Retounen nan akèy
             </button>
           </div>
         )}
@@ -4029,7 +4311,7 @@ export default function BlicPayApp() {
                 </div>
                 <ChevronRight size={15} color={C.muted} />
               </button>
-              <button onClick={() => setView('kyc')}
+              <button onClick={() => { setKycStep('entwo'); setView('kyc'); }}
                 className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
                 <div className="flex items-center gap-2.5">
                   <ShieldCheck size={16} color={C.muted} />
