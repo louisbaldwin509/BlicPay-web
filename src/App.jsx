@@ -1696,6 +1696,7 @@ export default function BlicPayApp() {
       setBalance(bal);
       setTx(transactions.map((t) => ({
         id: t.id,
+        type: t.type,
         method: methods.find((m) => m.id === t.method)?.name || t.method,
         amount: t.amount,
         status: t.status === 'confirmed' ? 'konfime' : t.status === 'rejected' ? 'rejte' : 'annatant',
@@ -3133,8 +3134,8 @@ export default function BlicPayApp() {
                       <span className="text-sm" style={{ ...fontMono, color: isOutgoing ? C.danger : C.ink }}>
                         {isOutgoing ? '-' : '+'}{money(t.amount)}
                       </span>
-                      <Badge tone={t.status === 'konfime' ? 'mint' : 'amber'}>
-                        {t.status === 'konfime' ? 'Konfime' : 'Annatant'}
+                      <Badge tone={t.status === 'konfime' ? 'mint' : t.status === 'rejte' ? 'danger' : 'amber'}>
+                        {t.status === 'konfime' ? 'Konfime' : t.status === 'rejte' ? 'Rejte' : 'Annatant'}
                       </Badge>
                     </div>
                   </div>
