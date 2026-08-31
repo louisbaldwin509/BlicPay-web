@@ -1631,6 +1631,33 @@ export default function BlicPayApp() {
     }, 4500);
     return () => clearInterval(timer);
   }, []);
+
+  // Restore sesyon an si li te sove (localStorage) — sa nesesè paske
+  // verifikasyon Didit fè navigatè a kite sit la epi retounen, sa ta dekonekte
+  // kliyan an si sesyon an te sèlman nan memwa. Nou tcheke tou si nou sot
+  // retounen soti nan Didit (/kyc-retou) pou montre ekran konfimasyon an.
+  React.useEffect(() => {
+    const cameFromDidit = window.location.pathname.startsWith('/kyc-retou');
+    if (cameFromDidit) {
+      window.history.replaceState(null, '', '/');
+    }
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem('blicpay_session') || 'null');
+    } catch { /* done sove a domaje — inyore l */ }
+
+    if (saved?.token && saved?.user) {
+      setToken(saved.token);
+      setUser(saved.user);
+      setBalance(saved.user.balance);
+      setView(cameFromDidit ? 'kyc' : 'dashboard');
+      if (cameFromDidit) setKycStep('retou');
+      loadWallet(saved.token);
+      loadKycStatusSilently(saved.token);
+      loadNotifications(saved.token);
+    }
+  }, []);
+
   const [tx, setTx] = useState([]);
   const [loadingWallet, setLoadingWallet] = useState(false);
   const [amount, setAmount] = useState('');
@@ -1750,6 +1777,9 @@ export default function BlicPayApp() {
       setUser(newUser);
       setBalance(newUser.balance);
       setView('dashboard');
+      try {
+        localStorage.setItem('blicpay_session', JSON.stringify({ token: newToken, user: newUser }));
+      } catch { /* localStorage endispoinib — kontinye san sove sesyon an */ }
       await loadWallet(newToken);
       await loadKycStatusSilently(newToken);
       await loadNotifications(newToken);
@@ -1796,6 +1826,9 @@ export default function BlicPayApp() {
         address: authForm.address, city: authForm.city, country: authForm.country, department: authForm.department,
       });
       setView('dashboard');
+      try {
+        localStorage.setItem('blicpay_session', JSON.stringify({ token: newToken, user: newUser }));
+      } catch { /* localStorage endispoinib — kontinye san sove sesyon an */ }
       await loadWallet(newToken);
     } catch (err) {
       setAuthError(err.message);
@@ -1809,6 +1842,9 @@ export default function BlicPayApp() {
     setUser(null);
     setTx([]);
     setBalance(0);
+    try {
+      localStorage.removeItem('blicpay_session');
+    } catch { /* pa gen anyen pou fè si localStorage pa disponib */ }
     setAuthForm({
       lastName: '', firstName: '', phone: '', email: '',
       country: '', address: '', city: '', department: '', password: '',
@@ -2368,30 +2404,19 @@ export default function BlicPayApp() {
     setForgotDone(false);
   }
 
-  async function submitKyc() {
-    if (!kycFile) {
-      flash('Ajoute yon foto dokiman ou anvan.', 'error');
-      return;
-    }
-    if (!kycSelfieFile) {
-      flash('Pran yon selfi anvan.', 'error');
-      return;
-    }
+  async function startDiditVerification() {
     setKycSubmitting(true);
     try {
-      const [docMimeType, docImage] = splitDataUrl(kycFile);
-      const [selfieMimeType, selfieImage] = splitDataUrl(kycSelfieFile);
-      await apiFetch('/kyc/submit', {
-        method: 'POST',
-        token,
-        body: { docType: kycDocType, docImage, docMimeType, selfieImage, selfieMimeType },
-      });
-      setKycStatus('annatant');
-      setKycStep('siksè');
+      const data = await apiFetch('/kyc/didit/start', { method: 'POST', token });
+      // Sove sesyon an anvan n ale — nou bezwen l toujou la lè Didit voye
+      // kliyan an retounen sou sit la (wè restorasyon sesyon nan useEffect pi wo).
+      try {
+        localStorage.setItem('blicpay_session', JSON.stringify({ token, user }));
+      } catch { /* pa gen anyen pou fè si localStorage pa disponib */ }
+      window.location.href = data.url;
     } catch (e) {
-      console.error('KYC submit error:', e);
-      flash(e.message || 'Nou pa t ka voye dokiman yo. Verifye koneksyon entènèt ou epi eseye ankò.', 'error');
-    } finally {
+      console.error('Didit start error:', e);
+      flash(e.message || 'Nou pa t ka kòmanse verifikasyon an. Eseye ankò.', 'error');
       setKycSubmitting(false);
     }
   }
@@ -2400,8 +2425,9 @@ export default function BlicPayApp() {
   // san mesaj flash paske se pa yon aksyon kliyan te mande dirèkteman.
   async function loadKycStatusSilently(tok) {
     try {
-      const data = await apiFetch('/kyc/status', { token: tok });
-      setKycStatus(data.status === 'approved' ? 'verifye' : data.status === 'pending' ? 'annatant' : 'pa verifye');
+      const data = await apiFetch('/kyc/didit/status', { token: tok });
+      const s = data.verification?.status;
+      setKycStatus(s === 'approved' ? 'verifye' : s === 'pending' ? 'annatant' : 'pa verifye');
     } catch (e) {
       console.error('KYC status load error:', e);
       // Kite estati a jan li te ye a olye fè kliyan an panse li bezwen resoumèt.
@@ -2449,11 +2475,12 @@ export default function BlicPayApp() {
   async function checkKycStatus() {
     setRefreshing(true);
     try {
-      const data = await apiFetch('/kyc/status', { token });
-      setKycStatus(data.status === 'approved' ? 'verifye' : data.status === 'pending' ? 'annatant' : 'pa verifye');
-      if (data.status === 'approved') flash('Kont ou verifye kounye a.');
-      else if (data.status === 'rejected') flash(data.rejectionReason || 'Demand verifikasyon w refize — eseye ankò.');
-      else flash('Pa gen chanjman.');
+      const data = await apiFetch('/kyc/didit/status', { token });
+      const s = data.verification?.status;
+      setKycStatus(s === 'approved' ? 'verifye' : s === 'pending' ? 'annatant' : 'pa verifye');
+      if (s === 'approved') flash('Kont ou verifye kounye a.');
+      else if (s === 'rejected') flash(data.verification?.rejectionReason || 'Demand verifikasyon w refize — eseye ankò.', 'error');
+      else flash('Pa gen chanjman.', 'info');
     } catch (e) {
       flash(e.message || 'Nou pa t ka verifye estati a.', 'error');
     } finally {
@@ -3456,86 +3483,9 @@ export default function BlicPayApp() {
               <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
                 <ShieldCheck size={28} color="#fff" />
               </div>
-              <h2 className="mt-3" style={{ ...fontDisplay, fontWeight: 800, fontSize: 20 }}>Kòman pou <em style={{ fontStyle: 'italic', color: C.sky }}>pran bon foto</em></h2>
-              <p className="mt-1.5 text-sm max-w-xs" style={{ color: C.muted }}>
-                Kèk segond sèlman — men sa ki fè yon demand ale pi vit.
-              </p>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <div className="rounded-xl p-3" style={{ background: '#E4F5EF', border: `1px solid #BFE7D8` }}>
-                <div className="rounded-lg flex items-center justify-center" style={{ background: '#fff', height: 96 }}>
-                  <svg width="72" height="50" viewBox="0 0 72 50" fill="none">
-                    <rect x="1" y="1" width="70" height="48" rx="4" fill="#fff" stroke={C.mint} strokeWidth="2" />
-                    <rect x="8" y="9" width="16" height="16" rx="8" fill="#CDEFE1" />
-                    <rect x="30" y="11" width="34" height="4" rx="2" fill="#CDEFE1" />
-                    <rect x="30" y="19" width="26" height="4" rx="2" fill="#CDEFE1" />
-                    <rect x="8" y="32" width="56" height="4" rx="2" fill="#CDEFE1" />
-                    <rect x="8" y="40" width="34" height="4" rx="2" fill="#CDEFE1" />
-                  </svg>
-                </div>
-                <div className="mt-2 flex items-center gap-1.5">
-                  <Check size={13} color={C.mint} />
-                  <span className="text-xs font-bold" style={{ color: C.mint }}>Byen</span>
-                </div>
-                <p className="mt-0.5 text-xs" style={{ color: '#2E6B57' }}>Tout dokiman an vizib, plat, byen kadre.</p>
-              </div>
-
-              <div className="rounded-xl p-3" style={{ background: '#FBEAEA', border: `1px solid #F3C9C9` }}>
-                <div className="rounded-lg flex items-center justify-center overflow-hidden" style={{ background: '#fff', height: 96 }}>
-                  <svg width="72" height="50" viewBox="0 0 72 50" fill="none" style={{ transform: 'rotate(-14deg) scale(1.5) translate(6px, 4px)' }}>
-                    <rect x="1" y="1" width="70" height="48" rx="4" fill="#fff" stroke={C.danger} strokeWidth="2" />
-                    <rect x="8" y="9" width="16" height="16" rx="8" fill="#F6D3D3" />
-                    <rect x="30" y="11" width="34" height="4" rx="2" fill="#F6D3D3" />
-                    <rect x="30" y="19" width="26" height="4" rx="2" fill="#F6D3D3" />
-                    <rect x="8" y="32" width="56" height="4" rx="2" fill="#F6D3D3" />
-                    <rect x="8" y="40" width="34" height="4" rx="2" fill="#F6D3D3" />
-                  </svg>
-                </div>
-                <div className="mt-2 flex items-center gap-1.5">
-                  <X size={13} color={C.danger} />
-                  <span className="text-xs font-bold" style={{ color: C.danger }}>Evite sa</span>
-                </div>
-                <p className="mt-0.5 text-xs" style={{ color: '#8C3535' }}>Dokiman kwochi, koupe, oswa flou.</p>
-              </div>
-            </div>
-
-            <div className="mt-5 flex flex-col gap-3">
-              {[
-                'Poze dokiman an byen plat sou yon sifas klere, san limyè k ap reflete sou li.',
-                'Asire w kat kwen dokiman an vizib nan foto a — pa koupe okenn pati.',
-                'Pou selfi a: figi w dwe klere, san linèt solèy ni chapo.',
-              ].map((tip, i) => (
-                <div key={i} className="flex items-start gap-2.5">
-                  <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: C.bg }}>
-                    <span className="text-xs font-bold" style={{ color: C.navy }}>{i + 1}</span>
-                  </div>
-                  <p className="text-sm" style={{ color: C.ink }}>{tip}</p>
-                </div>
-              ))}
-            </div>
-
-            <button onClick={() => setKycStep('fòm')}
-              className="bp-btn mt-7 w-full py-3.5 rounded-xl font-semibold text-white"
-              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-              Kontinye
-            </button>
-          </div>
-        )}
-
-        {view === 'kyc' && kycStep === 'fòm' && (
-          <div className="fadein px-5 pb-10 pt-2">
-            <button onClick={() => setKycStep('entwo')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Retounen
-            </button>
-
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-                <ShieldCheck size={28} color="#fff" />
-              </div>
               <h2 className="mt-3" style={{ ...fontDisplay, fontWeight: 800, fontSize: 20 }}>Verifye <em style={{ fontStyle: 'italic', color: C.sky }}>idantite ou</em></h2>
               <p className="mt-1.5 text-sm max-w-xs" style={{ color: C.muted }}>
-                Nou bezwen konfime idantite ou anvan ou ka fè plis operasyon sou kont BLICPay ou.
+                Nou sèvi ak yon patnè sekirize (Didit) pou verifye dokiman w ak yon foto vivan — pran sèlman kèk minit.
               </p>
             </div>
 
@@ -3551,108 +3501,49 @@ export default function BlicPayApp() {
               </div>
             </div>
 
-            <p className="mt-6 text-xs font-semibold" style={{ color: C.muted }}>TIP DOKIMAN</p>
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              {['paspò', 'ID nasyonal', 'lisans chofè'].map((doc) => (
-                <button key={doc} onClick={() => setKycDocType(doc)}
-                  className="bp-btn py-2.5 rounded-lg text-xs font-semibold capitalize"
-                  style={{
-                    background: kycDocType === doc ? C.navy : C.card,
-                    color: kycDocType === doc ? '#fff' : C.ink,
-                    border: `1px solid ${kycDocType === doc ? C.navy : C.border}`,
-                  }}>
-                  {doc}
-                </button>
+            <div className="mt-6 flex flex-col gap-3">
+              {[
+                'Prepare paspò w, CIN, oswa lisans chofè w.',
+                'Ou pral pran yon foto dokiman an ak yon selfi vivan sou platfòm Didit.',
+                'Rezilta a rive an kèk minit — men yon admin BLICPay dwe konfime l anvan kont ou verifye nèt.',
+              ].map((tip, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: C.bg }}>
+                    <span className="text-xs font-bold" style={{ color: C.navy }}>{i + 1}</span>
+                  </div>
+                  <p className="text-sm" style={{ color: C.ink }}>{tip}</p>
+                </div>
               ))}
             </div>
 
-            <p className="mt-5 text-xs font-semibold" style={{ color: C.muted }}>FOTO DOKIMAN AN</p>
-            <label className="mt-2 flex flex-col items-center justify-center gap-2 rounded-xl cursor-pointer"
-              style={{ background: C.card, border: `1.5px dashed ${C.border}`, padding: kycFile ? 0 : '32px 16px', overflow: 'hidden' }}>
-              {kycFile ? (
-                <img src={kycFile} alt="Dokiman" className="w-full max-h-64 object-contain" style={{ background: C.bg }} />
-              ) : (
-                <>
-                  <Building2 size={22} color={C.muted} />
-                  <span className="text-xs font-medium" style={{ color: C.muted }}>Tape pou ajoute yon foto</span>
-                </>
-              )}
-              <input type="file" accept="image/*" className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  compressImageFile(file)
-                    .then(async (dataUrl) => {
-                      const quality = await analyzeImageQuality(dataUrl);
-                      if (!quality.ok) {
-                        flash(quality.reason, 'error');
-                        return;
-                      }
-                      setKycFile(dataUrl);
-                    })
-                    .catch((err) => flash(err.message || 'Nou pa t ka trete foto a.', 'error'));
-                }} />
-            </label>
-
-            <p className="mt-5 text-xs font-semibold" style={{ color: C.muted }}>SELFI</p>
-            <p className="mt-0.5 text-xs" style={{ color: C.muted }}>
-              Pran yon foto figi ou ki klè, san linèt solèy ni chapo, pou nou ka konpare l ak dokiman an.
-            </p>
-            <label className="mt-2 flex flex-col items-center justify-center gap-2 mx-auto cursor-pointer rounded-full"
-              style={{
-                background: C.card, border: `1.5px dashed ${C.border}`, overflow: 'hidden',
-                width: 168, height: 168,
-              }}>
-              {kycSelfieFile ? (
-                <img src={kycSelfieFile} alt="Selfi" className="w-full h-full object-cover" />
-              ) : (
-                <>
-                  <Camera size={24} color={C.muted} />
-                  <span className="text-xs font-medium px-4 text-center" style={{ color: C.muted }}>Tape pou pran selfi</span>
-                </>
-              )}
-              <input type="file" accept="image/*" capture="user" className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  compressImageFile(file)
-                    .then(async (dataUrl) => {
-                      const quality = await analyzeImageQuality(dataUrl);
-                      if (!quality.ok) {
-                        flash(quality.reason, 'error');
-                        return;
-                      }
-                      setKycSelfieFile(dataUrl);
-                    })
-                    .catch((err) => flash(err.message || 'Nou pa t ka trete foto a.', 'error'));
-                }} />
-            </label>
-
-            <button onClick={submitKyc} disabled={kycSubmitting}
-              className="bp-btn mt-6 w-full py-3.5 rounded-xl font-semibold text-white"
+            <button onClick={startDiditVerification} disabled={kycSubmitting}
+              className="bp-btn mt-7 w-full py-3.5 rounded-xl font-semibold text-white"
               style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: kycSubmitting ? 0.7 : 1 }}>
-              {kycSubmitting ? 'Ap voye...' : 'Voye pou verifikasyon'}
+              {kycSubmitting ? 'Ap prepare...' : 'Kòmanse verifikasyon'}
             </button>
+            <p className="mt-3 text-xs text-center" style={{ color: C.muted }}>
+              Ou pral kite BLICPay pou yon moman pou konplete verifikasyon an sou Didit.
+            </p>
           </div>
         )}
 
-        {view === 'kyc' && kycStep === 'siksè' && (
+        {view === 'kyc' && kycStep === 'retou' && (
           <div className="fadein px-5 pb-10 pt-10 flex flex-col items-center text-center">
             <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: C.mint }}>
               <Check size={38} color="#fff" />
             </div>
             <h2 className="mt-5" style={{ ...fontDisplay, fontWeight: 800, fontSize: 21 }}>
-              Demand ou <em style={{ fontStyle: 'italic', color: C.mint }}>voye avèk siksè</em>
+              Verifikasyon <em style={{ fontStyle: 'italic', color: C.mint }}>resevwa</em>
             </h2>
             <p className="mt-2 text-sm max-w-xs" style={{ color: C.muted }}>
-              Nou resevwa dokiman w yo. Ekip nou an ap egzamine yo, sa ka pran kèk moman jiska kèk èdtan.
+              Nou resevwa rezilta verifikasyon w. Yon admin BLICPay ap egzamine l anvan konfimasyon final — sa ka pran kèk moman jiska kèk èdtan.
             </p>
 
             <div className="mt-7 w-full max-w-xs p-4 rounded-xl text-left" style={{ background: C.card, border: `1px solid ${C.border}` }}>
               <p className="text-xs font-bold uppercase" style={{ color: C.muted }}>Pwochèn etap</p>
               <div className="mt-3 flex items-start gap-2.5">
                 <Badge tone="amber">1</Badge>
-                <p className="text-sm mt-0.5">N ap konpare foto dokiman w ak selfi a.</p>
+                <p className="text-sm mt-0.5">Admin BLICPay ap egzamine rapò verifikasyon an.</p>
               </div>
               <div className="mt-2.5 flex items-start gap-2.5">
                 <Badge tone="amber">2</Badge>
