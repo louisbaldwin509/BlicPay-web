@@ -1664,6 +1664,28 @@ export default function BlicPayApp() {
     }
   }, []);
 
+  // Konvèti dokiman Sòl la (PDF/imaj) an yon vrè URL fichye (Blob) olye yon
+  // "data:" URI — sa a rezoud yon pwoblèm konni: PDF nan yon iframe ak yon
+  // data: URI souvan rete blan sou telefòn (espesyalman Safari/iOS).
+  React.useEffect(() => {
+    if (!viewingSolDocument?.fileData) {
+      setSolDocBlobUrl(null);
+      return;
+    }
+    try {
+      const byteChars = atob(viewingSolDocument.fileData);
+      const byteNumbers = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([new Uint8Array(byteNumbers)], { type: viewingSolDocument.fileMimeType });
+      const url = URL.createObjectURL(blob);
+      setSolDocBlobUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Sol document blob error:', e);
+      setSolDocBlobUrl(null);
+    }
+  }, [viewingSolDocument]);
+
   const [tx, setTx] = useState([]);
   const [loadingWallet, setLoadingWallet] = useState(false);
   const [amount, setAmount] = useState('');
@@ -1689,6 +1711,7 @@ export default function BlicPayApp() {
   const [solSubView, setSolSubView] = useState('browse'); // 'browse' | 'mine' | 'detail' | 'documents'
   const [solJoinProcessing, setSolJoinProcessing] = useState(null);
   const [viewingSolDocument, setViewingSolDocument] = useState(null);
+  const [solDocBlobUrl, setSolDocBlobUrl] = useState(null);
   const [solFreqFilter, setSolFreqFilter] = useState('semenn');
   const [solTierFilter, setSolTierFilter] = useState('basic');
   const [transferId, setTransferId] = useState('');
@@ -3504,13 +3527,26 @@ export default function BlicPayApp() {
                   <X size={14} color={C.muted} />
                 </button>
               </div>
-              <div className="flex-1 overflow-auto p-3" style={{ background: C.bg }}>
+              <div className="flex-1 overflow-auto p-3 flex flex-col" style={{ background: C.bg }}>
                 {viewingSolDocument.fileMimeType?.startsWith('image/') ? (
                   <img src={`data:${viewingSolDocument.fileMimeType};base64,${viewingSolDocument.fileData}`} alt={viewingSolDocument.title}
                     className="w-full rounded-lg" />
+                ) : solDocBlobUrl ? (
+                  <div className="flex-1 flex flex-col items-center justify-center gap-4 py-10">
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                      <FileText size={28} color={C.navy} />
+                    </div>
+                    <p className="text-sm text-center px-6" style={{ color: C.muted }}>
+                      Dokiman sa a se yon fichye PDF — louvri l pou ka gade l byen.
+                    </p>
+                    <a href={solDocBlobUrl} target="_blank" rel="noreferrer"
+                      className="bp-btn px-5 py-3 rounded-xl text-sm font-semibold text-white"
+                      style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+                      Louvri dokiman an
+                    </a>
+                  </div>
                 ) : (
-                  <iframe title={viewingSolDocument.title} src={`data:${viewingSolDocument.fileMimeType};base64,${viewingSolDocument.fileData}`}
-                    className="w-full h-full rounded-lg" style={{ border: 'none', minHeight: 400 }} />
+                  <p className="text-sm text-center py-10" style={{ color: C.muted }}>Ap prepare dokiman an...</p>
                 )}
               </div>
             </div>
