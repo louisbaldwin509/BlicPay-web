@@ -3,7 +3,7 @@ import {
   Bell, Wallet, ArrowUpRight, ArrowDownLeft, Clock, Settings, Home,
   ArrowLeftRight, Plus, Check, Copy, ChevronRight, ArrowLeft, ShieldCheck,
   DollarSign, Smartphone, Banknote, X, AlertCircle, Building2, Eye, EyeOff, RefreshCw, Users, BadgeCheck, PiggyBank,
-  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star
+  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText
 } from 'lucide-react';
 
 // Coupe l'URL réelle de ton backend ici une fois qu'il est déployé
@@ -1668,11 +1668,13 @@ export default function BlicPayApp() {
   const [refreshing, setRefreshing] = useState(false);
   const [toast, setToast] = useState(null);
   const [navToast, setNavToast] = useState(false);
-  const [solGroups, setSolGroups] = useState(initialSolGroups);
-  const [joinedSolIds, setJoinedSolIds] = useState([]);
+  const [solGroups, setSolGroups] = useState([]);
+  const [mySolMemberships, setMySolMemberships] = useState([]);
+  const [loadingSol, setLoadingSol] = useState(false);
   const [activeSolGroupId, setActiveSolGroupId] = useState(null);
-  const [solSubView, setSolSubView] = useState('browse'); // 'browse' | 'mine' | 'detail'
-  const [selectedSolMember, setSelectedSolMember] = useState(null);
+  const [solSubView, setSolSubView] = useState('browse'); // 'browse' | 'mine' | 'detail' | 'documents'
+  const [solJoinProcessing, setSolJoinProcessing] = useState(null);
+  const [viewingSolDocument, setViewingSolDocument] = useState(null);
   const [solFreqFilter, setSolFreqFilter] = useState('semenn');
   const [solTierFilter, setSolTierFilter] = useState('basic');
   const [transferId, setTransferId] = useState('');
@@ -2520,46 +2522,68 @@ export default function BlicPayApp() {
     }
   }
 
-  function joinSolGroup(gid) {
-    const target = solGroups.find((g) => g.id === gid);
-    if (target && target.members.length >= target.maxMembers) {
-      flash('Sòl sa a konplè.');
-      return;
+  async function loadSolGroups() {
+    setLoadingSol(true);
+    try {
+      const { groups } = await apiFetch('/sol/groups', { token });
+      setSolGroups(groups);
+    } catch (e) {
+      flash(e.message || 'Nou pa t ka chaje gwoup Sòl yo.', 'error');
+    } finally {
+      setLoadingSol(false);
     }
-    if (target && !joinedSolIds.includes(gid) && !isSolGroupOpen(solGroups, target)) {
-      flash(`Sòl sa a fèmen pou kounye a — Sòl ${target.tier} #${target.order - 1} dwe ranpli anvan.`);
-      return;
-    }
-    if (!joinedSolIds.includes(gid)) {
-      setSolGroups((gs) => gs.map((g) => g.id === gid
-        ? { ...g, members: [...g.members, { id: 'me-' + Date.now(), name: user?.fullName || 'Ou', lastPaidPeriod: null }] }
-        : g));
-      setJoinedSolIds((ids) => [...ids, gid]);
-      flash('Ou antre nan sòl la.');
-    }
-    openSolDetail(gid);
   }
 
-  function markSolPaid(gid, memberId) {
-    setSolGroups((gs) => gs.map((g) => g.id !== gid ? g : {
-      ...g,
-      members: g.members.map((m) => m.id === memberId ? { ...m, lastPaidPeriod: currentPeriodKey(g.frequencyId) } : m),
-    }));
-    flash('Peman ou anrejistre pou peryòd sa a.');
+  async function loadMySol() {
+    try {
+      const { memberships } = await apiFetch('/sol/my', { token });
+      setMySolMemberships(memberships);
+    } catch (e) {
+      flash(e.message || 'Nou pa t ka chaje Sòl ou yo.', 'error');
+    }
+  }
+
+  async function requestJoinSol(gid) {
+    setSolJoinProcessing(gid);
+    try {
+      await apiFetch(`/sol/groups/${gid}/request`, { method: 'POST', token });
+      flash('Demand ou voye — n ap tann admin apwouve l.');
+      await Promise.all([loadSolGroups(), loadMySol()]);
+    } catch (e) {
+      flash(e.message || 'Nou pa t ka voye demand lan.', 'error');
+    } finally {
+      setSolJoinProcessing(null);
+    }
   }
 
   function openSolDetail(gid) {
     setActiveSolGroupId(gid);
-    setSelectedSolMember(null);
     setSolSubView('detail');
   }
 
-  function openSolSection() {
-    setSolSubView(joinedSolIds.length > 0 ? 'mine' : 'browse');
+  async function openSolSection() {
     setView('sol');
+    setSolSubView(mySolMemberships.length > 0 ? 'mine' : 'browse');
+    await Promise.all([loadSolGroups(), loadMySol()]);
   }
 
-  const userSolGroup = solGroups.find((g) => g.id === activeSolGroupId);
+  async function openSolDocuments() {
+    setSolSubView('documents');
+    await loadMySol();
+  }
+
+  async function viewSolDocument(docId) {
+    try {
+      const { document: doc } = await apiFetch(`/sol/documents/${docId}`, { token });
+      setViewingSolDocument(doc);
+    } catch (e) {
+      flash(e.message || 'Nou pa t ka chaje dokiman an.', 'error');
+    }
+  }
+
+  const userSolMembership = mySolMemberships.find((m) => m.groupId === activeSolGroupId || m.group?.id === activeSolGroupId);
+  const userSolGroup = userSolMembership?.group || solGroups.find((g) => g.id === activeSolGroupId);
+
 
   return (
     <div style={{ background: C.bg, minHeight: '100%', color: C.ink }} className="w-full">
@@ -3177,8 +3201,9 @@ export default function BlicPayApp() {
           <div className="fadein px-5 pb-10 pt-2">
             <button
               onClick={() => {
-                if (solSubView === 'detail') setSolSubView(joinedSolIds.length > 0 ? 'mine' : 'browse');
-                else if (solSubView === 'browse' && joinedSolIds.length > 0) setSolSubView('mine');
+                if (solSubView === 'documents') setSolSubView(mySolMemberships.length > 0 ? 'mine' : 'browse');
+                else if (solSubView === 'detail') setSolSubView(mySolMemberships.length > 0 ? 'mine' : 'browse');
+                else if (solSubView === 'browse' && mySolMemberships.length > 0) setSolSubView('mine');
                 else setView('dashboard');
               }}
               className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
@@ -3193,33 +3218,34 @@ export default function BlicPayApp() {
                     + Antre nan yon lòt
                   </button>
                 </div>
-                <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Ou fè pati {joinedSolIds.length} sòl.</p>
-                <p className="mt-1 text-xs" style={{ color: C.muted }}>Chak sòl gen pwòp orè peman li dapre frekans li.</p>
+                <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Ou gen {mySolMemberships.length} demand/adezyon Sòl.</p>
+                <button onClick={openSolDocuments} className="mt-2 text-xs font-semibold flex items-center gap-1" style={{ color: C.navy }}>
+                  <FileText size={13} /> Dokiman Sòl mwen yo
+                </button>
                 <div className="mt-5 space-y-3">
-                  {solGroups.filter((g) => joinedSolIds.includes(g.id)).map((g) => {
-                    const myIdx = g.members.findIndex((m) => m.name === user?.fullName);
-                    return (
-                      <button key={g.id} onClick={() => openSolDetail(g.id)}
-                        className="bp-btn w-full p-4 rounded-xl text-left flex items-center justify-between"
-                        style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-sm">{g.name}</h3>
-                            <Badge tone={g.tier === 'Premium' ? 'premium' : g.tier === 'Standard' ? 'navy' : 'muted'}>{g.tier}</Badge>
-                          </div>
-                          <p className="mt-1 text-xs" style={{ color: C.muted }}>
-                            {g.frequency} · {money(g.amount)}
-                          </p>
-                          {myIdx !== -1 && (
-                            <p className="mt-1 text-xs font-semibold" style={{ color: C.navy }}>
-                              Ou ap resevwa: {memberPayoutPeriod(g, myIdx)}
-                            </p>
-                          )}
+                  {loadingSol ? (
+                    <p className="text-sm p-6 text-center" style={{ color: C.muted }}>Ap chaje...</p>
+                  ) : mySolMemberships.length === 0 ? (
+                    <p className="text-sm p-5 rounded-xl" style={{ color: C.muted, background: C.card, border: `1px solid ${C.border}` }}>Ou poko gen okenn demand Sòl.</p>
+                  ) : mySolMemberships.map((m) => (
+                    <button key={m.id} onClick={() => openSolDetail(m.group.id)}
+                      className="bp-btn w-full p-4 rounded-xl text-left flex items-center justify-between"
+                      style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-sm">{m.group.name}</h3>
+                          <Badge tone={m.group.tier === 'Premium' ? 'premium' : m.group.tier === 'Standard' ? 'navy' : 'muted'}>{m.group.tier}</Badge>
                         </div>
-                        <ChevronRight size={16} color={C.muted} />
-                      </button>
-                    );
-                  })}
+                        <p className="mt-1 text-xs" style={{ color: C.muted }}>
+                          {m.group.frequency} · {money(m.group.amount)}
+                        </p>
+                        <Badge tone={m.status === 'approved' ? 'mint' : m.status === 'rejected' ? 'danger' : 'amber'}>
+                          {m.status === 'approved' ? 'Manm apwouve' : m.status === 'rejected' ? 'Refize' : 'Annatant'}
+                        </Badge>
+                      </div>
+                      <ChevronRight size={16} color={C.muted} />
+                    </button>
+                  ))}
                 </div>
               </>
             )}
@@ -3228,7 +3254,7 @@ export default function BlicPayApp() {
               <>
                 <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>BLIC <em style={{ fontStyle: 'italic', color: C.sky }}>Sòl</em></h2>
                 <p className="mt-1.5 text-sm" style={{ color: C.muted }}>
-                  {joinedSolIds.length > 0 ? 'Ou ka antre nan plizyè sòl an menm tan.' : 'Ou poko manm okenn sòl. Chwazi youn pou kòmanse.'}
+                  {mySolMemberships.length > 0 ? 'Ou ka antre nan plizyè sòl an menm tan.' : 'Ou poko manm okenn sòl. Chwazi youn pou kòmanse.'}
                 </p>
 
                 <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
@@ -3253,45 +3279,43 @@ export default function BlicPayApp() {
                     </button>
                   ))}
                 </div>
-                <p className="mt-3 text-xs font-medium" style={{ color: C.navy }}>
-                  {money(SOL_FREQUENCIES.find((f) => f.id === solFreqFilter)?.amounts[solTierFilter] || 0)} pa moun · {SOL_FREQUENCIES.find((f) => f.id === solFreqFilter)?.label}
-                </p>
 
                 <div className="mt-4 space-y-3">
-                  {solGroups.filter((g) => g.frequencyId === solFreqFilter && g.tierId === solTierFilter).map((g) => {
-                    const spotsLeft = g.maxMembers - g.members.length;
-                    const isFull = spotsLeft <= 0;
-                    const alreadyIn = joinedSolIds.includes(g.id);
-                    const isOpen = isSolGroupOpen(solGroups, g);
-                    const isLocked = !isFull && !isOpen && !alreadyIn;
+                  {loadingSol ? (
+                    <p className="text-sm p-6 text-center" style={{ color: C.muted }}>Ap chaje...</p>
+                  ) : solGroups.filter((g) => g.frequencyId === solFreqFilter && g.tierId === solTierFilter).map((g) => {
+                    const isFull = !g.isOpen && g.myStatus !== 'approved' && g.myStatus !== 'pending';
+                    const alreadyIn = !!g.myStatus;
                     return (
-                      <div key={g.id} className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}`, opacity: isLocked ? 0.65 : 1 }}>
+                      <div key={g.id} className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}`, opacity: (!g.isOpen && !alreadyIn) ? 0.65 : 1 }}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-sm">{g.name}</h3>
                             <Badge tone={g.tier === 'Premium' ? 'premium' : g.tier === 'Standard' ? 'navy' : 'muted'}>{g.tier}</Badge>
                           </div>
-                          <Badge tone={isFull ? 'mint' : 'muted'}>{g.members.length}/{g.maxMembers}</Badge>
+                          <Badge tone={!g.isOpen && !alreadyIn ? 'mint' : 'muted'}>{g.memberCount}/{g.maxMembers}</Badge>
                         </div>
                         <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{g.frequency} · {money(g.amount)} pa moun</p>
+                        <div className="mt-1.5 flex items-center justify-between rounded-lg px-2.5 py-1.5" style={{ background: C.bg }}>
+                          <span className="text-xs" style={{ color: C.muted }}>Frè entegrasyon</span>
+                          <span className="text-xs font-semibold" style={{ color: C.ink }}>{money(g.integrationFee)}</span>
+                        </div>
                         {!alreadyIn && (
-                          <p className="mt-1 text-xs font-medium" style={{ color: isFull ? C.mint : isLocked ? C.muted : C.amber }}>
-                            {isFull ? 'Sòl la konplè — li ka demare'
-                              : isLocked ? <><Lock size={11} className="inline mr-1" />Ap louvri lè Sòl {g.tier} #{g.order - 1} fin ranpli</>
-                              : `${spotsLeft} plas ki rete pou l demare`}
+                          <p className="mt-1.5 text-xs font-medium" style={{ color: !g.isOpen ? C.muted : C.amber }}>
+                            {!g.isOpen ? <><Lock size={11} className="inline mr-1" />Fèmen pou kounye a</> : `${g.maxMembers - g.memberCount} plas ki rete`}
                           </p>
                         )}
                         {alreadyIn ? (
                           <button onClick={() => openSolDetail(g.id)}
                             className="bp-btn mt-3 w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5"
                             style={{ background: C.bg, color: C.navy, border: `1px solid ${C.border}` }}>
-                            Deja manm — wè detay <ChevronRight size={14} />
+                            {g.myStatus === 'approved' ? 'Deja manm' : g.myStatus === 'rejected' ? 'Demand refize' : 'Demand annatant'} — wè detay <ChevronRight size={14} />
                           </button>
                         ) : (
-                          <button onClick={() => joinSolGroup(g.id)} disabled={isFull || isLocked}
+                          <button onClick={() => requestJoinSol(g.id)} disabled={!g.isOpen || solJoinProcessing === g.id}
                             className="bp-btn mt-3 w-full py-2.5 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-1.5"
-                            style={{ background: (isFull || isLocked) ? C.border : `linear-gradient(135deg, ${C.navy}, ${C.sky})`, color: (isFull || isLocked) ? C.muted : '#fff', cursor: (isFull || isLocked) ? 'not-allowed' : 'pointer' }}>
-                            {isFull ? 'Pa gen plas ankò' : isLocked ? <><Lock size={13} /> Fèmen pou kounye a</> : <>Antre nan sòl la <ChevronRight size={14} /></>}
+                            style={{ background: !g.isOpen ? C.border : `linear-gradient(135deg, ${C.navy}, ${C.sky})`, color: !g.isOpen ? C.muted : '#fff', cursor: !g.isOpen ? 'not-allowed' : 'pointer', opacity: solJoinProcessing === g.id ? 0.7 : 1 }}>
+                            {solJoinProcessing === g.id ? 'Ap voye...' : !g.isOpen ? <><Lock size={13} /> Fèmen pou kounye a</> : <>Antre nan sòl la <ChevronRight size={14} /></>}
                           </button>
                         )}
                       </div>
@@ -3309,169 +3333,102 @@ export default function BlicPayApp() {
                     {userSolGroup.tier}
                   </Badge>
                 </div>
-                <p className="mt-1 text-sm" style={{ color: C.muted }}>Sikl {userSolGroup.cycle} · {userSolGroup.frequency}</p>
+                <p className="mt-1 text-sm" style={{ color: C.muted }}>{userSolGroup.frequency} · {money(userSolGroup.amount)} pa moun</p>
 
-                <div className="mt-5 p-5 rounded-2xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                  <SolWheel group={userSolGroup} selected={selectedSolMember} onSelect={setSelectedSolMember} />
-                  <div className="flex items-center justify-center gap-4 mt-4">
-                    <span className="flex items-center gap-1.5 text-xs" style={{ color: C.muted }}>
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }} /> Kounye a
-                    </span>
-                    <span className="flex items-center gap-1.5 text-xs" style={{ color: C.muted }}>
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ background: C.mint }} /> Deja resevwa
-                    </span>
-                    <span className="flex items-center gap-1.5 text-xs" style={{ color: C.muted }}>
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ border: `1.5px solid ${C.border}` }} /> Poko rive
-                    </span>
-                  </div>
-                  {selectedSolMember && (() => {
-                    const idx = userSolGroup.members.findIndex((m) => m.id === selectedSolMember);
-                    const isNow = idx === userSolGroup.currentTurn;
-                    const hasReceived = idx < userSolGroup.currentTurn;
-                    return (
-                      <p className="text-center text-xs mt-3" style={{ color: C.muted }}>
-                        <span style={{ color: C.ink, fontWeight: 600 }}>{userSolGroup.members[idx]?.name}</span>
-                        {isNow
-                          ? ' ap resevwa pòch la sikl sa a.'
-                          : hasReceived
-                            ? <> deja resevwa pòch li an <span style={{ color: C.mint, fontWeight: 600 }}>{memberPayoutPeriod(userSolGroup, idx)}</span>.</>
-                            : ` ap resevwa pòch li an ${memberPayoutPeriod(userSolGroup, idx)}.`}
-                      </p>
-                    );
-                  })()}
-                </div>
-
-                {(() => {
-                  const myIdx = userSolGroup.members.findIndex((m) => m.name === user?.fullName);
-                  if (myIdx === -1) return null;
-                  const { gross, fee, net } = solPayoutAmounts(userSolGroup);
-                  return (
-                    <div className="mt-4 p-4 rounded-xl flex items-center gap-3" style={{ background: '#E6F0FB', border: `1px solid #C7DEF5` }}>
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: C.navy }}>
-                        <Wallet size={17} color="#fff" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold" style={{ color: C.navy }}>DAT OU AP RESEVWA MEN PAW LA</p>
-                        <p className="text-sm font-bold mt-0.5" style={{ color: C.navy }}>{memberPayoutPeriod(userSolGroup, myIdx)}</p>
-                        <p className="mt-1 text-xs" style={{ color: C.navy }}>
-                          Ou pral resevwa <span className="font-bold">{money(net)}</span>
-                          <span style={{ color: '#6B94BE' }}> ({money(gross)} − 2% frè sèvis = {money(fee)})</span>
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {(() => {
-                  if (userSolGroup.frequencyId !== 'semenn') return null;
-                  const myIdx = userSolGroup.members.findIndex((m) => m.name === user?.fullName);
-                  const myMember = userSolGroup.members[myIdx];
-                  if (!myMember) return null;
-                  const paid = hasMemberPaid(myMember, 'semenn');
-                  if (!isSolPaymentWindowOpen('semenn') || paid) return null;
-                  return (
-                    <div className="mt-4 p-4 rounded-xl flex items-start gap-3" style={{ background: '#FBEAEA', border: `1px solid #F3C4C4` }}>
-                      <AlertCircle size={18} color={C.danger} className="shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold" style={{ color: C.danger }}>Jodi a se Vandredi — se pou ou peye!</p>
-                        <p className="mt-0.5 text-xs" style={{ color: C.danger }}>Pèman semèn nan dwe fèt obligatwa nan Vandredi. Peye kounya pou evite tout reta.</p>
-                        <button onClick={() => markSolPaid(userSolGroup.id, myMember.id)}
-                          className="bp-btn mt-2.5 px-4 py-2 rounded-lg text-xs font-semibold text-white"
-                          style={{ background: C.danger }}>
-                          Make peman fèt
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                    <p className="text-xs" style={{ color: C.muted }}>Kotizasyon</p>
-                    <p className="mt-1" style={{ ...fontMono, fontSize: 17, fontWeight: 600 }}>{money(userSolGroup.amount)}</p>
-                  </div>
-                  <div className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                    <p className="text-xs" style={{ color: C.muted }}>Manm</p>
-                    <p className="mt-1 text-sm font-semibold">
-                      {userSolGroup.members.length}/{userSolGroup.maxMembers}
-                      {userSolGroup.members.length < userSolGroup.maxMembers && (
-                        <span className="font-normal" style={{ color: C.amber }}> · {userSolGroup.maxMembers - userSolGroup.members.length} plas rete</span>
-                      )}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex items-center justify-between">
-                  <h3 className="font-semibold text-sm" style={{ color: C.muted }}>ESTATI PEMAN MANM YO</h3>
-                </div>
-                <div className="mt-3 rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
-                  {userSolGroup.members.length === 0 ? (
-                    <p className="text-sm p-4" style={{ color: C.muted, background: C.card }}>Pa gen manm poko.</p>
-                  ) : userSolGroup.members.map((m, i) => {
-                    const paid = hasMemberPaid(m, userSolGroup.frequencyId);
-                    return (
-                      <div key={m.id} className="flex items-center justify-between px-4 py-3"
-                        style={{ background: C.card, borderTop: i ? `1px solid ${C.border}` : 'none' }}>
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold"
-                            style={{ background: C.bg, color: C.navy }}>
-                            {initials(m.name)}
-                          </div>
-                          <span className="text-sm font-medium">{m.name}{m.name === user?.fullName ? ' (ou)' : ''}</span>
-                        </div>
-                        <Badge tone={paid ? 'mint' : 'danger'}>{paid ? 'Peye' : 'Pa peye'}</Badge>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-6 flex items-center justify-between">
-                  <h3 className="font-semibold text-sm" style={{ color: C.muted }}>ISTWA PEMAN OU</h3>
-                </div>
-                <div className="mt-3 rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
-                  {(userSolGroup.myPayments || []).length === 0 ? (
-                    <p className="text-sm p-4" style={{ color: C.muted, background: C.card }}>Ou poko fè okenn peman.</p>
-                  ) : userSolGroup.myPayments.map((p, i) => (
-                    <div key={p.month} className="flex items-center justify-between px-4 py-3"
-                      style={{ background: C.card, borderTop: i ? `1px solid ${C.border}` : 'none' }}>
+                {userSolMembership && (
+                  <div className="mt-4 p-4 rounded-xl flex items-center gap-3" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                    <Badge tone={userSolMembership.status === 'approved' ? 'mint' : userSolMembership.status === 'rejected' ? 'danger' : 'amber'}>
+                      {userSolMembership.status === 'approved' ? 'Manm apwouve' : userSolMembership.status === 'rejected' ? 'Demand refize' : 'Demand annatant'}
+                    </Badge>
+                    {userSolMembership.status === 'approved' && userSolMembership.turnIndex != null && (
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center"
-                          style={{ background: p.status === 'peye' ? '#E4F5EF' : p.status === 'annatant' ? '#FBF0DE' : '#FBEAEA' }}>
-                          {p.status === 'peye'
-                            ? <Check size={14} color={C.mint} />
-                            : p.status === 'annatant'
-                              ? <Clock size={14} color={C.amber} />
-                              : <X size={14} color={C.danger} />}
+                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0" style={{ background: C.navy, color: '#fff' }}>
+                          {userSolMembership.turnIndex + 1}
                         </div>
-                        <span className="text-sm font-medium">{p.month}</span>
+                        <p className="text-xs" style={{ color: C.muted }}>Pozisyon ou nan wotasyon an</p>
                       </div>
-                      <Badge tone={p.status === 'peye' ? 'mint' : p.status === 'annatant' ? 'amber' : 'danger'}>
-                        {p.status === 'peye' ? 'Peye' : p.status === 'annatant' ? 'Annatant' : 'Manke'}
-                      </Badge>
+                    )}
+                  </div>
+                )}
+
+                <div className="mt-3 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#FBF0DE', color: '#946115' }}>
+                  <AlertCircle size={15} className="shrink-0 mt-0.5" />
+                  Dat ak montan peman rotasyon an ap anonse pa BLICPay pita.
+                </div>
+
+                <button onClick={openSolDocuments}
+                  className="bp-btn mt-4 w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5"
+                  style={{ background: C.card, color: C.navy, border: `1px solid ${C.border}` }}>
+                  <FileText size={15} /> Dokiman Sòl mwen yo
+                </button>
+              </>
+            )}
+
+            {solSubView === 'documents' && (
+              <>
+                <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>Dokiman <em style={{ fontStyle: 'italic', color: C.sky }}>Sòl mwen yo</em></h2>
+                <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Dokiman ou siyen pou chak Sòl — ou ka gade yo, ou pa ka modifye yo.</p>
+
+                <div className="mt-5 space-y-4">
+                  {mySolMemberships.length === 0 ? (
+                    <p className="text-sm p-5 rounded-xl" style={{ color: C.muted, background: C.card, border: `1px solid ${C.border}` }}>Ou poko gen okenn demand Sòl.</p>
+                  ) : mySolMemberships.map((m) => (
+                    <div key={m.id} className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-sm">{m.group.name}</h3>
+                        <Badge tone={m.formApproved ? 'mint' : 'amber'}>{m.formApproved ? 'Konfime' : 'Annatant'}</Badge>
+                      </div>
+                      {(m.documents || []).length === 0 ? (
+                        <p className="mt-2 text-xs" style={{ color: C.muted }}>Poko gen dokiman telechaje pou Sòl sa a.</p>
+                      ) : (
+                        <div className="mt-2.5 flex flex-col gap-2">
+                          {m.documents.map((doc) => (
+                            <button key={doc.id} onClick={() => viewSolDocument(doc.id)}
+                              className="bp-btn flex items-center justify-between px-3 py-2.5 rounded-lg"
+                              style={{ background: C.bg }}>
+                              <div className="flex items-center gap-2">
+                                <FileText size={14} color={C.navy} />
+                                <span className="text-xs font-medium">{doc.title}</span>
+                              </div>
+                              <span className="text-xs" style={{ color: C.muted }}>{new Date(doc.uploadedAt).toLocaleDateString('fr-FR')}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
-
-                <div className="mt-4 flex items-start gap-2 text-xs p-3 rounded-lg"
-                  style={{
-                    background: isSolPaymentWindowOpen(userSolGroup.frequencyId) ? '#E4F5EF' : '#FBF0DE',
-                    color: isSolPaymentWindowOpen(userSolGroup.frequencyId) ? C.mint : '#946115',
-                  }}>
-                  <Calendar size={15} className="shrink-0 mt-0.5" />
-                  {isSolPaymentWindowOpen(userSolGroup.frequencyId)
-                    ? 'Fenèt peman an louvri kounye a.'
-                    : solWindowMessage(userSolGroup.frequencyId)}
-                </div>
-
-                <button onClick={startDeposit}
-                  className="bp-btn mt-3 w-full py-3.5 rounded-xl font-semibold text-white"
-                  style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-                  Peye
-                </button>
               </>
             )}
           </div>
         )}
+
+        {viewingSolDocument && (
+          <>
+            <div onClick={() => setViewingSolDocument(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,27,51,0.5)', zIndex: 50 }} />
+            <div className="fadein" style={{
+              position: 'fixed', top: '8%', left: '5%', right: '5%', bottom: '8%', background: C.card,
+              borderRadius: 16, zIndex: 51, display: 'flex', flexDirection: 'column', overflow: 'hidden',
+            }}>
+              <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+                <p className="text-sm font-semibold">{viewingSolDocument.title}</p>
+                <button onClick={() => setViewingSolDocument(null)} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: C.bg }}>
+                  <X size={14} color={C.muted} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto p-3" style={{ background: C.bg }}>
+                {viewingSolDocument.fileMimeType?.startsWith('image/') ? (
+                  <img src={`data:${viewingSolDocument.fileMimeType};base64,${viewingSolDocument.fileData}`} alt={viewingSolDocument.title}
+                    className="w-full rounded-lg" />
+                ) : (
+                  <iframe title={viewingSolDocument.title} src={`data:${viewingSolDocument.fileMimeType};base64,${viewingSolDocument.fileData}`}
+                    className="w-full h-full rounded-lg" style={{ border: 'none', minHeight: 400 }} />
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
 
         {view === 'kyc' && kycStep === 'entwo' && (
           <div className="fadein px-5 pb-10 pt-2">
