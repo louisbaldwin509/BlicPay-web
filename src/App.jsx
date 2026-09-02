@@ -1655,6 +1655,12 @@ export default function BlicPayApp() {
       loadWallet(saved.token);
       loadKycStatusSilently(saved.token);
       loadNotifications(saved.token);
+      apiFetch('/pin/status', { token: saved.token })
+        .then(({ hasPin: hp }) => {
+          setHasPin(hp);
+          if (hp) setAppLocked(true);
+        })
+        .catch(() => {});
     }
   }, []);
 
@@ -1668,6 +1674,14 @@ export default function BlicPayApp() {
   const [refreshing, setRefreshing] = useState(false);
   const [toast, setToast] = useState(null);
   const [navToast, setNavToast] = useState(false);
+  const [hasPin, setHasPin] = useState(false);
+  const [appLocked, setAppLocked] = useState(false);
+  const [pinScreen, setPinScreen] = useState(null); // null | 'unlock' | 'withdraw' | 'setup'
+  const [pinDigits, setPinDigits] = useState('');
+  const [pinError, setPinError] = useState(null);
+  const [pinBusy, setPinBusy] = useState(false);
+  const [pendingWithdraw, setPendingWithdraw] = useState(null);
+  const [pinSetupPassword, setPinSetupPassword] = useState('');
   const [solGroups, setSolGroups] = useState([]);
   const [mySolMemberships, setMySolMemberships] = useState([]);
   const [loadingSol, setLoadingSol] = useState(false);
@@ -1890,22 +1904,10 @@ export default function BlicPayApp() {
         return;
       }
       setSelectedMethod(m);
-      setProcessing(true);
-      try {
-        const { withdrawal } = await apiFetch('/withdrawals', {
-          method: 'POST',
-          token,
-          body: { amount: Number(amount), method: m.id },
-        });
-        setReference(withdrawal.reference);
-        setBalance((b) => b - Number(amount));
-        setTx((t) => [{ id: withdrawal.id, method: m.name, amount: withdrawal.amount, ts: Date.now(), status: 'annatant', date: 'jodi a', type: 'retrè' }, ...t]);
-        setView('confirm');
-      } catch (err) {
-        flash(err.message, 'error');
-      } finally {
-        setProcessing(false);
-      }
+      setPendingWithdraw({ amount: Number(amount), method: m });
+      setPinDigits('');
+      setPinError(null);
+      setPinScreen(hasPin ? 'withdraw' : 'setup');
       return;
     }
 
@@ -1940,6 +1942,92 @@ export default function BlicPayApp() {
     } finally {
       setProcessing(false);
     }
+  }
+
+  // Ekran PIN nan itilize pou 3 bagay: reverouye app la (kliyan deja gen
+  // sesyon), konfime yon retrè (kliyan deja gen yon PIN), oswa kreye premye
+  // PIN la (kliyan poko gen youn, nesesè anvan premye retrè li).
+  function pinDigitPress(d) {
+    if (pinBusy || pinDigits.length >= 4) return;
+    const next = pinDigits + d;
+    setPinDigits(next);
+    setPinError(null);
+    if (next.length === 4) submitPin(next);
+  }
+
+  function pinBackspace() {
+    if (pinBusy) return;
+    setPinDigits((d) => d.slice(0, -1));
+  }
+
+  async function submitPin(pin) {
+    setPinBusy(true);
+    try {
+      if (pinScreen === 'unlock') {
+        await apiFetch('/pin/verify', { method: 'POST', token, body: { pin } });
+        setAppLocked(false);
+        setPinScreen(null);
+        setPinDigits('');
+      } else if (pinScreen === 'withdraw' && pendingWithdraw) {
+        const { withdrawal } = await apiFetch('/withdrawals', {
+          method: 'POST',
+          token,
+          body: { amount: pendingWithdraw.amount, method: pendingWithdraw.method.id, pin },
+        });
+        setReference(withdrawal.reference);
+        setBalance((b) => b - pendingWithdraw.amount);
+        setTx((t) => [{ id: withdrawal.id, method: pendingWithdraw.method.name, amount: withdrawal.amount, ts: Date.now(), status: 'annatant', date: 'jodi a', type: 'retrè' }, ...t]);
+        setPinScreen(null);
+        setPinDigits('');
+        setPendingWithdraw(null);
+        setView('confirm');
+      }
+    } catch (err) {
+      setPinError(err.message || 'Kòd PIN la pa kòrèk.');
+      setPinDigits('');
+    } finally {
+      setPinBusy(false);
+    }
+  }
+
+  async function submitPinSetup() {
+    if (!pinSetupPassword) {
+      setPinError('Antre modpas kont ou pou konfime.');
+      return;
+    }
+    if (pinDigits.length !== 4) {
+      setPinError('Kòd PIN la dwe gen 4 chif.');
+      return;
+    }
+    setPinBusy(true);
+    try {
+      await apiFetch('/pin/set', { method: 'POST', token, body: { password: pinSetupPassword, pin: pinDigits } });
+      setHasPin(true);
+      setPinSetupPassword('');
+      if (pendingWithdraw) {
+        // Sèvi ak menm PIN la kliyan sot kreye a pou konfime retrè k ap tann lan.
+        const pinToUse = pinDigits;
+        setPinDigits('');
+        setPinScreen('withdraw');
+        await submitPin(pinToUse);
+      } else {
+        setPinScreen(null);
+        setPinDigits('');
+        flash('Kòd PIN ou kreye.');
+      }
+    } catch (err) {
+      setPinError(err.message || 'Nou pa t ka kreye PIN la.');
+    } finally {
+      setPinBusy(false);
+    }
+  }
+
+  function cancelPinScreen() {
+    setPinScreen(null);
+    setPinDigits('');
+    setPinError(null);
+    setPinSetupPassword('');
+    setPendingWithdraw(null);
   }
 
   async function sendTransfer() {
@@ -3424,6 +3512,119 @@ export default function BlicPayApp() {
                   <iframe title={viewingSolDocument.title} src={`data:${viewingSolDocument.fileMimeType};base64,${viewingSolDocument.fileData}`}
                     className="w-full h-full rounded-lg" style={{ border: 'none', minHeight: 400 }} />
                 )}
+              </div>
+            </div>
+          </>
+        )}
+
+        {(appLocked || pinScreen) && (
+          <>
+            <div style={{ position: 'fixed', inset: 0, background: appLocked && !pinScreen ? C.bg : 'rgba(11,27,51,0.55)', zIndex: 60 }} />
+            <div className="fadein" style={{
+              position: 'fixed', inset: 0, zIndex: 61, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+            }}>
+              <div style={{ width: '100%', maxWidth: 340, background: C.card, borderRadius: 20, overflow: 'hidden' }}>
+
+                {(pinScreen === 'withdraw' || pinScreen === 'setup') ? (
+                  <div style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, padding: '26px 20px 22px', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: -30, right: -30, width: 110, height: 110, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+                    <div style={{ position: 'absolute', bottom: -40, left: -20, width: 90, height: 90, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+                    <div className="flex items-center gap-2" style={{ position: 'relative' }}>
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.18)' }}>
+                        <ShieldCheck size={15} color="#fff" />
+                      </div>
+                      <span className="text-white text-sm font-semibold">BLICPay Sekirite</span>
+                    </div>
+                    {pinScreen === 'withdraw' && pendingWithdraw ? (
+                      <>
+                        <p style={{ position: 'relative', margin: '16px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>Konfime retrè</p>
+                        <p style={{ position: 'relative', margin: '2px 0 0', color: '#fff', fontSize: 28, fontWeight: 700 }}>{money(pendingWithdraw.amount)}</p>
+                        <p style={{ position: 'relative', margin: '2px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>Vè {pendingWithdraw.method.name}</p>
+                      </>
+                    ) : (
+                      <>
+                        <p style={{ position: 'relative', margin: '16px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>Premye etap</p>
+                        <p style={{ position: 'relative', margin: '2px 0 0', color: '#fff', fontSize: 18, fontWeight: 700 }}>Kreye kòd PIN ou</p>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, padding: '32px 20px 30px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: -40, left: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+                    <div style={{ position: 'absolute', bottom: -30, right: -20, width: 90, height: 90, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+                    <div className="w-15 h-15 rounded-full flex items-center justify-center mx-auto" style={{ position: 'relative', width: 60, height: 60, background: 'rgba(255,255,255,0.15)', fontSize: 20, fontWeight: 700, color: '#fff' }}>
+                      {(user?.fullName || '').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()}
+                    </div>
+                    <p style={{ position: 'relative', margin: '12px 0 0', color: '#fff', fontSize: 15, fontWeight: 600 }}>Byenvini, {(user?.fullName || '').split(' ')[0]}</p>
+                    <p style={{ position: 'relative', margin: '3px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>BLICPay</p>
+                  </div>
+                )}
+
+                <div style={{ padding: '22px 20px 24px' }}>
+                  {pinScreen === 'setup' && (
+                    <input type="password" value={pinSetupPassword} onChange={(e) => setPinSetupPassword(e.target.value)}
+                      placeholder="Modpas kont ou (pou konfime)"
+                      className="w-full mb-4 px-3 py-2.5 rounded-lg text-sm" style={{ border: `1px solid ${C.border}` }} />
+                  )}
+
+                  <p className="text-center text-sm mb-3.5" style={{ color: C.ink }}>
+                    {pinScreen === 'setup' ? 'Chwazi yon kòd PIN 4 chif' : pinScreen === 'unlock' ? 'Antre kòd PIN ou pou kontinye' : 'Antre kòd PIN 4 chif ou'}
+                  </p>
+
+                  <div className="flex justify-center gap-3.5 mb-5">
+                    {[0, 1, 2, 3].map((i) => (
+                      <div key={i} style={{
+                        width: 14, height: 14, borderRadius: '50%',
+                        background: i < pinDigits.length ? C.navy : 'transparent',
+                        border: i < pinDigits.length ? 'none' : `1.5px solid ${C.border}`,
+                      }} />
+                    ))}
+                  </div>
+
+                  {pinError && <p className="text-center text-xs mb-3" style={{ color: C.danger }}>{pinError}</p>}
+
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => (
+                      <button key={d} onClick={() => pinDigitPress(d)} disabled={pinBusy}
+                        className="bp-btn rounded-xl text-lg font-semibold" style={{ height: 54, border: `0.5px solid ${C.border}`, background: '#fff', color: C.ink }}>
+                        {d}
+                      </button>
+                    ))}
+                    <div />
+                    <button onClick={() => pinDigitPress('0')} disabled={pinBusy}
+                      className="bp-btn rounded-xl text-lg font-semibold" style={{ height: 54, border: `0.5px solid ${C.border}`, background: '#fff', color: C.ink }}>
+                      0
+                    </button>
+                    <button onClick={pinBackspace} disabled={pinBusy}
+                      className="bp-btn rounded-xl flex items-center justify-center" style={{ height: 54, border: 'none', background: 'transparent' }}>
+                      <X size={18} color={C.muted} />
+                    </button>
+                  </div>
+
+                  {pinScreen === 'setup' && (
+                    <button onClick={submitPinSetup} disabled={pinBusy}
+                      className="bp-btn mt-4 w-full py-2.5 rounded-lg text-sm font-semibold text-white"
+                      style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: pinBusy ? 0.7 : 1 }}>
+                      {pinBusy ? 'Ap konfime...' : 'Kreye kòd PIN'}
+                    </button>
+                  )}
+
+                  {pinScreen === 'unlock' ? (
+                    <button onClick={() => { localStorage.removeItem('blicpay_session'); window.location.reload(); }}
+                      className="mt-4 w-full text-center text-xs font-semibold" style={{ color: C.navy, background: 'transparent', border: 'none' }}>
+                      Sòti — konekte ak modpas ou pito
+                    </button>
+                  ) : (
+                    <button onClick={cancelPinScreen} className="mt-4 w-full text-center text-xs font-semibold" style={{ color: C.muted, background: 'transparent', border: 'none' }}>
+                      Anile
+                    </button>
+                  )}
+
+                  <div className="flex items-center justify-center gap-1.5 mt-4">
+                    <Lock size={12} color={C.muted} />
+                    <p className="text-xs" style={{ color: C.muted }}>Kòd sa a rete ant ou ak BLICPay sèlman</p>
+                  </div>
+                </div>
               </div>
             </div>
           </>
