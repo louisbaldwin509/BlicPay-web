@@ -142,11 +142,11 @@ const fontDisplay = { fontFamily: "'Manrope', sans-serif" };
 const fontMono = { fontFamily: "'IBM Plex Mono', monospace" };
 
 const methods = [
-  { id: 'moncash', name: 'Mon Cash', desc: 'Depoze kach nan pwen Digicel ou', color: '#1E9E7C', icon: DollarSign, kind: 'mobile', comingSoon: true },
-  { id: 'natcash', name: 'NatCash', desc: 'Depoze ak bous mobil NatCash ou', color: '#1C6FBF', icon: Smartphone, kind: 'mobile', comingSoon: true },
-  { id: 'usdt', name: 'USDT', desc: 'Depoze dola ameriken an stablecoin (Tether)', color: '#0E9E86', icon: Banknote, kind: 'crypto', comingSoon: true },
-  { id: 'zelle', name: 'Zelle', desc: 'Depoze dirèkteman soti nan kont labank ou', color: '#6D3FD1', icon: ArrowLeftRight, kind: 'bank', comingSoon: true },
-  { id: 'biwo', name: 'Nan biwo', desc: 'Ale peye kach nan yonn nan biwo nou yo', color: '#946115', icon: Building2, kind: 'office' },
+  { id: 'moncash', name: 'Mon Cash', desc: 'Depoze kach nan pwen Digicel ou', color: '#1E9E7C', icon: DollarSign, logo: '/logos/moncash.jpg', kind: 'mobile' },
+  { id: 'natcash', name: 'NatCash', desc: 'Depoze ak bous mobil NatCash ou', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash.jpg', kind: 'mobile', comingSoon: true },
+  { id: 'usdt', name: 'USDT', desc: 'Depoze dola ameriken an stablecoin (Tether)', color: '#0E9E86', icon: Banknote, logo: '/logos/usdt.jpg', kind: 'crypto', comingSoon: true },
+  { id: 'zelle', name: 'Zelle', desc: 'Depoze dirèkteman soti nan kont labank ou', color: '#6D3FD1', icon: ArrowLeftRight, logo: '/logos/zelle.png', kind: 'bank', comingSoon: true },
+  { id: 'biwo', name: 'Nan biwo', desc: 'Ale peye kach nan yonn nan biwo nou yo', color: '#946115', icon: Building2, logo: null, kind: 'office' },
 ];
 
 const offices = [
@@ -1638,7 +1638,9 @@ export default function BlicPayApp() {
   // retounen soti nan Didit (/kyc-retou) pou montre ekran konfimasyon an.
   React.useEffect(() => {
     const cameFromDidit = window.location.pathname.startsWith('/kyc-retou');
-    if (cameFromDidit) {
+    const cameFromMoncashSuccess = window.location.pathname.startsWith('/depo-konfime');
+    const cameFromMoncashFailure = window.location.pathname.startsWith('/depo-echwe');
+    if (cameFromDidit || cameFromMoncashSuccess || cameFromMoncashFailure) {
       window.history.replaceState(null, '', '/');
     }
     let saved = null;
@@ -1661,6 +1663,11 @@ export default function BlicPayApp() {
           if (hp) setAppLocked(true);
         })
         .catch(() => {});
+      if (cameFromMoncashSuccess) {
+        setTimeout(() => flash('Depo MonCash ou konfime — li ajoute nan balans ou.'), 400);
+      } else if (cameFromMoncashFailure) {
+        setTimeout(() => flash('Depo MonCash la pa t reyisi — eseye ankò.', 'error'), 400);
+      }
     }
   }, []);
 
@@ -1914,6 +1921,23 @@ export default function BlicPayApp() {
 
     setSelectedMethod(m);
     setReference(null);
+
+    if (flowKind === 'deposit' && m.id === 'moncash') {
+      setProcessing(true);
+      try {
+        const { paymentUrl } = await apiFetch('/deposits/moncash/start', {
+          method: 'POST',
+          token,
+          body: { amount: Number(amount) },
+        });
+        window.location.href = paymentUrl;
+      } catch (err) {
+        flash(err.message || 'Nou pa t ka kòmanse peman MonCash la.', 'error');
+        setProcessing(false);
+      }
+      return;
+    }
+
     setProcessing(true);
     try {
       if (token === DEMO_TOKEN) {
@@ -4902,8 +4926,8 @@ export default function BlicPayApp() {
                 <button key={m.id} onClick={() => pickMethod(m)} disabled={processing}
                   className="bp-btn w-full flex items-center gap-3 p-3.5 rounded-xl text-left"
                   style={{ background: C.card, border: `1px solid ${C.border}`, opacity: processing || m.comingSoon ? 0.6 : 1 }}>
-                  <div className="w-11 h-11 rounded-full flex items-center justify-center shrink-0" style={{ background: m.color }}>
-                    <m.icon size={19} color="#fff" />
+                  <div className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden" style={{ background: m.logo ? '#fff' : m.color, border: m.logo ? `1px solid ${C.border}` : 'none' }}>
+                    {m.logo ? <img src={m.logo} alt={m.name} className="w-full h-full object-cover" /> : <m.icon size={19} color="#fff" />}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -4928,8 +4952,8 @@ export default function BlicPayApp() {
             </button>
 
             <div className="flex flex-col items-center text-center mt-2">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: selectedMethod.color }}>
-                <selectedMethod.icon size={26} color="#fff" />
+              <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden" style={{ background: selectedMethod.logo ? '#fff' : selectedMethod.color, border: selectedMethod.logo ? `1px solid ${C.border}` : 'none' }}>
+                {selectedMethod.logo ? <img src={selectedMethod.logo} alt={selectedMethod.name} className="w-full h-full object-cover" /> : <selectedMethod.icon size={26} color="#fff" />}
               </div>
               <h2 className="mt-4" style={{ ...fontDisplay, fontWeight: 800, fontSize: 20 }}>
                 {flowKind === 'withdraw' ? 'Retrè ' : 'Depo '}<em style={{ fontStyle: 'italic', color: C.sky }}>{selectedMethod.name}</em>
