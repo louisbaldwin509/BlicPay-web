@@ -1688,6 +1688,7 @@ export default function BlicPayApp() {
   const [activeSolGroupId, setActiveSolGroupId] = useState(null);
   const [solSubView, setSolSubView] = useState('browse'); // 'browse' | 'mine' | 'detail' | 'documents'
   const [solJoinProcessing, setSolJoinProcessing] = useState(null);
+  const [solFeeProcessing, setSolFeeProcessing] = useState(null);
   const [viewingSolDocument, setViewingSolDocument] = useState(null);
   const [solFreqFilter, setSolFreqFilter] = useState('semenn');
   const [solTierFilter, setSolTierFilter] = useState('basic');
@@ -2635,12 +2636,26 @@ export default function BlicPayApp() {
     setSolJoinProcessing(gid);
     try {
       await apiFetch(`/sol/groups/${gid}/request`, { method: 'POST', token });
-      flash('Demand ou voye — n ap tann admin apwouve l.');
+      flash('Demand ou voye — peye frè entegrasyon an pou admin ka egzamine l.');
       await Promise.all([loadSolGroups(), loadMySol()]);
     } catch (e) {
       flash(e.message || 'Nou pa t ka voye demand lan.', 'error');
     } finally {
       setSolJoinProcessing(null);
+    }
+  }
+
+  async function payIntegrationFee(membershipId) {
+    setSolFeeProcessing(membershipId);
+    try {
+      const { fee } = await apiFetch(`/sol/memberships/${membershipId}/pay-integration-fee`, { method: 'POST', token });
+      setBalance((b) => b - fee);
+      flash('Frè entegrasyon peye — n ap tann admin apwouve demand ou.');
+      await loadMySol();
+    } catch (e) {
+      flash(e.message || 'Nou pa t ka trete peman an.', 'error');
+    } finally {
+      setSolFeeProcessing(null);
     }
   }
 
@@ -3316,23 +3331,46 @@ export default function BlicPayApp() {
                   ) : mySolMemberships.length === 0 ? (
                     <p className="text-sm p-5 rounded-xl" style={{ color: C.muted, background: C.card, border: `1px solid ${C.border}` }}>Ou poko gen okenn demand Sòl.</p>
                   ) : mySolMemberships.map((m) => (
-                    <button key={m.id} onClick={() => openSolDetail(m.group.id)}
-                      className="bp-btn w-full p-4 rounded-xl text-left flex items-center justify-between"
-                      style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-sm">{m.group.name}</h3>
-                          <Badge tone={m.group.tier === 'Premium' ? 'premium' : m.group.tier === 'Standard' ? 'navy' : 'muted'}>{m.group.tier}</Badge>
+                    <div key={m.id} className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                      <button onClick={() => openSolDetail(m.group.id)} className="bp-btn w-full text-left flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-sm">{m.group.name}</h3>
+                            <Badge tone={m.group.tier === 'Premium' ? 'premium' : m.group.tier === 'Standard' ? 'navy' : 'muted'}>{m.group.tier}</Badge>
+                          </div>
+                          <p className="mt-1 text-xs" style={{ color: C.muted }}>
+                            {m.group.frequency} · {money(m.group.amount)}
+                          </p>
+                          <Badge tone={m.status === 'approved' ? 'mint' : m.status === 'rejected' ? 'danger' : 'amber'}>
+                            {m.status === 'approved' ? 'Manm apwouve' : m.status === 'rejected' ? 'Refize' : 'Annatant'}
+                          </Badge>
+                          {m.currentContribution && (
+                            <Badge tone={m.currentContribution.status === 'paid' ? 'mint' : m.currentContribution.status === 'overdue' ? 'danger' : 'amber'}>
+                              {m.currentContribution.status === 'paid' ? 'Kotizasyon peye ✓'
+                                : m.currentContribution.status === 'overdue' ? 'Kotizasyon an reta serye'
+                                : m.currentContribution.status === 'late' ? 'Kotizasyon an reta'
+                                : 'Kotizasyon ap tann'}
+                            </Badge>
+                          )}
                         </div>
-                        <p className="mt-1 text-xs" style={{ color: C.muted }}>
-                          {m.group.frequency} · {money(m.group.amount)}
-                        </p>
-                        <Badge tone={m.status === 'approved' ? 'mint' : m.status === 'rejected' ? 'danger' : 'amber'}>
-                          {m.status === 'approved' ? 'Manm apwouve' : m.status === 'rejected' ? 'Refize' : 'Annatant'}
-                        </Badge>
-                      </div>
-                      <ChevronRight size={16} color={C.muted} />
-                    </button>
+                        <ChevronRight size={16} color={C.muted} />
+                      </button>
+
+                      {m.status === 'pending' && (
+                        m.integrationFeePaid ? (
+                          <div className="mt-3 flex items-center gap-2 p-2.5 rounded-lg" style={{ background: '#E4F5EF' }}>
+                            <Check size={14} color={C.mint} />
+                            <p className="text-xs font-semibold" style={{ color: C.mint }}>Frè entegrasyon peye — n ap tann admin</p>
+                          </div>
+                        ) : (
+                          <button onClick={() => payIntegrationFee(m.id)} disabled={solFeeProcessing === m.id}
+                            className="bp-btn mt-3 w-full py-2.5 rounded-lg text-sm font-semibold text-white"
+                            style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: solFeeProcessing === m.id ? 0.7 : 1 }}>
+                            {solFeeProcessing === m.id ? 'Ap trete...' : `Peye frè entegrasyon an (${money(m.integrationFee)})`}
+                          </button>
+                        )
+                      )}
+                    </div>
                   ))}
                 </div>
               </>
@@ -3344,6 +3382,15 @@ export default function BlicPayApp() {
                 <p className="mt-1.5 text-sm" style={{ color: C.muted }}>
                   {mySolMemberships.length > 0 ? 'Ou ka antre nan plizyè sòl an menm tan.' : 'Ou poko manm okenn sòl. Chwazi youn pou kòmanse.'}
                 </p>
+
+                <a href="https://blicpayht.com/BLIC_Global_Fiche_Solde_Remplissable.pdf" target="_blank" rel="noreferrer"
+                  className="bp-btn mt-3 flex items-center gap-2.5 p-3 rounded-xl" style={{ background: '#E6F0FB' }}>
+                  <FileText size={16} color={C.navy} className="shrink-0" />
+                  <div className="text-left">
+                    <p className="text-xs font-semibold" style={{ color: C.navy }}>Telechaje fòm enskripsyon an</p>
+                    <p className="text-xs mt-0.5" style={{ color: C.muted }}>Ranpli l epi voye l pa email, WhatsApp, oswa nan biwo a.</p>
+                  </div>
+                </a>
 
                 <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
                   {SOL_FREQUENCIES.map((f) => (
@@ -3439,10 +3486,65 @@ export default function BlicPayApp() {
                   </div>
                 )}
 
-                <div className="mt-3 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#FBF0DE', color: '#946115' }}>
-                  <AlertCircle size={15} className="shrink-0 mt-0.5" />
-                  Dat ak montan peman rotasyon an ap anonse pa BLICPay pita.
-                </div>
+                {userSolMembership?.status === 'pending' && (
+                  userSolMembership.integrationFeePaid ? (
+                    <div className="mt-3 flex items-center gap-2 p-3 rounded-xl" style={{ background: '#E4F5EF' }}>
+                      <Check size={15} color={C.mint} />
+                      <p className="text-sm font-semibold" style={{ color: C.mint }}>Frè entegrasyon peye — n ap tann admin egzamine demand ou</p>
+                    </div>
+                  ) : (
+                    <button onClick={() => payIntegrationFee(userSolMembership.id)} disabled={solFeeProcessing === userSolMembership.id}
+                      className="bp-btn mt-3 w-full py-3 rounded-xl text-sm font-semibold text-white"
+                      style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: solFeeProcessing === userSolMembership.id ? 0.7 : 1 }}>
+                      {solFeeProcessing === userSolMembership.id ? 'Ap trete...' : `Peye frè entegrasyon an (${money(userSolMembership.integrationFee)})`}
+                    </button>
+                  )
+                )}
+
+                {userSolMembership?.currentContribution && (
+                  <div className="mt-3 p-4 rounded-xl" style={{
+                    background: userSolMembership.currentContribution.status === 'paid' ? '#E4F5EF' : userSolMembership.currentContribution.status === 'overdue' ? '#FBEAEA' : '#FBF0DE',
+                  }}>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold" style={{
+                        color: userSolMembership.currentContribution.status === 'paid' ? C.mint : userSolMembership.currentContribution.status === 'overdue' ? C.danger : '#946115',
+                      }}>
+                        {userSolMembership.currentContribution.status === 'paid' ? 'Kotizasyon mwa sa a peye ✓'
+                          : userSolMembership.currentContribution.status === 'overdue' ? 'Kotizasyon an reta serye'
+                          : userSolMembership.currentContribution.status === 'late' ? 'Kotizasyon an reta'
+                          : 'Kotizasyon mwa sa a ap tann'}
+                      </p>
+                      <p className="text-sm font-semibold" style={{ color: C.ink }}>
+                        {money(userSolMembership.currentContribution.amount + (userSolMembership.currentContribution.penaltyAmount || 0))}
+                      </p>
+                    </div>
+                    {userSolMembership.currentContribution.penaltyAmount > 0 && (
+                      <p className="mt-1 text-xs" style={{ color: '#946115' }}>
+                        Sa gen ladan {money(userSolMembership.currentContribution.penaltyAmount)} penalite pou reta.
+                      </p>
+                    )}
+                    {userSolMembership.currentContribution.status === 'overdue' && (
+                      <p className="mt-1 text-xs" style={{ color: C.danger }}>
+                        Delè gras la pase — yon admin BLICPay ap kontakte w byento.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {userSolMembership?.currentPeriodDates ? (
+                  <div className="mt-3 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#E6F0FB', color: C.navy }}>
+                    <Calendar size={15} className="shrink-0 mt-0.5" />
+                    <div>
+                      <p>Dat limit kotizasyon: <strong>{userSolMembership.currentPeriodDates.deadline}</strong></p>
+                      <p className="mt-0.5">Dat prevwa vèsman: <strong>{userSolMembership.currentPeriodDates.payoutDate}</strong></p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-3 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#FBF0DE', color: '#946115' }}>
+                    <AlertCircle size={15} className="shrink-0 mt-0.5" />
+                    Dat ak montan peman rotasyon an ap anonse pa BLICPay pita.
+                  </div>
+                )}
 
                 <button onClick={openSolDocuments}
                   className="bp-btn mt-4 w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5"
@@ -3456,6 +3558,15 @@ export default function BlicPayApp() {
               <>
                 <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>Dokiman <em style={{ fontStyle: 'italic', color: C.sky }}>Sòl mwen yo</em></h2>
                 <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Dokiman ou siyen pou chak Sòl — ou ka gade yo, ou pa ka modifye yo.</p>
+
+                <a href="https://blicpayht.com/BLIC_Global_Fiche_Solde_Remplissable.pdf" target="_blank" rel="noreferrer"
+                  className="bp-btn mt-3 flex items-center gap-2.5 p-3 rounded-xl" style={{ background: '#E6F0FB' }}>
+                  <FileText size={16} color={C.navy} className="shrink-0" />
+                  <div className="text-left">
+                    <p className="text-xs font-semibold" style={{ color: C.navy }}>Telechaje fòm enskripsyon an</p>
+                    <p className="text-xs mt-0.5" style={{ color: C.muted }}>Ranpli l epi voye l pa email, WhatsApp, oswa nan biwo a.</p>
+                  </div>
+                </a>
 
                 <div className="mt-5 space-y-4">
                   {mySolMemberships.length === 0 ? (
@@ -3509,8 +3620,31 @@ export default function BlicPayApp() {
                   <img src={`data:${viewingSolDocument.fileMimeType};base64,${viewingSolDocument.fileData}`} alt={viewingSolDocument.title}
                     className="w-full rounded-lg" />
                 ) : (
-                  <iframe title={viewingSolDocument.title} src={`data:${viewingSolDocument.fileMimeType};base64,${viewingSolDocument.fileData}`}
-                    className="w-full h-full rounded-lg" style={{ border: 'none', minHeight: 400 }} />
+                  <div className="flex flex-col items-center justify-center gap-4 py-10">
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                      <FileText size={28} color={C.navy} />
+                    </div>
+                    <p className="text-sm text-center px-6" style={{ color: C.muted }}>
+                      Dokiman sa a se yon fichye PDF — louvri l pou ka gade l byen.
+                    </p>
+                    <button
+                      onClick={() => {
+                        try {
+                          const byteChars = atob(viewingSolDocument.fileData);
+                          const byteNumbers = new Array(byteChars.length);
+                          for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+                          const blob = new Blob([new Uint8Array(byteNumbers)], { type: viewingSolDocument.fileMimeType });
+                          const url = URL.createObjectURL(blob);
+                          window.open(url, '_blank');
+                        } catch (e) {
+                          flash('Nou pa t ka louvri dokiman an.', 'error');
+                        }
+                      }}
+                      className="bp-btn px-5 py-3 rounded-xl text-sm font-semibold text-white"
+                      style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+                      Louvri dokiman an
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
