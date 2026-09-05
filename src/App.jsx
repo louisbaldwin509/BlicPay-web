@@ -1701,6 +1701,10 @@ export default function BlicPayApp() {
   const [natcashProofFile, setNatcashProofFile] = useState(null);
   const [natcashSubmitting, setNatcashSubmitting] = useState(false);
   const [natcashScanning, setNatcashScanning] = useState(false);
+  const [biwoBranchScreen, setBiwoBranchScreen] = useState(false);
+  const [biwoBranches, setBiwoBranches] = useState([]);
+  const [loadingBiwoBranches, setLoadingBiwoBranches] = useState(false);
+  const [selectedBiwoBranch, setSelectedBiwoBranch] = useState('');
   const [viewingSolDocument, setViewingSolDocument] = useState(null);
   const [solFreqFilter, setSolFreqFilter] = useState('semenn');
   const [solTierFilter, setSolTierFilter] = useState('basic');
@@ -1919,6 +1923,24 @@ export default function BlicPayApp() {
       return;
     }
 
+    if (m.id === 'biwo') {
+      setSelectedMethod(m);
+      setSelectedBiwoBranch('');
+      setBiwoBranchScreen(true);
+      if (biwoBranches.length === 0) {
+        setLoadingBiwoBranches(true);
+        try {
+          const { branches } = await apiFetch('/branches', { token });
+          setBiwoBranches(branches);
+        } catch (err) {
+          flash(err.message || 'Nou pa t ka chaje lis siikisal yo.', 'error');
+        } finally {
+          setLoadingBiwoBranches(false);
+        }
+      }
+      return;
+    }
+
     if (flowKind === 'withdraw') {
       if (Number(amount) > balance) {
         flash('Ou pa gen ase lajan pou retrè sa a.');
@@ -1992,6 +2014,49 @@ export default function BlicPayApp() {
       setView('confirm');
     } catch (err) {
       flash(err.message, 'error');
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  // Kliyan an fin chwazi siikisal la — kontinye selon si se yon depo (kreye
+  // demand lan tousuit) oswa yon retrè (montre ekran PIN ak frè a).
+  async function confirmBiwoBranch() {
+    if (!selectedBiwoBranch) {
+      flash('Chwazi yon siikisal.');
+      return;
+    }
+
+    if (flowKind === 'withdraw') {
+      setProcessing(true);
+      try {
+        const { fee } = await apiFetch(`/withdrawals/fee-preview?amount=${Number(amount)}`, { token });
+        setPendingWithdraw({ amount: Number(amount), method: selectedMethod, fee, branch: selectedBiwoBranch });
+        setPinDigits('');
+        setPinError(null);
+        setBiwoBranchScreen(false);
+        setPinScreen(hasPin ? 'withdraw' : 'setup');
+      } catch (err) {
+        flash(err.message || 'Nou pa t ka kalkile frè a.', 'error');
+      } finally {
+        setProcessing(false);
+      }
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const { deposit } = await apiFetch('/deposits', {
+        method: 'POST',
+        token,
+        body: { amount: Number(amount), method: 'biwo', branch: selectedBiwoBranch },
+      });
+      setReference(deposit.reference);
+      setTx((t) => [{ id: deposit.id, method: selectedMethod.name, amount: deposit.amount, ts: Date.now(), status: 'annatant', date: 'jodi a' }, ...t]);
+      setBiwoBranchScreen(false);
+      setView('confirm');
+    } catch (err) {
+      flash(err.message || 'Nou pa t ka soumèt demand lan.', 'error');
     } finally {
       setProcessing(false);
     }
@@ -2099,7 +2164,7 @@ export default function BlicPayApp() {
         const { withdrawal } = await apiFetch('/withdrawals', {
           method: 'POST',
           token,
-          body: { amount: pendingWithdraw.amount, method: pendingWithdraw.method.id, pin },
+          body: { amount: pendingWithdraw.amount, method: pendingWithdraw.method.id, pin, branch: pendingWithdraw.branch },
         });
         setReference(withdrawal.reference);
         setBalance((b) => b - withdrawal.amount - (withdrawal.fee || 0));
@@ -5011,7 +5076,7 @@ export default function BlicPayApp() {
           </div>
         )}
 
-        {view === 'deposit' && !natcashProofScreen && (
+        {view === 'deposit' && !natcashProofScreen && !biwoBranchScreen && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('dashboard')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
               <ArrowLeft size={15} /> Retounen
@@ -5054,6 +5119,49 @@ export default function BlicPayApp() {
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {view === 'deposit' && biwoBranchScreen && (
+          <div className="fadein px-5 pb-10 pt-2">
+            <button onClick={() => setBiwoBranchScreen(false)} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
+              <ArrowLeft size={15} /> Chanje metòd
+            </button>
+
+            <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>
+              Chwazi <em style={{ fontStyle: 'italic', color: C.sky }}>siikisal</em> la
+            </h2>
+            <p className="mt-1.5 text-sm" style={{ color: C.muted }}>
+              {money(Number(amount))} · {flowKind === 'withdraw' ? 'Retrè' : 'Depo'} nan biwo
+            </p>
+
+            {loadingBiwoBranches ? (
+              <p className="mt-6 text-sm text-center" style={{ color: C.muted }}>Ap chaje...</p>
+            ) : biwoBranches.length === 0 ? (
+              <p className="mt-6 text-sm p-4 rounded-xl" style={{ color: C.muted, background: C.card, border: `1px solid ${C.border}` }}>
+                Pa gen okenn siikisal disponib toujou.
+              </p>
+            ) : (
+              <div className="mt-5 space-y-2.5">
+                {biwoBranches.map((b) => (
+                  <button key={b} onClick={() => setSelectedBiwoBranch(b)}
+                    className="bp-btn w-full flex items-center justify-between p-3.5 rounded-xl text-left"
+                    style={{
+                      background: C.card,
+                      border: selectedBiwoBranch === b ? `2px solid ${C.navy}` : `1px solid ${C.border}`,
+                    }}>
+                    <span className="text-sm font-semibold">{b}</span>
+                    {selectedBiwoBranch === b && <Check size={16} color={C.navy} />}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <button onClick={confirmBiwoBranch} disabled={!selectedBiwoBranch || processing}
+              className="bp-btn mt-6 w-full py-3.5 rounded-xl text-sm font-semibold text-white"
+              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: (!selectedBiwoBranch || processing) ? 0.6 : 1 }}>
+              {processing ? 'Ap trete...' : 'Kontinye'}
+            </button>
           </div>
         )}
 
