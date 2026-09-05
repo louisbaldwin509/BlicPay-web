@@ -143,7 +143,7 @@ const fontMono = { fontFamily: "'IBM Plex Mono', monospace" };
 
 const methods = [
   { id: 'moncash', name: 'Mon Cash', desc: 'Depoze kach nan pwen Digicel ou', color: '#1E9E7C', icon: DollarSign, logo: '/logos/moncash.jpg', kind: 'mobile' },
-  { id: 'natcash', name: 'NatCash', desc: 'Depoze ak bous mobil NatCash ou', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash.jpg', kind: 'mobile', comingSoon: true },
+  { id: 'natcash', name: 'NatCash', desc: 'Depoze ak bous mobil NatCash ou', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash.jpg', kind: 'mobile' },
   { id: 'usdt', name: 'USDT', desc: 'Depoze dola ameriken an stablecoin (Tether)', color: '#0E9E86', icon: Banknote, logo: '/logos/usdt.jpg', kind: 'crypto', comingSoon: true },
   { id: 'zelle', name: 'Zelle', desc: 'Depoze dirèkteman soti nan kont labank ou', color: '#6D3FD1', icon: ArrowLeftRight, logo: '/logos/zelle.png', kind: 'bank', comingSoon: true },
   { id: 'biwo', name: 'Nan biwo', desc: 'Ale peye kach nan yonn nan biwo nou yo', color: '#946115', icon: Building2, logo: null, kind: 'office' },
@@ -1696,6 +1696,11 @@ export default function BlicPayApp() {
   const [solSubView, setSolSubView] = useState('browse'); // 'browse' | 'mine' | 'detail' | 'documents'
   const [solJoinProcessing, setSolJoinProcessing] = useState(null);
   const [solFeeProcessing, setSolFeeProcessing] = useState(null);
+  const [natcashProofScreen, setNatcashProofScreen] = useState(false);
+  const [natcashTransactionId, setNatcashTransactionId] = useState('');
+  const [natcashProofFile, setNatcashProofFile] = useState(null);
+  const [natcashSubmitting, setNatcashSubmitting] = useState(false);
+  const [natcashScanning, setNatcashScanning] = useState(false);
   const [viewingSolDocument, setViewingSolDocument] = useState(null);
   const [solFreqFilter, setSolFreqFilter] = useState('semenn');
   const [solTierFilter, setSolTierFilter] = useState('basic');
@@ -1946,6 +1951,13 @@ export default function BlicPayApp() {
       return;
     }
 
+    if (flowKind === 'deposit' && m.id === 'natcash') {
+      setNatcashTransactionId('');
+      setNatcashProofFile(null);
+      setNatcashProofScreen(true);
+      return;
+    }
+
     setProcessing(true);
     try {
       if (token === DEMO_TOKEN) {
@@ -1974,6 +1986,80 @@ export default function BlicPayApp() {
       flash(err.message, 'error');
     } finally {
       setProcessing(false);
+    }
+  }
+
+  // Konvèti foto resi a an base64 epi soumèt li ansanm ak montan/ID
+  // tranzaksyon an. Backend la fè verifikasyon OCR AVAN li kreye depo a —
+  // si ID la pa koresponn ak sa ki nan resi a, demand lan BLOKE net.
+  // Lè kliyan an chwazi foto a, nou eskane l tousuit pou pwopoze ID ak
+  // montan an otomatikman — li ka toujou korije yo anvan li soumèt.
+  async function onNatcashFileSelected(file) {
+    setNatcashProofFile(file);
+    if (!file) return;
+
+    setNatcashScanning(true);
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = () => reject(new Error('Nou pa t ka li foto a.'));
+        reader.readAsDataURL(file);
+      });
+
+      const { suggestedTransactionId, suggestedAmount } = await apiFetch('/deposits/natcash/scan', {
+        method: 'POST',
+        token,
+        body: { proofImage: base64, proofMimeType: file.type },
+      });
+
+      if (suggestedTransactionId) setNatcashTransactionId(suggestedTransactionId);
+      if (suggestedAmount) setAmount(String(suggestedAmount));
+    } catch (err) {
+      // Echèk otomatik la pa grav — kliyan an ka toujou ranpli chan yo alamen.
+    } finally {
+      setNatcashScanning(false);
+    }
+  }
+
+  async function submitNatcashDeposit() {
+    if (!natcashTransactionId.trim()) {
+      flash('Antre ID tranzaksyon an.');
+      return;
+    }
+    if (!natcashProofFile) {
+      flash('Ajoute yon foto resi a.');
+      return;
+    }
+    setNatcashSubmitting(true);
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = () => reject(new Error('Nou pa t ka li foto a.'));
+        reader.readAsDataURL(natcashProofFile);
+      });
+
+      const { deposit } = await apiFetch('/deposits/natcash', {
+        method: 'POST',
+        token,
+        body: {
+          amount: Number(amount),
+          transactionId: natcashTransactionId.trim(),
+          proofImage: base64,
+          proofMimeType: natcashProofFile.type,
+        },
+      });
+
+      setSelectedMethod(methods.find((m) => m.id === 'natcash'));
+      setReference(deposit.reference);
+      setTx((t) => [{ id: deposit.id, method: 'NatCash', amount: deposit.amount, ts: Date.now(), status: 'annatant', date: 'jodi a' }, ...t]);
+      setNatcashProofScreen(false);
+      setView('confirm');
+    } catch (err) {
+      flash(err.message || 'Nou pa t ka soumèt depo a.', 'error');
+    } finally {
+      setNatcashSubmitting(false);
     }
   }
 
@@ -4917,7 +5003,7 @@ export default function BlicPayApp() {
           </div>
         )}
 
-        {view === 'deposit' && (
+        {view === 'deposit' && !natcashProofScreen && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('dashboard')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
               <ArrowLeft size={15} /> Retounen
@@ -4960,6 +5046,56 @@ export default function BlicPayApp() {
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {view === 'deposit' && natcashProofScreen && (
+          <div className="fadein px-5 pb-10 pt-2">
+            <button onClick={() => setNatcashProofScreen(false)} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
+              <ArrowLeft size={15} /> Chanje metòd
+            </button>
+
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#fff', border: `1px solid ${C.border}` }}>
+                <img src="/logos/natcash.jpg" alt="NatCash" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 19 }}>Depo NatCash</h2>
+                <p className="text-xs" style={{ color: C.muted }}>{money(Number(amount))}</p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-xs p-3 rounded-lg" style={{ background: '#E6F0FB', color: C.navy }}>
+              Voye {money(Number(amount))} sou nimewo NatCash BLICPay a, epi ajoute ID tranzaksyon an ak yon kapti resi a anba a.
+            </p>
+
+            <label className="block mt-4 text-xs font-semibold" style={{ color: C.muted }}>ID TRANZAKSYON AN</label>
+            <input
+              value={natcashTransactionId}
+              onChange={(e) => setNatcashTransactionId(e.target.value)}
+              placeholder="Egzanp: TXN123456789"
+              className="w-full mt-1.5 px-3.5 py-3 rounded-xl text-sm"
+              style={{ background: C.card, border: `1px solid ${C.border}` }}
+            />
+
+            <label className="block mt-4 text-xs font-semibold" style={{ color: C.muted }}>KAPTI RESI A</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => onNatcashFileSelected(e.target.files?.[0] || null)}
+              className="w-full mt-1.5 text-xs"
+            />
+            {natcashScanning && (
+              <p className="mt-1.5 text-xs flex items-center gap-1.5" style={{ color: C.muted }}>
+                <RefreshCw size={12} style={{ animation: 'spin 0.8s linear infinite' }} /> Ap li resi a pou ranpli chan yo otomatikman...
+              </p>
+            )}
+
+            <button onClick={submitNatcashDeposit} disabled={natcashSubmitting}
+              className="bp-btn mt-6 w-full py-3.5 rounded-xl text-sm font-semibold text-white"
+              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: natcashSubmitting ? 0.7 : 1 }}>
+              {natcashSubmitting ? 'Ap verifye resi a...' : 'Soumèt depo a'}
+            </button>
           </div>
         )}
 
