@@ -1910,6 +1910,14 @@ export default function BlicPayApp() {
       flash('Antre yon montan anvan.');
       return;
     }
+    if (flowKind === 'deposit' && Number(amount) < 100) {
+      flash('Montan minimòm pou yon depo se 100 HTG.');
+      return;
+    }
+    if (flowKind === 'withdraw' && Number(amount) < 250) {
+      flash('Montan minimòm pou yon retrè se 250 HTG.');
+      return;
+    }
 
     if (flowKind === 'withdraw') {
       if (Number(amount) > balance) {
