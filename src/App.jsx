@@ -1912,10 +1912,18 @@ export default function BlicPayApp() {
         return;
       }
       setSelectedMethod(m);
-      setPendingWithdraw({ amount: Number(amount), method: m });
-      setPinDigits('');
-      setPinError(null);
-      setPinScreen(hasPin ? 'withdraw' : 'setup');
+      setProcessing(true);
+      try {
+        const { fee } = await apiFetch(`/withdrawals/fee-preview?amount=${Number(amount)}`, { token });
+        setPendingWithdraw({ amount: Number(amount), method: m, fee });
+        setPinDigits('');
+        setPinError(null);
+        setPinScreen(hasPin ? 'withdraw' : 'setup');
+      } catch (err) {
+        flash(err.message || 'Nou pa t ka kalkile frè a.', 'error');
+      } finally {
+        setProcessing(false);
+      }
       return;
     }
 
@@ -2000,8 +2008,8 @@ export default function BlicPayApp() {
           body: { amount: pendingWithdraw.amount, method: pendingWithdraw.method.id, pin },
         });
         setReference(withdrawal.reference);
-        setBalance((b) => b - pendingWithdraw.amount);
-        setTx((t) => [{ id: withdrawal.id, method: pendingWithdraw.method.name, amount: withdrawal.amount, ts: Date.now(), status: 'annatant', date: 'jodi a', type: 'retrè' }, ...t]);
+        setBalance((b) => b - withdrawal.amount - (withdrawal.fee || 0));
+        setTx((t) => [{ id: withdrawal.id, method: pendingWithdraw.method.name, amount: withdrawal.amount, fee: withdrawal.fee, ts: Date.now(), status: 'annatant', date: 'jodi a', type: 'retrè' }, ...t]);
         setPinScreen(null);
         setPinDigits('');
         setPendingWithdraw(null);
@@ -3698,6 +3706,16 @@ export default function BlicPayApp() {
                         <p style={{ position: 'relative', margin: '16px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>Konfime retrè</p>
                         <p style={{ position: 'relative', margin: '2px 0 0', color: '#fff', fontSize: 28, fontWeight: 700 }}>{money(pendingWithdraw.amount)}</p>
                         <p style={{ position: 'relative', margin: '2px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>Vè {pendingWithdraw.method.name}</p>
+                        <div style={{ position: 'relative', marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+                          <div className="flex items-center justify-between">
+                            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11.5 }}>Frè</span>
+                            <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: 11.5 }}>{pendingWithdraw.fee > 0 ? money(pendingWithdraw.fee) : 'Gratis'}</span>
+                          </div>
+                          <div className="flex items-center justify-between" style={{ marginTop: 2 }}>
+                            <span style={{ color: '#fff', fontSize: 12.5, fontWeight: 600 }}>Total ki soti nan balans ou</span>
+                            <span style={{ color: '#fff', fontSize: 12.5, fontWeight: 700 }}>{money(pendingWithdraw.amount + (pendingWithdraw.fee || 0))}</span>
+                          </div>
+                        </div>
                       </>
                     ) : (
                       <>
