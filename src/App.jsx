@@ -1660,10 +1660,7 @@ export default function BlicPayApp() {
       apiFetch('/pin/status', { token: saved.token })
         .then(({ hasPin: hp }) => {
           setHasPin(hp);
-          if (hp) {
-            setAppLocked(true);
-            setPinScreen('unlock');
-          }
+          if (hp) setAppLocked(true);
         })
         .catch(() => {});
       if (cameFromMoncashSuccess) {
@@ -2176,12 +2173,6 @@ export default function BlicPayApp() {
         setPinDigits('');
         setPendingWithdraw(null);
         setView('confirm');
-      } else {
-        // Cas imprévu : ne devrait jamais arriver — mais si ça arrive,
-        // on le signale au lieu de rester silencieux.
-        console.error('submitPin appelé avec un état inattendu:', { pinScreen, pendingWithdraw });
-        setPinError('Yon bagay pa mache. Eseye fèmen epi louvri app la ankò.');
-        setPinDigits('');
       }
     } catch (err) {
       setPinError(err.message || 'Kòd PIN la pa kòrèk.');
@@ -2229,9 +2220,6 @@ export default function BlicPayApp() {
     setPinError(null);
     setPinSetupPassword('');
     setPendingWithdraw(null);
-    // Si on annule un écran de déverrouillage, il faut aussi déverrouiller,
-    // sinon l'app reste bloquée avec appLocked=true et pinScreen=null.
-    if (appLocked) setAppLocked(false);
   }
 
   async function sendTransfer() {
@@ -2720,8 +2708,12 @@ export default function BlicPayApp() {
   async function loadKycStatusSilently(tok) {
     try {
       const data = await apiFetch('/kyc/didit/status', { token: tok });
+      if (data.verified) {
+        setKycStatus('verifye');
+        return;
+      }
       const s = data.verification?.status;
-      setKycStatus(s === 'approved' ? 'verifye' : s === 'pending' ? 'annatant' : 'pa verifye');
+      setKycStatus(s === 'pending' ? 'annatant' : 'pa verifye');
     } catch (e) {
       console.error('KYC status load error:', e);
       // Kite estati a jan li te ye a olye fè kliyan an panse li bezwen resoumèt.
