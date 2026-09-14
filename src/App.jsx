@@ -141,6 +141,14 @@ const C = {
 const fontDisplay = { fontFamily: "'Manrope', sans-serif" };
 const fontMono = { fontFamily: "'IBM Plex Mono', monospace" };
 
+// Etikèt lizib pou chak tip demand admin ka kreye nan VerificationRequest.
+const VR_TYPE_LABELS = {
+  address_proof: 'Prèv adrès',
+  income_proof: 'Prèv revni',
+  identity_reverify: 'Refè verifikasyon idantite',
+  other: 'Lòt dokiman',
+};
+
 const methods = [
   { id: 'moncash', name: 'Mon Cash', desc: 'Depoze kach nan pwen Digicel ou', color: '#1E9E7C', icon: DollarSign, logo: '/logos/moncash.jpg', kind: 'mobile' },
   { id: 'natcash', name: 'NatCash', desc: 'Depoze ak bous mobil NatCash ou', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash.jpg', kind: 'mobile' },
@@ -1566,7 +1574,12 @@ export default function BlicPayApp() {
   const [authLoading, setAuthLoading] = useState(false);
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
-  const [kycStatus, setKycStatus] = useState('pa verifye'); // 'pa verifye' | 'annatant' | 'verifye'
+  const [kycStatus, setKycStatus] = useState('pa verifye'); // estati DÈNYE demand la : 'pa verifye' | 'annatant' | 'verifye'
+  const [accountVerified, setAccountVerified] = useState(false); // badge PÈMANAN kont lan (User.verified) — pa depann de dènye demand lan
+  const [verificationRequests, setVerificationRequests] = useState([]); // demand admin voye pou dokiman siplemantè (prèv adrès, elt.) — apa de KYC
+  const [vrActive, setVrActive] = useState(null); // demand ki louvri pou telechajman kounye a
+  const [vrBusy, setVrBusy] = useState(false);
+  const [vrError, setVrError] = useState('');
   const [kycDocType, setKycDocType] = useState('paspò');
   const [kycStep, setKycStep] = useState('entwo'); // 'entwo' | 'fòm' — montre egzanp anvan telechajman
   const [kycFile, setKycFile] = useState(null);
@@ -1656,6 +1669,7 @@ export default function BlicPayApp() {
       if (cameFromDidit) setKycStep('retou');
       loadWallet(saved.token);
       loadKycStatusSilently(saved.token);
+      loadVerificationRequests(saved.token);
       loadNotifications(saved.token);
       apiFetch('/pin/status', { token: saved.token })
         .then(({ hasPin: hp }) => {
@@ -1821,6 +1835,7 @@ export default function BlicPayApp() {
       } catch { /* localStorage endispoinib — kontinye san sove sesyon an */ }
       await loadWallet(newToken);
       await loadKycStatusSilently(newToken);
+      await loadVerificationRequests(newToken);
       await loadNotifications(newToken);
     } catch (err) {
       setAuthError(err.message);
@@ -2761,15 +2776,58 @@ export default function BlicPayApp() {
   async function loadKycStatusSilently(tok) {
     try {
       const data = await apiFetch('/kyc/didit/status', { token: tok });
-      if (data.verified) {
-        setKycStatus('verifye');
-        return;
-      }
       const s = data.verification?.status;
-      setKycStatus(s === 'pending' ? 'annatant' : 'pa verifye');
+      setKycStatus(s === 'approved' ? 'verifye' : s === 'pending' ? 'annatant' : 'pa verifye');
+      // "verified" a soti nan kont lan (badge PÈMANAN) — pa mele l ak estati
+      // dènye demand lan, ki ka retounen 'annatant' menm apre yon kont deja apwouve.
+      setAccountVerified(!!data.verified);
     } catch (e) {
       console.error('KYC status load error:', e);
       // Kite estati a jan li te ye a olye fè kliyan an panse li bezwen resoumèt.
+    }
+  }
+
+  // Demand SIPLEMANTÈ yon admin ka kreye pou YON kliyan presizeman (prèv
+  // adrès, revni, oswa mande l refè verifikasyon idantite a) — endepandan
+  // de badge KYC prensipal la (accountVerified pa chanje pou sa a).
+  async function loadVerificationRequests(tok) {
+    try {
+      const data = await apiFetch('/verification-requests', { token: tok });
+      setVerificationRequests(data.requests || []);
+    } catch (e) {
+      console.error('Verification requests load error:', e);
+    }
+  }
+
+  async function submitVerificationRequest(id, file) {
+    setVrBusy(true);
+    setVrError('');
+    try {
+      let fileData = null;
+      let fileMimeType = null;
+      if (file) {
+        const dataUrl = file.type?.startsWith('image/')
+          ? await compressImageFile(file)
+          : await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onerror = () => reject(new Error('Nou pa t ka li fichye a.'));
+              reader.onload = () => resolve(reader.result);
+              reader.readAsDataURL(file);
+            });
+        const [mime, base64] = splitDataUrl(dataUrl);
+        fileMimeType = mime;
+        fileData = base64;
+      }
+      await apiFetch(`/verification-requests/${id}/submit`, {
+        method: 'POST', token, body: { fileData, fileMimeType },
+      });
+      setVrActive(null);
+      flash('Dokiman ou voye — n ap egzamine l.');
+      await loadVerificationRequests(token);
+    } catch (e) {
+      setVrError(e.message || 'Nou pa t ka voye dokiman an.');
+    } finally {
+      setVrBusy(false);
     }
   }
 
@@ -2816,7 +2874,8 @@ export default function BlicPayApp() {
     try {
       const data = await apiFetch('/kyc/didit/status', { token });
       const s = data.verification?.status;
-      setKycStatus(data.verified ? 'verifye' : s === 'pending' ? 'annatant' : 'pa verifye');
+      setKycStatus(s === 'approved' ? 'verifye' : s === 'pending' ? 'annatant' : 'pa verifye');
+      setAccountVerified(!!data.verified);
       if (data.verified) flash('Kont ou verifye kounye a.');
       else if (s === 'rejected') flash(data.verification?.rejectionReason || 'Demand verifikasyon w refize — eseye ankò.', 'error');
       else flash('Pa gen chanjman.', 'info');
@@ -3340,13 +3399,11 @@ export default function BlicPayApp() {
             <p className="text-sm mt-2" style={{ color: C.muted }}>{tr('welcome')}</p>
             <div className="flex items-center gap-1.5">
               <h1 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{user?.fullName || '...'}</h1>
-              {kycStatus === 'verifye' && (
+              {accountVerified ? (
                 <span title="Kont verifye (KYC)"><BadgeCheck size={19} color={C.sky} fill={C.navy} /></span>
-              )}
-              {kycStatus === 'annatant' && (
+              ) : kycStatus === 'annatant' ? (
                 <Badge tone="amber">Annatant</Badge>
-              )}
-              {kycStatus === 'pa verifye' && (
+              ) : (
                 <button onClick={() => { setKycStep('entwo'); setView('kyc'); }} className="text-xs font-semibold underline" style={{ color: C.navy }}>
                   Verifye kont ou
                 </button>
@@ -3456,8 +3513,9 @@ export default function BlicPayApp() {
               </button>
             </div>
 
-            {/* kyc banner */}
-            {kycStatus !== 'verifye' && (
+            {/* kyc banner — baze sou accountVerified (pa kycStatus) pou l pa parèt
+                ankò pou yon kliyan deja verifye ki ta relanse yon nouvo demand */}
+            {!accountVerified && (
               <div className="mt-4 p-4 rounded-xl flex items-center gap-3" style={{ background: '#FBF0DE', border: `1px solid #F0D9A8` }}>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#F0D9A8' }}>
                   <ShieldCheck size={16} color="#946115" />
@@ -3483,6 +3541,43 @@ export default function BlicPayApp() {
                 )}
               </div>
             )}
+
+            {/* verification-request banner — demand SIPLEMANTÈ admin kreye pou
+                YON kliyan presizeman (prèv adrès, elt.), apa de badge KYC prensipal la */}
+            {verificationRequests.filter((r) => r.status === 'requested' || r.status === 'rejected').map((r) => (
+              <div key={r.id} className="mt-4 p-4 rounded-xl flex items-center gap-3" style={{ background: '#FBEAEA', border: `1px solid #F0C0C0` }}>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#F0C0C0' }}>
+                  <FileText size={16} color={C.danger} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold" style={{ color: C.danger }}>
+                    {VR_TYPE_LABELS[r.type] || 'Dokiman mande'}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: C.danger }}>
+                    {r.status === 'rejected' ? (r.rejectionReason || 'Refize — eseye ankò.') : (r.note || 'Yon admin mande sa a.')}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    if (r.type === 'identity_reverify') { submitVerificationRequest(r.id, null); setKycStep('entwo'); setView('kyc'); }
+                    else { setVrError(''); setVrActive(r); }
+                  }}
+                  className="text-xs font-semibold px-3 py-2 rounded-lg shrink-0" style={{ background: C.danger, color: '#fff' }}>
+                  {r.type === 'identity_reverify' ? 'Kòmanse' : 'Voye'}
+                </button>
+              </div>
+            ))}
+            {verificationRequests.filter((r) => r.status === 'submitted').map((r) => (
+              <div key={r.id} className="mt-4 p-4 rounded-xl flex items-center gap-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#EEF1F6' }}>
+                  <Clock size={16} color={C.muted} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold" style={{ color: C.navy }}>{VR_TYPE_LABELS[r.type] || 'Dokiman voye'}</p>
+                  <p className="text-xs mt-0.5" style={{ color: C.muted }}>N ap egzamine sa ou voye a.</p>
+                </div>
+              </div>
+            ))}
 
             {/* promo carousel — cycles automatically through several ads/services */}
             <div className="mt-4 rounded-2xl p-5 relative overflow-hidden" style={{ background: C.navy, transition: 'background 0.3s' }}>
@@ -3848,6 +3943,33 @@ export default function BlicPayApp() {
               </>
             )}
           </div>
+        )}
+
+        {vrActive && (
+          <>
+            <div onClick={() => !vrBusy && setVrActive(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,27,51,0.5)', zIndex: 50 }} />
+            <div className="fadein" style={{
+              position: 'fixed', left: '5%', right: '5%', bottom: '8%', background: C.card,
+              borderRadius: 16, zIndex: 51, padding: 20, maxWidth: 420, margin: '0 auto',
+            }}>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-bold">{VR_TYPE_LABELS[vrActive.type] || 'Voye dokiman'}</p>
+                <button onClick={() => !vrBusy && setVrActive(null)} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: C.bg }}>
+                  <X size={14} color={C.muted} />
+                </button>
+              </div>
+              {vrActive.note && <p className="text-xs mb-3" style={{ color: C.muted }}>{vrActive.note}</p>}
+              {vrError && <p className="text-xs mb-3" style={{ color: C.danger }}>{vrError}</p>}
+              <label className="flex flex-col items-center justify-center gap-2 rounded-xl py-8 cursor-pointer"
+                style={{ border: `1.5px dashed ${C.border}`, background: C.bg }}>
+                <FileText size={22} color={C.muted} />
+                <span className="text-xs font-semibold" style={{ color: C.navy }}>Chwazi yon foto oswa PDF</span>
+                <input type="file" accept="image/*,application/pdf" className="hidden" disabled={vrBusy}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) submitVerificationRequest(vrActive.id, f); }} />
+              </label>
+              {vrBusy && <p className="text-xs text-center mt-3" style={{ color: C.muted }}>Ap voye...</p>}
+            </div>
+          </>
         )}
 
         {viewingSolDocument && (
@@ -4682,7 +4804,7 @@ export default function BlicPayApp() {
               <div className="flex-1">
                 <div className="flex items-center gap-1.5">
                   <p className="text-sm font-semibold">{user?.fullName}</p>
-                  {kycStatus === 'verifye' && <BadgeCheck size={15} color={C.sky} fill={C.navy} />}
+                  {accountVerified && <BadgeCheck size={15} color={C.sky} fill={C.navy} />}
                 </div>
                 <p className="text-xs mt-0.5" style={{ color: C.muted }}>{user?.phone}</p>
                 <button onClick={() => { navigator.clipboard?.writeText(getClientId(user)); flash('ID kopye.'); }}
@@ -4691,8 +4813,8 @@ export default function BlicPayApp() {
                   <Copy size={11} />
                 </button>
               </div>
-              <Badge tone={kycStatus === 'verifye' ? 'mint' : kycStatus === 'annatant' ? 'amber' : 'muted'}>
-                {kycStatus === 'verifye' ? 'Verifye' : kycStatus === 'annatant' ? 'Annatant' : 'Pa verifye'}
+              <Badge tone={accountVerified ? 'mint' : kycStatus === 'annatant' ? 'amber' : 'muted'}>
+                {accountVerified ? 'Verifye' : kycStatus === 'annatant' ? 'Annatant' : 'Pa verifye'}
               </Badge>
             </div>
 
@@ -4707,13 +4829,20 @@ export default function BlicPayApp() {
                 </div>
                 <ChevronRight size={15} color={C.muted} />
               </button>
-              <button onClick={() => { setKycStep('entwo'); setView('kyc'); }}
-                className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
+              <button onClick={() => { if (!accountVerified) { setKycStep('entwo'); setView('kyc'); } }}
+                disabled={accountVerified}
+                className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}`, opacity: accountVerified ? 0.55 : 1, cursor: accountVerified ? 'default' : 'pointer' }}>
                 <div className="flex items-center gap-2.5">
                   <ShieldCheck size={16} color={C.muted} />
                   <span className="text-sm font-medium">KYC</span>
                 </div>
-                <ChevronRight size={15} color={C.muted} />
+                {accountVerified ? (
+                  <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: C.mint }}>
+                    <BadgeCheck size={14} /> Verifye
+                  </span>
+                ) : (
+                  <ChevronRight size={15} color={C.muted} />
+                )}
               </button>
               <button onClick={() => { setPwForm({ current: '', next: '', confirm: '' }); setPwError(''); setView('changepassword'); }}
                 className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
