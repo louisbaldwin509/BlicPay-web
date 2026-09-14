@@ -1993,8 +1993,11 @@ export default function BlicPayApp() {
   }
 
   async function pickMethod(m) {
-    if (m.comingSoon) {
-      flash(`${m.name} ap disponib byento.`);
+    // MonCash/NatCash pa disponib pou DEPO tan pou tan — kont machann yo
+    // poko reyèl, sèlman retrè MonCash/NatCash ap fonksyone kounye a.
+    const depositDisabled = flowKind === 'deposit' && (m.id === 'moncash' || m.id === 'natcash');
+    if (m.comingSoon || depositDisabled) {
+      flash(`${m.name} ap disponib byento pou depo.`);
       return;
     }
     if (!amount || Number(amount) <= 0) {
@@ -5426,25 +5429,29 @@ export default function BlicPayApp() {
 
             <h3 className="mt-7 font-semibold text-sm" style={{ color: C.muted }}>CHWAZI METÒD DEPO</h3>
             <div className="mt-3 space-y-2.5">
-              {methods.map((m) => (
-                <button key={m.id} onClick={() => pickMethod(m)} disabled={processing}
-                  className="bp-btn w-full flex items-center gap-3 p-3.5 rounded-xl text-left"
-                  style={{ background: C.card, border: `1px solid ${C.border}`, opacity: processing || m.comingSoon ? 0.6 : 1 }}>
-                  <div className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden" style={{ background: m.logo ? '#fff' : m.color, border: m.logo ? `1px solid ${C.border}` : 'none' }}>
-                    {m.logo ? <img src={m.logo} alt={m.name} className="w-full h-full object-cover" /> : <m.icon size={19} color="#fff" />}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold">{m.name}</p>
-                      {m.comingSoon && <Badge tone="amber">Coming soon</Badge>}
+              {methods.map((m) => {
+                const depositDisabled = flowKind === 'deposit' && (m.id === 'moncash' || m.id === 'natcash');
+                const disabled = m.comingSoon || depositDisabled;
+                return (
+                  <button key={m.id} onClick={() => pickMethod(m)} disabled={processing}
+                    className="bp-btn w-full flex items-center gap-3 p-3.5 rounded-xl text-left"
+                    style={{ background: C.card, border: `1px solid ${C.border}`, opacity: processing || disabled ? 0.6 : 1 }}>
+                    <div className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden" style={{ background: m.logo ? '#fff' : m.color, border: m.logo ? `1px solid ${C.border}` : 'none' }}>
+                      {m.logo ? <img src={m.logo} alt={m.name} className="w-full h-full object-cover" /> : <m.icon size={19} color="#fff" />}
                     </div>
-                    <p className="text-xs mt-0.5" style={{ color: C.muted }}>{m.desc}</p>
-                  </div>
-                  {!m.comingSoon && (processing && selectedMethod?.id === m.id
-                    ? <RefreshCw size={16} color={C.muted} style={{ animation: 'spin 0.8s linear infinite' }} />
-                    : <ChevronRight size={16} color={C.muted} />)}
-                </button>
-              ))}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold">{m.name}</p>
+                        {disabled && <Badge tone="amber">{flowKind === 'deposit' && depositDisabled ? 'Sèlman pou retrè' : 'Coming soon'}</Badge>}
+                      </div>
+                      <p className="text-xs mt-0.5" style={{ color: C.muted }}>{m.desc}</p>
+                    </div>
+                    {!disabled && (processing && selectedMethod?.id === m.id
+                      ? <RefreshCw size={16} color={C.muted} style={{ animation: 'spin 0.8s linear infinite' }} />
+                      : <ChevronRight size={16} color={C.muted} />)}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
