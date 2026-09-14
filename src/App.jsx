@@ -1710,6 +1710,7 @@ export default function BlicPayApp() {
   const [selectedBiwoBranch, setSelectedBiwoBranch] = useState('');
   const [destinationNumberScreen, setDestinationNumberScreen] = useState(false);
   const [destinationNumber, setDestinationNumber] = useState('');
+  const [destinationName, setDestinationName] = useState('');
   const [viewingSolDocument, setViewingSolDocument] = useState(null);
   const [solFreqFilter, setSolFreqFilter] = useState('semenn');
   const [solTierFilter, setSolTierFilter] = useState('basic');
@@ -1953,6 +1954,7 @@ export default function BlicPayApp() {
       }
       setSelectedMethod(m);
       setDestinationNumber('');
+      setDestinationName('');
       setDestinationNumberScreen(true);
       return;
     }
@@ -2044,10 +2046,14 @@ export default function BlicPayApp() {
       flash('Antre nimewo a.');
       return;
     }
+    if (!destinationName.trim()) {
+      flash('Antre non ki sou kont lan.');
+      return;
+    }
     setProcessing(true);
     try {
       const { fee } = await apiFetch(`/withdrawals/fee-preview?amount=${Number(amount)}`, { token });
-      setPendingWithdraw({ amount: Number(amount), method: selectedMethod, fee, destinationNumber: destinationNumber.trim() });
+      setPendingWithdraw({ amount: Number(amount), method: selectedMethod, fee, destinationNumber: destinationNumber.trim(), destinationName: destinationName.trim() });
       setPinDigits('');
       setPinError(null);
       setDestinationNumberScreen(false);
@@ -2202,7 +2208,7 @@ export default function BlicPayApp() {
         const { withdrawal } = await apiFetch('/withdrawals', {
           method: 'POST',
           token,
-          body: { amount: pendingWithdraw.amount, method: pendingWithdraw.method.id, pin, branch: pendingWithdraw.branch, destinationNumber: pendingWithdraw.destinationNumber },
+          body: { amount: pendingWithdraw.amount, method: pendingWithdraw.method.id, pin, branch: pendingWithdraw.branch, destinationNumber: pendingWithdraw.destinationNumber, destinationName: pendingWithdraw.destinationName },
         });
         setReference(withdrawal.reference);
         setBalance((b) => b - withdrawal.amount - (withdrawal.fee || 0));
@@ -5201,9 +5207,23 @@ export default function BlicPayApp() {
               Verifye nimewo a byen — nou pral voye lajan an dirèkteman la.
             </p>
 
-            <button onClick={confirmDestinationNumber} disabled={!destinationNumber.trim() || processing}
+            <label className="block mt-4 text-xs font-semibold" style={{ color: C.muted }}>
+              NON KI SOU KONT {selectedMethod?.name?.toUpperCase()} SA A
+            </label>
+            <input
+              value={destinationName}
+              onChange={(e) => setDestinationName(e.target.value)}
+              placeholder="Non konplè"
+              className="w-full mt-1.5 px-3.5 py-3 rounded-xl text-sm"
+              style={{ background: C.card, border: `1px solid ${C.border}` }}
+            />
+            <p className="mt-2 text-xs" style={{ color: C.muted }}>
+              Dwe menm non ak sou pwòp kont ou — pou sekirite.
+            </p>
+
+            <button onClick={confirmDestinationNumber} disabled={!destinationNumber.trim() || !destinationName.trim() || processing}
               className="bp-btn mt-6 w-full py-3.5 rounded-xl text-sm font-semibold text-white"
-              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: (!destinationNumber.trim() || processing) ? 0.6 : 1 }}>
+              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: (!destinationNumber.trim() || !destinationName.trim() || processing) ? 0.6 : 1 }}>
               {processing ? 'Ap trete...' : 'Kontinye'}
             </button>
           </div>
