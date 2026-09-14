@@ -149,6 +149,14 @@ const VR_TYPE_LABELS = {
   other: 'Lòt dokiman',
 };
 
+// Etikèt + koulè pou tip tranzaksyon an (depo/retrè/transfè) — montre nan
+// istorik la akote metòd la (egzanp "MonCash") pou li klè ki sans lajan an mouve.
+const TX_TYPE_LABELS = {
+  depo: { label: 'Depo', color: '#1E9E7C' },
+  retrè: { label: 'Retrè', color: '#D14343' },
+  transfè: { label: 'Transfè', color: '#143A73' },
+};
+
 const methods = [
   { id: 'moncash', name: 'Mon Cash', desc: 'Depoze kach nan pwen Digicel ou', color: '#1E9E7C', icon: DollarSign, logo: '/logos/moncash.jpg', kind: 'mobile' },
   { id: 'natcash', name: 'NatCash', desc: 'Depoze ak bous mobil NatCash ou', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash.jpg', kind: 'mobile' },
@@ -162,6 +170,15 @@ const offices = [
   'Petyonvil, Ri Grand-Rue',
   'Okap, Centre-vil',
 ];
+
+// Jwenn logo yon metòd (MonCash, NatCash, elt.) apati non li kòm li anrejistre
+// nan yon tranzaksyon (`t.method`). Retounen null pou "Nan biwo" (pa gen logo)
+// ak pou tranzaksyon Transfè/Pòch ki gen deskripsyon olye yon non metòd egzat
+// — nan ka sa yo, UI a retounen sou flèch antre/sòti a kòm repli.
+function getMethodLogo(methodName) {
+  const m = methods.find((x) => x.name === methodName);
+  return m?.logo || null;
+}
 
 const DEMO_TOKEN = 'demo-token';
 const demoUser = { fullName: 'Jean Baptiste', phone: '+509 3811 2244', balance: 10000, verified: true, clientId: 'BP-100234' };
@@ -200,6 +217,10 @@ const T = {
     navHome: 'Akèy', navHistory: 'Istwa', navTransfer: 'Transfè', navSettings: 'Paramèt',
     tileDeposit: 'Depoze', tileWithdraw: 'Retrè', tileTransfer: 'Transfere',
     tileSol: 'BLIC Sòl', tileDepo: 'BLIC Depo', tileGoal: 'Depo Ak Objektif', tileLoan: 'Prè',
+    lp_mockBalance: 'SOLDE KONT', lp_mockQuickAccess: 'AKSÈ RAPID', lp_mockGoalShort: 'Objektif',
+    lp_mockRecentActivity: 'AKTIVITE RESAN', lp_mockDepositMoncash: 'Depo MonCash', lp_mockSolContribution: 'Kotizasyon Sòl Basic #3',
+    lp_mockWeeklyDesc: 'Chak semenn · 1,000 HTG pa moun', lp_mockBiweeklyDesc: 'Chak 15 jou · 2,500 HTG', lp_mockRequestJoin: 'Mande antre',
+    lp_cardTagline: '| GLOBAL | SEKIRIZE | DIJITAL |', lp_cardHolder: 'KLIYAN BLICPAY',
     recentTx: 'TRANZAKSYON REZAN',
     loginTab: 'Konekte', registerTab: 'Kreye kont',
     fullNamePh: 'Non konplè', phonePh: 'Nimewo telefòn', passwordPh: 'Modpas',
@@ -267,6 +288,12 @@ const T = {
     lp_reachStat4: '3', lp_reachLabel4: 'lang disponib',
     lp_testiEyebrow: 'TEMWAYAJ', lp_testiTitle: 'Bati pou grandi, *pwouve pa kliyan*.',
     lp_testiQuote: '[Kòmantè kliyan an ap parèt isit la]', lp_testiName: '[Non Kliyan]', lp_testiRole: 'Kliyan BLICPay',
+    lp_testi1Name: 'Pierre', lp_testi1Role: 'Kliyan BLICPay', lp_testi1Quote: 'M ap tann kat entènasyonal BLICPay a ak tout kè m — aplikasyon an deja fasilite lavi m anpil.',
+    lp_testi2Name: 'Joseph', lp_testi2Role: 'Kliyan BLICPay', lp_testi2Quote: 'Mwen renmen aplikasyon BLICPay a — li senp e li rapid.',
+    lp_testi3Name: 'Louidor', lp_testi3Role: 'Kliyan BLICPay', lp_testi3Quote: 'Yon aplikasyon m renmen anpil, li fè tout bagay pi fasil pou mwen.',
+    lp_testi4Name: 'Julienne', lp_testi4Role: 'Kliyan BLICPay', lp_testi4Quote: 'BLIC Depo ede m mete lajan an kote pou objektif mwen yo — mwen renmen sa anpil.',
+    lp_testi5Name: 'Martha', lp_testi5Role: 'Kliyan BLICPay', lp_testi5Quote: 'Mwen renmen fason gwoup Sòl yo fonksyone sou BLICPay — li fasil pou swiv.',
+    lp_testi6Name: 'Salomon', lp_testi6Role: 'Kliyan BLICPay', lp_testi6Quote: 'Mwen renmen konsèp BLICPay a anpil.',
     lp_secEyebrow: 'SEKIRITE', lp_secTitle: 'Sekirize e fyab, *chak etap*.', lp_secSub: 'Nou pran pwoteksyon kont ou oserye, ak plizyè kouch verifikasyon pou chak aksyon ki enplike lajan.',
     lp_sec1t: 'Modpas Chifre', lp_sec1d: 'Chak kont pwoteje ak yon sistèm chifreman modèn.',
     lp_sec2t: 'Verifikasyon KYC', lp_sec2d: 'Idantite verifye pou plis limit ak sekirite.',
@@ -299,6 +326,10 @@ const T = {
     navHome: 'Accueil', navHistory: 'Historique', navTransfer: 'Transfert', navSettings: 'Paramètres',
     tileDeposit: 'Dépôt', tileWithdraw: 'Retrait', tileTransfer: 'Transfert',
     tileSol: 'BLIC Sòl', tileDepo: 'BLIC Dépo', tileGoal: 'Dépôt Objectif', tileLoan: 'Prêt',
+    lp_mockBalance: 'SOLDE DU COMPTE', lp_mockQuickAccess: 'ACCÈS RAPIDE', lp_mockGoalShort: 'Objectif',
+    lp_mockRecentActivity: 'ACTIVITÉ RÉCENTE', lp_mockDepositMoncash: 'Dépôt MonCash', lp_mockSolContribution: 'Cotisation Sòl Basic #3',
+    lp_mockWeeklyDesc: 'Chaque semaine · 1 000 HTG par personne', lp_mockBiweeklyDesc: 'Tous les 15 jours · 2 500 HTG', lp_mockRequestJoin: 'Demander à rejoindre',
+    lp_cardTagline: '| GLOBAL | SÉCURISÉ | DIGITAL |', lp_cardHolder: 'CLIENT BLICPAY',
     recentTx: 'TRANSACTIONS RÉCENTES',
     loginTab: 'Connexion', registerTab: 'Créer un compte',
     fullNamePh: 'Nom complet', phonePh: 'Numéro de téléphone', passwordPh: 'Mot de passe',
@@ -366,6 +397,12 @@ const T = {
     lp_reachStat4: '3', lp_reachLabel4: 'langues disponibles',
     lp_testiEyebrow: 'TÉMOIGNAGES', lp_testiTitle: 'Conçu pour grandir, *approuvé par nos clients*.',
     lp_testiQuote: '[Le commentaire du client apparaîtra ici]', lp_testiName: '[Nom du client]', lp_testiRole: 'Client BLICPay',
+    lp_testi1Name: 'Pierre', lp_testi1Role: 'Client BLICPay', lp_testi1Quote: "J'ai vraiment hâte de recevoir la carte internationale BLICPay ! L'application me facilite déjà beaucoup la vie.",
+    lp_testi2Name: 'Joseph', lp_testi2Role: 'Client BLICPay', lp_testi2Quote: "J'adore l'application BLICPay — simple et rapide.",
+    lp_testi3Name: 'Louidor', lp_testi3Role: 'Client BLICPay', lp_testi3Quote: "Une application que j'apprécie beaucoup, elle me simplifie vraiment la vie.",
+    lp_testi4Name: 'Julienne', lp_testi4Role: 'Client BLICPay', lp_testi4Quote: "BLIC Depo m'aide à mettre de l'argent de côté pour mes objectifs — j'adore cette fonctionnalité.",
+    lp_testi5Name: 'Martha', lp_testi5Role: 'Client BLICPay', lp_testi5Quote: "J'aime beaucoup le fonctionnement des groupes Sòl sur BLICPay — c'est facile à suivre.",
+    lp_testi6Name: 'Salomon', lp_testi6Role: 'Client BLICPay', lp_testi6Quote: "J'aime beaucoup le concept de BLICPay.",
     lp_secEyebrow: 'SÉCURITÉ', lp_secTitle: 'Sécurisé et fiable, *à chaque étape*.', lp_secSub: 'Nous prenons la protection de votre compte au sérieux, avec plusieurs niveaux de vérification pour chaque action impliquant de l\'argent.',
     lp_sec1t: 'Mot de passe chiffré', lp_sec1d: 'Chaque compte est protégé par un système de chiffrement moderne.',
     lp_sec2t: 'Vérification KYC', lp_sec2d: 'Identité vérifiée pour plus de limites et de sécurité.',
@@ -398,6 +435,10 @@ const T = {
     navHome: 'Home', navHistory: 'History', navTransfer: 'Transfer', navSettings: 'Settings',
     tileDeposit: 'Deposit', tileWithdraw: 'Withdraw', tileTransfer: 'Transfer',
     tileSol: 'BLIC Sòl', tileDepo: 'BLIC Depo', tileGoal: 'Goal Deposit', tileLoan: 'Loan',
+    lp_mockBalance: 'ACCOUNT BALANCE', lp_mockQuickAccess: 'QUICK ACCESS', lp_mockGoalShort: 'Goal',
+    lp_mockRecentActivity: 'RECENT ACTIVITY', lp_mockDepositMoncash: 'MonCash deposit', lp_mockSolContribution: 'Sòl Basic #3 contribution',
+    lp_mockWeeklyDesc: 'Weekly · 1,000 HTG per person', lp_mockBiweeklyDesc: 'Every 15 days · 2,500 HTG', lp_mockRequestJoin: 'Request to join',
+    lp_cardTagline: '| GLOBAL | SECURE | DIGITAL |', lp_cardHolder: 'BLICPAY CUSTOMER',
     recentTx: 'RECENT TRANSACTIONS',
     loginTab: 'Log In', registerTab: 'Sign Up',
     fullNamePh: 'Full name', phonePh: 'Phone number', passwordPh: 'Password',
@@ -465,6 +506,12 @@ const T = {
     lp_reachStat4: '3', lp_reachLabel4: 'languages available',
     lp_testiEyebrow: 'TESTIMONIALS', lp_testiTitle: 'Built to grow, *proven by customers*.',
     lp_testiQuote: '[Customer comment will appear here]', lp_testiName: '[Customer Name]', lp_testiRole: 'BLICPay Customer',
+    lp_testi1Name: 'Pierre', lp_testi1Role: 'BLICPay Customer', lp_testi1Quote: "I can't wait to get my hands on the BLICPay international card — the app already makes my life so much easier.",
+    lp_testi2Name: 'Joseph', lp_testi2Role: 'BLICPay Customer', lp_testi2Quote: 'I love the BLICPay app — simple and fast.',
+    lp_testi3Name: 'Louidor', lp_testi3Role: 'BLICPay Customer', lp_testi3Quote: 'An app I really enjoy using, it makes everything so much easier.',
+    lp_testi4Name: 'Julienne', lp_testi4Role: 'BLICPay Customer', lp_testi4Quote: 'BLIC Depo helps me set money aside for my goals — I love this feature.',
+    lp_testi5Name: 'Martha', lp_testi5Role: 'BLICPay Customer', lp_testi5Quote: 'I really like how the Sòl groups work on BLICPay — easy to keep track of.',
+    lp_testi6Name: 'Salomon', lp_testi6Role: 'BLICPay Customer', lp_testi6Quote: 'I really like the concept behind BLICPay.',
     lp_secEyebrow: 'SECURITY', lp_secTitle: 'Secure and reliable, *every step*.', lp_secSub: 'We take protecting your account seriously, with multiple layers of verification for every money-related action.',
     lp_sec1t: 'Encrypted Password', lp_sec1d: 'Every account is protected with modern encryption.',
     lp_sec2t: 'KYC Verification', lp_sec2d: 'Verified identity for higher limits and more security.',
@@ -1016,22 +1063,22 @@ function LandingPage({ onStart, lang, setLang, tr }) {
             <div className="p-5 md:p-6 grid md:grid-cols-2 gap-5" style={{ background: C.bg }}>
               {/* wallet card */}
               <div className="rounded-2xl p-5" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.75)' }}>SOLDE KONT</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.75)' }}>{tr('lp_mockBalance')}</p>
                 <p style={{ ...fontDisplay, fontWeight: 800, fontSize: 26, color: '#fff', marginTop: 4 }}>45,200 HTG</p>
                 <div className="mt-4 flex gap-2">
-                  <span className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>Depo</span>
-                  <span className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>Retrè</span>
+                  <span className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>{tr('tileDeposit')}</span>
+                  <span className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>{tr('tileWithdraw')}</span>
                 </div>
               </div>
               {/* quick links */}
               <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <p className="text-xs font-bold" style={{ color: C.muted }}>AKSÈ RAPID</p>
+                <p className="text-xs font-bold" style={{ color: C.muted }}>{tr('lp_mockQuickAccess')}</p>
                 <div className="mt-3 grid grid-cols-4 gap-3">
                   {[
-                    { icon: ArrowLeftRight, label: 'Transfè', fillable: false },
+                    { icon: ArrowLeftRight, label: tr('tileTransfer'), fillable: false },
                     { icon: Users, label: 'Sòl', fillable: true },
-                    { icon: PiggyBank, label: 'Objektif', fillable: true },
-                    { icon: HandCoins, label: 'Prè', fillable: true },
+                    { icon: PiggyBank, label: tr('lp_mockGoalShort'), fillable: true },
+                    { icon: HandCoins, label: tr('tileLoan'), fillable: true },
                   ].map((a) => (
                     <div key={a.label} className="flex flex-col items-center gap-1.5">
                       <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E6F0FB' }}>
@@ -1044,9 +1091,9 @@ function LandingPage({ onStart, lang, setLang, tr }) {
               </div>
               {/* recent activity */}
               <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <p className="text-xs font-bold" style={{ color: C.muted }}>AKTIVITE RESAN</p>
+                <p className="text-xs font-bold" style={{ color: C.muted }}>{tr('lp_mockRecentActivity')}</p>
                 <div className="mt-3 space-y-2">
-                  {[{ n: 'Depo MonCash', a: '+2,500 HTG', pos: true }, { n: 'Kotizasyon Sòl Basic #3', a: '−1,000 HTG', pos: false }].map((t) => (
+                  {[{ n: tr('lp_mockDepositMoncash'), a: '+2,500 HTG', pos: true }, { n: tr('lp_mockSolContribution'), a: '−1,000 HTG', pos: false }].map((t) => (
                     <div key={t.n} className="flex items-center justify-between px-3 py-2.5 rounded-lg" style={{ background: C.bg }}>
                       <span className="text-xs font-medium">{t.n}</span>
                       <span className="text-xs font-semibold" style={{ color: t.pos ? C.mint : C.ink }}>{t.a}</span>
@@ -1068,7 +1115,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
                   <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: C.border }}>
                     <div style={{ width: '70%', height: '100%', background: `linear-gradient(90deg, ${C.navy}, ${C.sky})` }} />
                   </div>
-                  <p className="mt-2 text-[10px]" style={{ color: C.muted }}>Chak semenn · 1,000 HTG pa moun</p>
+                  <p className="mt-2 text-[10px]" style={{ color: C.muted }}>{tr('lp_mockWeeklyDesc')}</p>
                 </div>
               </div>
               {/* Upcoming card feature — closely matches the reference layout, Mastercard-style mark blurred */}
@@ -1104,7 +1151,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
                       </div>
                       <div className="pt-0.5">
                         <p style={{ ...fontDisplay, fontWeight: 800, fontSize: 17, color: '#fff', lineHeight: 1 }}>BLIC<span style={{ fontStyle: 'italic' }}>Pay</span></p>
-                        <p className="mt-1" style={{ fontSize: 7, color: 'rgba(255,255,255,0.8)', letterSpacing: 0.8 }}>| GLOBAL | SEKIRIZE | DIJITAL |</p>
+                        <p className="mt-1" style={{ fontSize: 7, color: 'rgba(255,255,255,0.8)', letterSpacing: 0.8 }}>{tr('lp_cardTagline')}</p>
                       </div>
                     </div>
 
@@ -1119,7 +1166,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
                           <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.75)' }}>EXRID</span>
                           <span style={{ fontSize: 11, color: '#fff', fontFamily: 'monospace' }}>12/99</span>
                         </p>
-                        <p className="mt-1" style={{ fontSize: 10, color: '#fff', letterSpacing: 0.5 }}>KLIYAN BLICPAY</p>
+                        <p className="mt-1" style={{ fontSize: 10, color: '#fff', letterSpacing: 0.5 }}>{tr('lp_cardHolder')}</p>
                       </div>
                       {/* Mastercard-style dual-circle mark, deliberately blurred to avoid reproducing the trademark clearly */}
                       <div className="text-right">
@@ -1246,9 +1293,9 @@ function LandingPage({ onStart, lang, setLang, tr }) {
                     <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.25)' }}>
                       <div style={{ width: '60%', height: '100%', background: '#fff' }} />
                     </div>
-                    <p className="mt-2 text-[10px]" style={{ color: 'rgba(255,255,255,0.8)' }}>Chak 15 jou · 2,500 HTG</p>
+                    <p className="mt-2 text-[10px]" style={{ color: 'rgba(255,255,255,0.8)' }}>{tr('lp_mockBiweeklyDesc')}</p>
                   </div>
-                  <button className="mt-3 w-full py-2.5 rounded-xl text-xs font-bold text-white" style={{ background: C.mint }}>Mande antre</button>
+                  <button className="mt-3 w-full py-2.5 rounded-xl text-xs font-bold text-white" style={{ background: C.mint }}>{tr('lp_mockRequestJoin')}</button>
                 </div>
               </div>
             </div>
@@ -1399,28 +1446,32 @@ function LandingPage({ onStart, lang, setLang, tr }) {
         </Reveal>
         <div className="mt-10 lp-masonry">
           {[
-            { tint: '#FBF0F2' }, { tint: '#EFF7F0' }, { tint: '#F4F6FA' },
-            { tint: '#F4F6FA' }, { tint: '#FBF3EA' }, { tint: '#F4F6FA' },
-          ].map((s, i) => (
-            <Reveal key={i} delay={(i % 3) * 100} className="lp-masonry-item">
-              <div className="p-6 rounded-2xl flex flex-col" style={{ background: s.tint }}>
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(255,255,255,0.7)', color: C.navy }}>?</div>
-                  <span className="text-sm font-bold" style={{ color: C.muted }}>{tr('lp_testiName')}</span>
-                </div>
-                <p className="text-sm leading-relaxed flex-1" style={{ color: C.ink }}>"{tr('lp_testiQuote')}"</p>
-                <div className="mt-5 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold">{tr('lp_testiName')}</p>
-                    <p className="text-[11px]" style={{ color: C.muted }}>{tr('lp_testiRole')}</p>
+            { n: 1, tint: '#FBF0F2' }, { n: 2, tint: '#EFF7F0' }, { n: 3, tint: '#F4F6FA' },
+            { n: 4, tint: '#FBF3EA' }, { n: 5, tint: '#F4F6FA' }, { n: 6, tint: '#EFF0FB' },
+          ].map((s, i) => {
+            const name = tr(`lp_testi${s.n}Name`);
+            const initials = name.slice(0, 2).toUpperCase();
+            return (
+              <Reveal key={i} delay={(i % 3) * 100} className="lp-masonry-item">
+                <div className="p-6 rounded-2xl flex flex-col" style={{ background: s.tint }}>
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(255,255,255,0.7)', color: C.navy }}>{initials}</div>
+                    <span className="text-sm font-bold" style={{ color: C.muted }}>{name}</span>
                   </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: '#fff' }}>
-                    <Star size={11} color={C.amber} fill={C.amber} /> 5.0
-                  </span>
+                  <p className="text-sm leading-relaxed flex-1" style={{ color: C.ink }}>"{tr(`lp_testi${s.n}Quote`)}"</p>
+                  <div className="mt-5 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold">{name}</p>
+                      <p className="text-[11px]" style={{ color: C.muted }}>{tr(`lp_testi${s.n}Role`)}</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: '#fff' }}>
+                      <Star size={11} color={C.amber} fill={C.amber} /> 5.0
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </Reveal>
-          ))}
+              </Reveal>
+            );
+          })}
         </div>
       </div>
       </div>
@@ -1562,6 +1613,14 @@ export default function BlicPayApp() {
   const [lang, setLang] = useState('ht');
   const [showLangPicker, setShowLangPicker] = useState(false);
   const tr = (key) => T[lang]?.[key] ?? T.ht[key] ?? key;
+  const [appOpenFaq, setAppOpenFaq] = useState(null); // akòdeyon FAQ nan Sipò — apa de openFaq nan LandingPage
+  const APP_FAQS = [
+    { q: tr('lp_q1'), a: tr('lp_a1') },
+    { q: tr('lp_q2'), a: tr('lp_a2') },
+    { q: tr('lp_q3'), a: tr('lp_a3') },
+    { q: tr('lp_q4'), a: tr('lp_a4') },
+    { q: tr('lp_q5'), a: tr('lp_a5') },
+  ];
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
   const [authForm, setAuthForm] = useState({
     lastName: '', firstName: '', phone: '', email: '',
@@ -1612,6 +1671,7 @@ export default function BlicPayApp() {
   const [historyStatusFilter, setHistoryStatusFilter] = useState('all');
   const [historyDateFrom, setHistoryDateFrom] = useState('');
   const [historyDateTo, setHistoryDateTo] = useState('');
+  const [historyVisibleCount, setHistoryVisibleCount] = useState(10); // pajinasyon: 10 tranzaksyon alafwa
   const [kycSubmitting, setKycSubmitting] = useState(false);
   const [balance, setBalance] = useState(0);
   const [hideBalance, setHideBalance] = useState(true);
@@ -1644,6 +1704,12 @@ export default function BlicPayApp() {
     }, 4500);
     return () => clearInterval(timer);
   }, []);
+
+  // Retabli pajinasyon an a 10 chak fwa yon filt chanje — san sa, yon lis 10
+  // ta ka rete parèt apre yon rechèch ki gen mwens rezilta pase sa.
+  React.useEffect(() => {
+    setHistoryVisibleCount(10);
+  }, [historyFilter, historyQuery, historyStatusFilter, historyDateFrom, historyDateTo]);
 
   // Restore sesyon an si li te sove (localStorage) — sa nesesè paske
   // verifikasyon Didit fè navigatè a kite sit la epi retounen, sa ta dekonekte
@@ -2700,12 +2766,19 @@ export default function BlicPayApp() {
       return;
     }
     setSupportSending(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setSupportSending(false);
-    setSupportSent(true);
-    setSupportSubject('');
-    setSupportMessage('');
-    flash(tr('supportSentMsg'));
+    try {
+      await apiFetch('/support', {
+        method: 'POST', token, body: { subject: supportSubject, message: supportMessage.trim() },
+      });
+      setSupportSent(true);
+      setSupportSubject('');
+      setSupportMessage('');
+      flash(tr('supportSentMsg'));
+    } catch (err) {
+      flash(err.message || 'Nou pa t ka voye mesaj ou a.', 'error');
+    } finally {
+      setSupportSending(false);
+    }
   }
 
   async function sendResetCode() {
@@ -3445,7 +3518,7 @@ export default function BlicPayApp() {
                     <RefreshCw size={13} color="#fff" style={refreshing ? { animation: 'spin 0.8s linear infinite' } : undefined} />
                   </button>
                 </div>
-                <p className="mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>{tr('accountLabel')} · •••• 8455</p>
+                <p className="mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>{tr('accountLabel')} · •••• {getClientId(user).slice(-4)}</p>
                 <div className="mt-4 flex gap-2.5">
                   <button onClick={startDeposit} className="bp-btn flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold"
                     style={{ background: '#fff', color: C.navy }}>
@@ -3610,23 +3683,50 @@ export default function BlicPayApp() {
               ))}
             </div>
 
-            {/* transactions */}
+            {/* transactions — sèlman 5 pi resan yo, "Wè tout" mennen nan
+                istorik konplè a ki gen pwòp pajinasyon 10 pa 10 */}
             <div className="mt-7 flex items-center justify-between">
               <h3 className="font-semibold text-sm" style={{ color: C.muted }}>{tr('recentTx')}</h3>
-              <Clock size={14} color={C.muted} />
+              {tx.length > 5 ? (
+                <button onClick={() => setView('history')} className="text-xs font-semibold" style={{ color: C.navy }}>
+                  Wè tout
+                </button>
+              ) : (
+                <Clock size={14} color={C.muted} />
+              )}
             </div>
             <div className="mt-3 rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
               {tx.length === 0 && (
                 <p className="text-sm p-5" style={{ color: C.muted, background: C.card }}>{tr('noTx')}</p>
               )}
-              {tx.map((t, i) => {
+              {tx.slice(0, 5).map((t, i) => {
                 const isOutgoing = t.type === 'retrè' || t.type === 'transfè';
+                const logo = getMethodLogo(t.method);
                 return (
                   <div key={t.id} className="flex items-center justify-between px-4 py-3.5"
                     style={{ background: C.card, borderTop: i ? `1px solid ${C.border}` : 'none' }}>
-                    <div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden"
+                        style={{ background: logo ? C.bg : t.type === 'transfè' ? '#E6F0FB' : isOutgoing ? '#FBEAEA' : '#E4F5EF' }}>
+                        {logo ? (
+                          <img src={logo} alt={t.method} className="w-full h-full object-cover" />
+                        ) : t.type === 'transfè' ? (
+                          <ArrowLeftRight size={15} color={C.navy} />
+                        ) : isOutgoing ? (
+                          <ArrowUpRight size={15} color={C.danger} />
+                        ) : (
+                          <ArrowDownLeft size={15} color={C.mint} />
+                        )}
+                      </div>
+                      <div>
                       <p className="text-sm font-semibold">{t.method}</p>
-                      <p className="text-xs mt-0.5" style={{ color: C.muted }}>{t.date}</p>
+                      <p className="text-xs mt-0.5" style={{ color: C.muted }}>
+                        {t.date}
+                        {TX_TYPE_LABELS[t.type] && (
+                          <> · <span style={{ color: TX_TYPE_LABELS[t.type].color, fontWeight: 600 }}>{TX_TYPE_LABELS[t.type].label}</span></>
+                        )}
+                      </p>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2.5">
                       <span className="text-sm" style={{ ...fontMono, color: isOutgoing ? C.danger : C.ink }}>
@@ -4893,7 +4993,7 @@ export default function BlicPayApp() {
                 </div>
                 <ChevronRight size={15} color={C.muted} />
               </button>
-              <button onClick={() => flash('Fonksyon sa a ap vini.')}
+              <button onClick={() => { setAppOpenFaq(null); setView('faq'); }}
                 className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
                 <div className="flex items-center gap-2.5">
                   <AlertCircle size={16} color={C.muted} />
@@ -5021,36 +5121,25 @@ export default function BlicPayApp() {
             <p className="mt-1.5 text-sm" style={{ color: C.muted }}>{tr('supportSubtitle')}</p>
 
             <div className="mt-5 space-y-2.5">
-              <a href="tel:+50928000000"
+              <a href="tel:+13073460474"
                 className="bp-btn w-full flex items-center gap-3 p-3.5 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                 <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: '#E6F0FB' }}>
                   <Phone size={17} color={C.navy} />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold">{tr('callUs')}</p>
-                  <p className="text-xs mt-0.5" style={{ color: C.muted }}>+509 2800 0000</p>
+                  <p className="text-xs mt-0.5" style={{ color: C.muted }}>+1 307 346 0474</p>
                 </div>
                 <ChevronRight size={16} color={C.muted} />
               </a>
-              <a href="https://wa.me/50928000000" target="_blank" rel="noopener noreferrer"
+              <a href="https://wa.me/13073460474" target="_blank" rel="noopener noreferrer"
                 className="bp-btn w-full flex items-center gap-3 p-3.5 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                 <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: '#E4F5EF' }}>
                   <Smartphone size={17} color={C.mint} />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold">{tr('chatWhatsapp')}</p>
-                  <p className="text-xs mt-0.5" style={{ color: C.muted }}>+509 2800 0000</p>
-                </div>
-                <ChevronRight size={16} color={C.muted} />
-              </a>
-              <a href="mailto:sipò@blicpay.com"
-                className="bp-btn w-full flex items-center gap-3 p-3.5 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: '#F4EBFF' }}>
-                  <Mail size={17} color="#6D3FD1" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">{tr('emailUs')}</p>
-                  <p className="text-xs mt-0.5" style={{ color: C.muted }}>sipò@blicpay.com</p>
+                  <p className="text-xs mt-0.5" style={{ color: C.muted }}>+1 307 346 0474</p>
                 </div>
                 <ChevronRight size={16} color={C.muted} />
               </a>
@@ -5086,6 +5175,36 @@ export default function BlicPayApp() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {view === 'faq' && (
+          <div className="fadein px-5 pb-10 pt-2">
+            <button onClick={() => setView('settings')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
+              <ArrowLeft size={15} /> {tr('back')}
+            </button>
+            <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{tr('faq')}</h2>
+
+            <div className="mt-5 space-y-2.5">
+              {APP_FAQS.map((f, i) => (
+                <div key={i} className="rounded-xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                  <button onClick={() => setAppOpenFaq(appOpenFaq === i ? null : i)} className="w-full flex items-center justify-between px-4 py-3.5 text-left">
+                    <span className="text-sm font-semibold">{f.q}</span>
+                    <ChevronRight size={15} color={C.muted} style={{ transform: appOpenFaq === i ? 'rotate(90deg)' : 'none', transition: 'transform .25s ease' }} />
+                  </button>
+                  {appOpenFaq === i && (
+                    <p className="px-4 pb-3.5 text-sm" style={{ color: C.muted }}>{f.a}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-6 text-xs text-center" style={{ color: C.muted }}>
+              {lang === 'fr' ? 'Vous ne trouvez pas votre réponse ?' : lang === 'en' ? "Can't find your answer?" : 'Ou pa jwenn repons ou?'}{' '}
+              <button onClick={() => { setSupportSent(false); setView('support'); }} className="font-semibold underline" style={{ color: C.navy }}>
+                {tr('contactSupport')}
+              </button>
+            </p>
           </div>
         )}
 
@@ -5181,19 +5300,33 @@ export default function BlicPayApp() {
               <div className="mt-4 rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
                 {filtered.length === 0 ? (
                   <p className="text-sm p-5" style={{ color: C.muted, background: C.card }}>{tr('noResults')}</p>
-                ) : filtered.map((t, i) => {
+                ) : filtered.slice(0, historyVisibleCount).map((t, i) => {
                   const outgoing = t.type === 'retrè' || t.type === 'transfè';
+                  const logo = getMethodLogo(t.method);
                   return (
                     <div key={t.id} className="flex items-center justify-between px-4 py-3.5"
                       style={{ background: C.card, borderTop: i ? `1px solid ${C.border}` : 'none' }}>
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                          style={{ background: outgoing ? '#FBEAEA' : '#E4F5EF' }}>
-                          {outgoing ? <ArrowUpRight size={15} color={C.danger} /> : <ArrowDownLeft size={15} color={C.mint} />}
+                        <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden"
+                          style={{ background: logo ? C.bg : t.type === 'transfè' ? '#E6F0FB' : outgoing ? '#FBEAEA' : '#E4F5EF' }}>
+                          {logo ? (
+                            <img src={logo} alt={t.method} className="w-full h-full object-cover" />
+                          ) : t.type === 'transfè' ? (
+                            <ArrowLeftRight size={15} color={C.navy} />
+                          ) : outgoing ? (
+                            <ArrowUpRight size={15} color={C.danger} />
+                          ) : (
+                            <ArrowDownLeft size={15} color={C.mint} />
+                          )}
                         </div>
                         <div>
                           <p className="text-sm font-semibold">{t.method}</p>
-                          <p className="text-xs mt-0.5" style={{ color: C.muted }}>{t.date}</p>
+                          <p className="text-xs mt-0.5" style={{ color: C.muted }}>
+                            {t.date}
+                            {TX_TYPE_LABELS[t.type] && (
+                              <> · <span style={{ color: TX_TYPE_LABELS[t.type].color, fontWeight: 600 }}>{TX_TYPE_LABELS[t.type].label}</span></>
+                            )}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5">
@@ -5208,6 +5341,14 @@ export default function BlicPayApp() {
                   );
                 })}
               </div>
+
+              {filtered.length > historyVisibleCount && (
+                <button onClick={() => setHistoryVisibleCount((n) => n + 10)}
+                  className="mt-3 w-full py-3 rounded-xl text-sm font-semibold"
+                  style={{ background: C.card, border: `1px solid ${C.border}`, color: C.navy }}>
+                  Wè 10 lòt ({filtered.length - historyVisibleCount} rete)
+                </button>
+              )}
             </div>
           );
         })()}
