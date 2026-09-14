@@ -1566,8 +1566,7 @@ export default function BlicPayApp() {
   const [authLoading, setAuthLoading] = useState(false);
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
-  const [kycStatus, setKycStatus] = useState('pa verifye'); // estati DÈNYE demand la : 'pa verifye' | 'annatant' | 'verifye'
-  const [accountVerified, setAccountVerified] = useState(false); // badge PÈMANAN kont lan (User.verified) — pa depann de dènye demand lan
+  const [kycStatus, setKycStatus] = useState('pa verifye'); // 'pa verifye' | 'annatant' | 'verifye'
   const [kycDocType, setKycDocType] = useState('paspò');
   const [kycStep, setKycStep] = useState('entwo'); // 'entwo' | 'fòm' — montre egzanp anvan telechajman
   const [kycFile, setKycFile] = useState(null);
@@ -1709,6 +1708,8 @@ export default function BlicPayApp() {
   const [biwoBranches, setBiwoBranches] = useState([]);
   const [loadingBiwoBranches, setLoadingBiwoBranches] = useState(false);
   const [selectedBiwoBranch, setSelectedBiwoBranch] = useState('');
+  const [destinationNumberScreen, setDestinationNumberScreen] = useState(false);
+  const [destinationNumber, setDestinationNumber] = useState('');
   const [viewingSolDocument, setViewingSolDocument] = useState(null);
   const [solFreqFilter, setSolFreqFilter] = useState('semenn');
   const [solTierFilter, setSolTierFilter] = useState('basic');
@@ -1945,6 +1946,17 @@ export default function BlicPayApp() {
       return;
     }
 
+    if (flowKind === 'withdraw' && (m.id === 'moncash' || m.id === 'natcash')) {
+      if (Number(amount) > balance) {
+        flash('Ou pa gen ase lajan pou retrè sa a.');
+        return;
+      }
+      setSelectedMethod(m);
+      setDestinationNumber('');
+      setDestinationNumberScreen(true);
+      return;
+    }
+
     if (flowKind === 'withdraw') {
       if (Number(amount) > balance) {
         flash('Ou pa gen ase lajan pou retrè sa a.');
@@ -2025,6 +2037,28 @@ export default function BlicPayApp() {
 
   // Kliyan an fin chwazi siikisal la — kontinye selon si se yon depo (kreye
   // demand lan tousuit) oswa yon retrè (montre ekran PIN ak frè a).
+  // Kliyan an fin bay nimewo kote pou voye lajan an — kontinye nan ekran PIN
+  // an, tankou yon retrè nòmal, men ak nimewo a anrejistre pou admin/ajan an.
+  async function confirmDestinationNumber() {
+    if (!destinationNumber.trim()) {
+      flash('Antre nimewo a.');
+      return;
+    }
+    setProcessing(true);
+    try {
+      const { fee } = await apiFetch(`/withdrawals/fee-preview?amount=${Number(amount)}`, { token });
+      setPendingWithdraw({ amount: Number(amount), method: selectedMethod, fee, destinationNumber: destinationNumber.trim() });
+      setPinDigits('');
+      setPinError(null);
+      setDestinationNumberScreen(false);
+      setPinScreen(hasPin ? 'withdraw' : 'setup');
+    } catch (err) {
+      flash(err.message || 'Nou pa t ka kalkile frè a.', 'error');
+    } finally {
+      setProcessing(false);
+    }
+  }
+
   async function confirmBiwoBranch() {
     if (!selectedBiwoBranch) {
       flash('Chwazi yon siikisal.');
@@ -2168,7 +2202,7 @@ export default function BlicPayApp() {
         const { withdrawal } = await apiFetch('/withdrawals', {
           method: 'POST',
           token,
-          body: { amount: pendingWithdraw.amount, method: pendingWithdraw.method.id, pin, branch: pendingWithdraw.branch },
+          body: { amount: pendingWithdraw.amount, method: pendingWithdraw.method.id, pin, branch: pendingWithdraw.branch, destinationNumber: pendingWithdraw.destinationNumber },
         });
         setReference(withdrawal.reference);
         setBalance((b) => b - withdrawal.amount - (withdrawal.fee || 0));
@@ -2721,11 +2755,12 @@ export default function BlicPayApp() {
   async function loadKycStatusSilently(tok) {
     try {
       const data = await apiFetch('/kyc/didit/status', { token: tok });
+      if (data.verified) {
+        setKycStatus('verifye');
+        return;
+      }
       const s = data.verification?.status;
-      setKycStatus(s === 'approved' ? 'verifye' : s === 'pending' ? 'annatant' : 'pa verifye');
-      // "verified" a soti nan kont lan (badge PÈMANAN) — pa mele l ak estati
-      // dènye demand lan, ki ka retounen 'annatant' menm apre yon kont deja apwouve.
-      setAccountVerified(!!data.verified);
+      setKycStatus(s === 'pending' ? 'annatant' : 'pa verifye');
     } catch (e) {
       console.error('KYC status load error:', e);
       // Kite estati a jan li te ye a olye fè kliyan an panse li bezwen resoumèt.
@@ -2775,9 +2810,8 @@ export default function BlicPayApp() {
     try {
       const data = await apiFetch('/kyc/didit/status', { token });
       const s = data.verification?.status;
-      setKycStatus(s === 'approved' ? 'verifye' : s === 'pending' ? 'annatant' : 'pa verifye');
-      setAccountVerified(!!data.verified);
-      if (s === 'approved') flash('Kont ou verifye kounye a.');
+      setKycStatus(data.verified ? 'verifye' : s === 'pending' ? 'annatant' : 'pa verifye');
+      if (data.verified) flash('Kont ou verifye kounye a.');
       else if (s === 'rejected') flash(data.verification?.rejectionReason || 'Demand verifikasyon w refize — eseye ankò.', 'error');
       else flash('Pa gen chanjman.', 'info');
     } catch (e) {
@@ -3300,11 +3334,13 @@ export default function BlicPayApp() {
             <p className="text-sm mt-2" style={{ color: C.muted }}>{tr('welcome')}</p>
             <div className="flex items-center gap-1.5">
               <h1 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{user?.fullName || '...'}</h1>
-              {accountVerified ? (
+              {kycStatus === 'verifye' && (
                 <span title="Kont verifye (KYC)"><BadgeCheck size={19} color={C.sky} fill={C.navy} /></span>
-              ) : kycStatus === 'annatant' ? (
+              )}
+              {kycStatus === 'annatant' && (
                 <Badge tone="amber">Annatant</Badge>
-              ) : (
+              )}
+              {kycStatus === 'pa verifye' && (
                 <button onClick={() => { setKycStep('entwo'); setView('kyc'); }} className="text-xs font-semibold underline" style={{ color: C.navy }}>
                   Verifye kont ou
                 </button>
@@ -3414,9 +3450,8 @@ export default function BlicPayApp() {
               </button>
             </div>
 
-            {/* kyc banner — baze sou accountVerified (pa kycStatus) pou l pa parèt
-                ankò pou yon kliyan deja verifye ki ta relanse yon nouvo demand */}
-            {!accountVerified && (
+            {/* kyc banner */}
+            {kycStatus !== 'verifye' && (
               <div className="mt-4 p-4 rounded-xl flex items-center gap-3" style={{ background: '#FBF0DE', border: `1px solid #F0D9A8` }}>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#F0D9A8' }}>
                   <ShieldCheck size={16} color="#946115" />
@@ -4641,7 +4676,7 @@ export default function BlicPayApp() {
               <div className="flex-1">
                 <div className="flex items-center gap-1.5">
                   <p className="text-sm font-semibold">{user?.fullName}</p>
-                  {accountVerified && <BadgeCheck size={15} color={C.sky} fill={C.navy} />}
+                  {kycStatus === 'verifye' && <BadgeCheck size={15} color={C.sky} fill={C.navy} />}
                 </div>
                 <p className="text-xs mt-0.5" style={{ color: C.muted }}>{user?.phone}</p>
                 <button onClick={() => { navigator.clipboard?.writeText(getClientId(user)); flash('ID kopye.'); }}
@@ -4650,8 +4685,8 @@ export default function BlicPayApp() {
                   <Copy size={11} />
                 </button>
               </div>
-              <Badge tone={accountVerified ? 'mint' : kycStatus === 'annatant' ? 'amber' : 'muted'}>
-                {accountVerified ? 'Verifye' : kycStatus === 'annatant' ? 'Annatant' : 'Pa verifye'}
+              <Badge tone={kycStatus === 'verifye' ? 'mint' : kycStatus === 'annatant' ? 'amber' : 'muted'}>
+                {kycStatus === 'verifye' ? 'Verifye' : kycStatus === 'annatant' ? 'Annatant' : 'Pa verifye'}
               </Badge>
             </div>
 
@@ -4666,20 +4701,13 @@ export default function BlicPayApp() {
                 </div>
                 <ChevronRight size={15} color={C.muted} />
               </button>
-              <button onClick={() => { if (!accountVerified) { setKycStep('entwo'); setView('kyc'); } }}
-                disabled={accountVerified}
-                className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}`, opacity: accountVerified ? 0.55 : 1, cursor: accountVerified ? 'default' : 'pointer' }}>
+              <button onClick={() => { setKycStep('entwo'); setView('kyc'); }}
+                className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
                 <div className="flex items-center gap-2.5">
                   <ShieldCheck size={16} color={C.muted} />
                   <span className="text-sm font-medium">KYC</span>
                 </div>
-                {accountVerified ? (
-                  <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: C.mint }}>
-                    <BadgeCheck size={14} /> Verifye
-                  </span>
-                ) : (
-                  <ChevronRight size={15} color={C.muted} />
-                )}
+                <ChevronRight size={15} color={C.muted} />
               </button>
               <button onClick={() => { setPwForm({ current: '', next: '', confirm: '' }); setPwError(''); setView('changepassword'); }}
                 className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
@@ -5099,7 +5127,7 @@ export default function BlicPayApp() {
           </div>
         )}
 
-        {view === 'deposit' && !natcashProofScreen && !biwoBranchScreen && (
+        {view === 'deposit' && !natcashProofScreen && !biwoBranchScreen && !destinationNumberScreen && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('dashboard')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
               <ArrowLeft size={15} /> Retounen
@@ -5145,6 +5173,42 @@ export default function BlicPayApp() {
           </div>
         )}
 
+        {view === 'deposit' && destinationNumberScreen && (
+          <div className="fadein px-5 pb-10 pt-2">
+            <button onClick={() => setDestinationNumberScreen(false)} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
+              <ArrowLeft size={15} /> Chanje metòd
+            </button>
+
+            <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>
+              Nimewo <em style={{ fontStyle: 'italic', color: C.sky }}>{selectedMethod?.name}</em> ou
+            </h2>
+            <p className="mt-1.5 text-sm" style={{ color: C.muted }}>
+              {money(Number(amount))} · Kote pou nou voye lajan an
+            </p>
+
+            <label className="block mt-5 text-xs font-semibold" style={{ color: C.muted }}>
+              NIMEWO {selectedMethod?.name?.toUpperCase()} OU
+            </label>
+            <input
+              value={destinationNumber}
+              onChange={(e) => setDestinationNumber(e.target.value.replace(/[^0-9]/g, ''))}
+              placeholder="Egzanp: 50912345678"
+              inputMode="numeric"
+              className="w-full mt-1.5 px-3.5 py-3 rounded-xl text-sm"
+              style={{ background: C.card, border: `1px solid ${C.border}` }}
+            />
+            <p className="mt-2 text-xs" style={{ color: C.muted }}>
+              Verifye nimewo a byen — nou pral voye lajan an dirèkteman la.
+            </p>
+
+            <button onClick={confirmDestinationNumber} disabled={!destinationNumber.trim() || processing}
+              className="bp-btn mt-6 w-full py-3.5 rounded-xl text-sm font-semibold text-white"
+              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: (!destinationNumber.trim() || processing) ? 0.6 : 1 }}>
+              {processing ? 'Ap trete...' : 'Kontinye'}
+            </button>
+          </div>
+        )}
+
         {view === 'deposit' && biwoBranchScreen && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setBiwoBranchScreen(false)} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
@@ -5177,6 +5241,15 @@ export default function BlicPayApp() {
                     {selectedBiwoBranch === b && <Check size={16} color={C.navy} />}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {flowKind === 'withdraw' && user?.clientId && (
+              <div className="mt-5 p-3.5 rounded-xl" style={{ background: '#E6F0FB', border: `1px solid ${C.border}` }}>
+                <p className="text-xs" style={{ color: C.navy }}>
+                  Nan biwo a, ajan an ap mande kòd BLICPay ou pou verifye idantite w:
+                </p>
+                <p className="mt-1 text-base font-bold" style={{ ...fontMono, color: C.navy }}>{user.clientId}</p>
               </div>
             )}
 
