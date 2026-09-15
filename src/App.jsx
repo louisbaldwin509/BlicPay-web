@@ -709,8 +709,13 @@ function Logo({ size = 30 }) {
   );
 }
 
-function SolWheel({ group, selected, onSelect }) {
-  const n = group.members.length;
+// Roa sikilè ki montre pwogrè wotasyon an — ANONIM: pa gen non pèsonn ki
+// parèt, sèlman nimewo pozisyon yo, konsistan ak chwa konfidansyalite
+// backend lan deja fè (chak kliyan sèlman ka wè pwòp adezyon pa li).
+// `myTurnIndex` sèlman itilize pou make PWÒP pozisyon kliyan an — pa gen
+// okenn lòt done sou lòt manm yo.
+function SolWheel({ maxMembers, currentTurn, myTurnIndex, potAmount }) {
+  const n = maxMembers;
   const size = 260;
   const cx = size / 2, cy = size / 2, r = 96;
   return (
@@ -723,15 +728,15 @@ function SolWheel({ group, selected, onSelect }) {
           </linearGradient>
         </defs>
         <circle cx={cx} cy={cy} r={r} fill="none" stroke={C.border} strokeWidth="1.5" strokeDasharray="2 6" />
-        {group.members.map((m, i) => {
+        {Array.from({ length: n }, (_, i) => {
           const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
           const x = cx + r * Math.cos(angle);
           const y = cy + r * Math.sin(angle);
-          const isTurn = i === group.currentTurn;
-          const hasReceived = i < group.currentTurn;
-          const isSel = selected === m.id;
+          const isTurn = i === currentTurn;
+          const hasReceived = i < currentTurn;
+          const isMine = i === myTurnIndex;
           return (
-            <g key={m.id} style={{ cursor: 'pointer' }} onClick={() => onSelect(m.id)}>
+            <g key={i}>
               {isTurn && (
                 <circle cx={x} cy={y} r="23" fill="none" stroke={C.sky} strokeWidth="1.5" opacity="0.5">
                   <animate attributeName="r" values="19;26;19" dur="2.4s" repeatCount="indefinite" />
@@ -741,12 +746,12 @@ function SolWheel({ group, selected, onSelect }) {
               <circle
                 cx={x} cy={y} r="18"
                 fill={isTurn ? 'url(#turnGrad)' : hasReceived ? '#E4F5EF' : C.card}
-                stroke={isSel ? C.navy : isTurn ? 'transparent' : hasReceived ? C.mint : C.border}
-                strokeWidth={isSel ? 2 : 1}
+                stroke={isMine ? C.gold : isTurn ? 'transparent' : hasReceived ? C.mint : C.border}
+                strokeWidth={isMine ? 2.5 : 1}
               />
               <text x={x} y={y + 4} textAnchor="middle" fontSize="10.5" fontWeight="600"
                 fill={isTurn ? '#fff' : hasReceived ? C.mint : C.ink} style={{ fontFamily: 'Inter, sans-serif' }}>
-                {initials(m.name)}
+                {i + 1}
               </text>
               {hasReceived && (
                 <g transform={`translate(${x + 11}, ${y - 11})`}>
@@ -758,12 +763,18 @@ function SolWheel({ group, selected, onSelect }) {
           );
         })}
         <text x={cx} y={cy - 6} textAnchor="middle" fontSize="9.5" fill={C.muted} style={{ fontFamily: 'Inter, sans-serif' }}>
-          POT SIKL {group.cycle}
+          POT LA VO
         </text>
         <text x={cx} y={cy + 13} textAnchor="middle" fontSize="15" fontWeight="700" fill={C.ink} style={fontMono}>
-          {(group.amount * n).toLocaleString('fr-FR')}
+          {(potAmount || 0).toLocaleString('fr-FR')}
         </text>
       </svg>
+      {myTurnIndex != null && (
+        <div className="flex items-center justify-center gap-1.5" style={{ marginTop: 6 }}>
+          <span style={{ width: 9, height: 9, borderRadius: '50%', border: `2px solid ${C.gold}`, display: 'inline-block' }} />
+          <span className="text-xs" style={{ color: C.muted }}>Sa se pozisyon OU — lòt sèk yo anonim</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -3988,6 +3999,17 @@ export default function BlicPayApp() {
                         <p className="text-xs" style={{ color: C.muted }}>Pozisyon ou nan wotasyon an</p>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {userSolMembership?.status === 'approved' && userSolMembership.turnIndex != null && (
+                  <div className="mt-4 p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                    <SolWheel
+                      maxMembers={userSolGroup.maxMembers}
+                      currentTurn={userSolGroup.currentTurn || 0}
+                      myTurnIndex={userSolMembership.turnIndex}
+                      potAmount={userSolGroup.amount * userSolGroup.maxMembers}
+                    />
                   </div>
                 )}
 
