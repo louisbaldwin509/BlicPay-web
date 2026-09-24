@@ -165,11 +165,6 @@ const methods = [
   { id: 'biwo', name: 'Nan biwo', desc: 'Ale peye kach nan yonn nan biwo nou yo', color: '#946115', icon: Building2, logo: null, kind: 'office' },
 ];
 
-const offices = [
-  'Delmas 33, Pòtoprens',
-  'Petyonvil, Ri Grand-Rue',
-  'Okap, Centre-vil',
-];
 
 // Jwenn logo yon metòd (MonCash, NatCash, elt.) apati non li kòm li anrejistre
 // nan yon tranzaksyon (`t.method`). Retounen null pou "Nan biwo" (pa gen logo)
@@ -1856,6 +1851,7 @@ export default function BlicPayApp() {
   const [natcashScanning, setNatcashScanning] = useState(false);
   const [biwoBranchScreen, setBiwoBranchScreen] = useState(false);
   const [biwoBranches, setBiwoBranches] = useState([]);
+  const [biwoBranchDetails, setBiwoBranchDetails] = useState([]); // [{name, address}] pou lis biwo yo ak vrè adrès
   const [loadingBiwoBranches, setLoadingBiwoBranches] = useState(false);
   const [selectedBiwoBranch, setSelectedBiwoBranch] = useState('');
   const [destinationNumberScreen, setDestinationNumberScreen] = useState(false);
@@ -2090,8 +2086,9 @@ export default function BlicPayApp() {
       if (biwoBranches.length === 0) {
         setLoadingBiwoBranches(true);
         try {
-          const { branches } = await apiFetch('/branches', { token });
+          const { branches, branchDetails } = await apiFetch('/branches', { token });
           setBiwoBranches(branches);
+          setBiwoBranchDetails(branchDetails || []);
         } catch (err) {
           flash(err.message || 'Nou pa t ka chaje lis siikisal yo.', 'error');
         } finally {
@@ -5756,10 +5753,15 @@ export default function BlicPayApp() {
                   </div>
                   <p className="mt-4 text-xs font-semibold" style={{ color: C.muted }}>BIWO DISPONIB</p>
                   <div className="mt-2 space-y-1.5">
-                    {offices.map((o) => (
-                      <div key={o} className="flex items-center gap-2 text-sm">
+                    {biwoBranchDetails.length > 0 ? biwoBranchDetails.map((b) => (
+                      <div key={b.name} className="flex items-start gap-2 text-sm">
+                        <Building2 size={14} color={C.muted} className="mt-0.5 shrink-0" />
+                        <span>{b.name}{b.address ? ` — ${b.address}` : ''}</span>
+                      </div>
+                    )) : biwoBranches.map((name) => (
+                      <div key={name} className="flex items-center gap-2 text-sm">
                         <Building2 size={14} color={C.muted} />
-                        {o}
+                        {name}
                       </div>
                     ))}
                   </div>
