@@ -3086,8 +3086,11 @@ export default function BlicPayApp() {
     setSolJoinProcessing(gid);
     try {
       await apiFetch(`/sol/groups/${gid}/request`, { method: 'POST', token });
-      flash('Demand ou voye — peye frè entegrasyon an pou admin ka egzamine l.');
+      flash('Demand ou voye — peye frè entegrasyon an kounye a pou admin ka egzamine l.');
       await Promise.all([loadSolGroups(), loadMySol()]);
+      // Voye kliyan an dirèkteman kote bouton "peye frè a" ye a — pa kite l
+      // sou paj gwoup yo ak sèlman yon mesaj k ap disparèt pou l sonje pita.
+      setSolSubView('mine');
     } catch (e) {
       flash(e.message || 'Nou pa t ka voye demand lan.', 'error');
     } finally {
