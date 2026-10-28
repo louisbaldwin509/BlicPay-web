@@ -5,7 +5,7 @@ import {
   Bell, Wallet, ArrowUpRight, ArrowDownLeft, Clock, Settings, Home,
   ArrowLeftRight, Plus, Check, Copy, ChevronRight, ArrowLeft, ShieldCheck,
   DollarSign, Smartphone, Banknote, X, AlertCircle, Building2, Eye, EyeOff, RefreshCw, Users, BadgeCheck, PiggyBank,
-  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode
+  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode, Landmark, LayoutGrid
 } from 'lucide-react';
 
 // Coupe l'URL réelle de ton backend ici une fois qu'il est déployé
@@ -159,6 +159,14 @@ const TX_TYPE_LABELS = {
   transfè: { label: 'Transfè', color: '#143A73' },
 };
 
+// Kategori metòd depo/retrè yo — ekran an montre yo pa gwoup olye yon sèl blòk.
+// Pou ajoute yon nouvo metòd: mete `kind` li ('mobile' | 'bank' | 'crypto' | 'office').
+const METHOD_CATEGORIES = [
+  { id: 'mobile', kinds: ['mobile'], icon: Smartphone, color: '#1E9E7C', soft: '#E4F5EF' },
+  { id: 'bank', kinds: ['bank'], icon: Landmark, color: '#143A73', soft: '#E6F0FB' },
+  { id: 'other', kinds: ['crypto', 'office'], icon: LayoutGrid, color: '#946115', soft: '#FBF0DE' },
+];
+
 const methods = [
   { id: 'moncash', name: 'Mon Cash', desc: 'Depoze kach nan pwen Digicel ou', color: '#1E9E7C', icon: DollarSign, logo: '/logos/moncash-icon.png', kind: 'mobile' },
   { id: 'natcash', name: 'NatCash', desc: 'Depoze ak bous mobil NatCash ou', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash-icon.png', kind: 'mobile' },
@@ -263,6 +271,8 @@ const T = {
     lp_sub: 'Depo, retrè, transfè, prè, epay ak sistèm sòl tradisyonèl la — tout nan yon sèl aplikasyon, kèlkeswa kote w ye.',
     lp_start: 'Kòmanse kounye a', lp_login: 'Konekte', lp_signup: 'Kreye kont',
     lp_methods: 'Metòd Depo Ki Sipòte',
+    cat_mobile: 'Mobile wallet', cat_bank: 'Bank', cat_other: 'Lòt', cat_soon: 'Byento',
+    chooseCatDeposit: 'Chwazi kijan pou w depoze', chooseCatWithdraw: 'Chwazi kijan pou w retire',
     lp_stat1: 'gwoup BLIC Sòl', lp_stat2: 'fason pou depoze', lp_stat3: 'plan prè disponib', lp_stat4: 'nivo Sòl (Basic/Standard/Premium)',
     lp_featEyebrow: 'FONKSYONALITE', lp_featTitle: 'Tout sa ou bezwen, *nan yon sèl kote*.', lp_featSub: 'Yon platfòm pou chak aspè lajan ou — pou ou menm oswa fanmi w.',
     lp_f1t: 'Sistèm tradisyonèl la, *tounen dijital*.', lp_f1d: '90 gwoup nan 3 nivo (Basic, Standard, Premium) ak 3 frekans pou ekonomize an gwoup.',
@@ -376,6 +386,8 @@ const T = {
     lp_sub: 'Dépôt, retrait, transfert, prêt, épargne et le système sòl traditionnel — tout dans une seule application, où que vous soyez.',
     lp_start: 'Commencer maintenant', lp_login: 'Connexion', lp_signup: 'Créer un compte',
     lp_methods: 'Méthodes de dépôt prises en charge',
+    cat_mobile: 'Mobile wallet', cat_bank: 'Banque', cat_other: 'Autres', cat_soon: 'Bientôt',
+    chooseCatDeposit: 'Choisissez comment déposer', chooseCatWithdraw: 'Choisissez comment retirer',
     lp_stat1: 'groupes BLIC Sòl', lp_stat2: 'moyens de dépôt', lp_stat3: 'plans de prêt disponibles', lp_stat4: 'niveaux Sòl (Basic/Standard/Premium)',
     lp_featEyebrow: 'FONCTIONNALITÉS', lp_featTitle: 'Tout ce dont vous avez besoin, *en un seul endroit*.', lp_featSub: 'Une plateforme pour chaque aspect de votre argent — pour vous ou votre famille.',
     lp_f1t: 'Le système traditionnel, *devenu digital*.', lp_f1d: '90 groupes répartis en 3 niveaux (Basic, Standard, Premium) et 3 fréquences pour épargner en groupe.',
@@ -489,6 +501,8 @@ const T = {
     lp_sub: 'Deposits, withdrawals, transfers, loans, savings, and the traditional sòl system — all in one app, wherever you are.',
     lp_start: 'Get started now', lp_login: 'Log in', lp_signup: 'Sign up',
     lp_methods: 'Supported Deposit Methods',
+    cat_mobile: 'Mobile wallet', cat_bank: 'Bank', cat_other: 'Other', cat_soon: 'Soon',
+    chooseCatDeposit: 'Choose how to deposit', chooseCatWithdraw: 'Choose how to withdraw',
     lp_stat1: 'BLIC Sòl groups', lp_stat2: 'deposit methods', lp_stat3: 'loan plans available', lp_stat4: 'Sòl tiers (Basic/Standard/Premium)',
     lp_featEyebrow: 'FEATURES', lp_featTitle: 'Everything you need, *all in one place*.', lp_featSub: 'A platform for every part of your money — for you or your family.',
     lp_f1t: 'The traditional system, *now digital*.', lp_f1d: '90 groups across 3 tiers (Basic, Standard, Premium) and 3 frequencies to save together.',
@@ -1713,6 +1727,7 @@ export default function BlicPayApp() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [showMyQr, setShowMyQr] = useState(false); // kòd QR pèsonèl (resevwa lajan)
+  const [methodCat, setMethodCat] = useState(null); // kategori metòd chwazi (null = otomatik)
   const [kycSelfieFile, setKycSelfieFile] = useState(null);
   const [profile, setProfile] = useState({
     firstName: '', lastName: '', email: '', address: '', city: '', country: '', department: '',
@@ -2048,6 +2063,7 @@ export default function BlicPayApp() {
   function startDeposit() {
     setAmount('');
     setFlowKind('deposit');
+    setMethodCat(null);
     setSelectedMethod(null);
     setReference(null);
     setView('deposit');
@@ -2056,6 +2072,7 @@ export default function BlicPayApp() {
   function startWithdraw() {
     setAmount('');
     setFlowKind('withdraw');
+    setMethodCat(null);
     setSelectedMethod(null);
     setReference(null);
     setView('deposit');
@@ -5545,9 +5562,39 @@ export default function BlicPayApp() {
               <span className="absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-sm" style={{ color: C.muted }}>HTG</span>
             </div>
 
-            <h3 className="mt-7 font-semibold text-sm" style={{ color: C.muted }}>CHWAZI METÒD DEPO</h3>
-            <div className="mt-3 space-y-2.5">
-              {methods.map((m) => {
+            {(() => {
+              // Yon metòd disponib pou flux sa a (depo oswa retrè)?
+              const isOff = (m) => m.comingSoon || (flowKind === 'deposit' && (m.id === 'moncash' || m.id === 'natcash'));
+              const cats = METHOD_CATEGORIES.map((c) => {
+                const list = methods.filter((m) => c.kinds.includes(m.kind));
+                return { ...c, list, available: list.filter((m) => !isOff(m)).length };
+              }).filter((c) => c.list.length > 0);
+              const active = cats.find((c) => c.id === methodCat) || cats.find((c) => c.available > 0) || cats[0];
+              return (
+                <>
+                  <h3 className="mt-7 font-semibold text-sm uppercase" style={{ color: C.muted }}>{flowKind === 'withdraw' ? tr('chooseCatWithdraw') : tr('chooseCatDeposit')}</h3>
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    {cats.map((c) => {
+                      const on = c.id === active.id;
+                      return (
+                        <button key={c.id} onClick={() => setMethodCat(c.id)}
+                          className="bp-btn relative rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center"
+                          style={{ background: on ? C.navy : C.card, border: `1px solid ${on ? C.navy : C.border}`, color: on ? '#fff' : C.ink }}>
+                          <span className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: on ? 'rgba(255,255,255,0.15)' : c.soft }}>
+                            <c.icon size={17} color={on ? '#fff' : c.color} />
+                          </span>
+                          <span className="text-xs font-semibold leading-tight">{tr('cat_' + c.id)}</span>
+                          {c.available === 0 ? (
+                            <span className="text-[10px] font-semibold px-1.5 rounded-full" style={{ background: on ? 'rgba(255,255,255,0.18)' : '#FBF0DE', color: on ? '#fff' : C.amber }}>{tr('cat_soon')}</span>
+                          ) : (
+                            <span className="text-[10px]" style={{ color: on ? 'rgba(255,255,255,0.75)' : C.muted }}>{c.list.map((m) => m.name).join(' · ')}</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+            <div className="mt-4 space-y-2.5">
+              {active.list.map((m) => {
                 const depositDisabled = flowKind === 'deposit' && (m.id === 'moncash' || m.id === 'natcash');
                 const disabled = m.comingSoon || depositDisabled;
                 return (
@@ -5571,6 +5618,9 @@ export default function BlicPayApp() {
                 );
               })}
             </div>
+                </>
+              );
+            })()}
           </div>
         )}
 
