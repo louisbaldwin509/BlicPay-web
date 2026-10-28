@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import BusinessApp from './business/BusinessApp.jsx';
 import {
   Bell, Wallet, ArrowUpRight, ArrowDownLeft, Clock, Settings, Home,
   ArrowLeftRight, Plus, Check, Copy, ChevronRight, ArrowLeft, ShieldCheck,
@@ -3141,6 +3142,9 @@ export default function BlicPayApp() {
   const userSolGroup = userSolMembership?.group || solGroups.find((g) => g.id === activeSolGroupId);
 
 
+  // Kont antrepriz: tablo bò lajè (stil "Monetra") olye tablo bò telefòn nan.
+  const isBizDash = view === 'dashboard' && !!token && token !== DEMO_TOKEN && user?.accountType === 'business';
+
   return (
     <div style={{ background: C.bg, minHeight: '100%', color: C.ink }} className="w-full">
       <style>{`
@@ -3174,14 +3178,26 @@ export default function BlicPayApp() {
         </div>
       )}
 
-      <div className={view === 'landing' ? 'w-full min-h-full' : 'max-w-md mx-auto min-h-full'} style={{ background: C.bg }}>
+      <div className={view === 'landing' || isBizDash ? 'w-full min-h-full' : 'max-w-md mx-auto min-h-full'} style={{ background: C.bg }}>
         {view === 'landing' ? (
           <LandingPage onStart={() => setView('auth')} lang={lang} setLang={setLang} tr={tr} />
         ) : (
         <>
 
+        {isBizDash && (
+          <BusinessApp
+            token={token} user={user} lang={lang} setLang={setLang} balance={balance} apiFetch={apiFetch} flash={flash}
+            notifications={notifications} unreadCount={unreadCount} showNotif={showNotifPanel} onToggleNotif={openNotifPanel}
+            onDeposit={startDeposit} onWithdraw={startWithdraw} onTransfer={() => setView('transfer')}
+            onKyc={() => { setKycStep('entwo'); setView('kyc'); }}
+            onSettings={() => setView('settings')} onSupport={() => { setSupportSent(false); setView('support'); }}
+            onChangePassword={() => { setPwForm({ current: '', next: '', confirm: '' }); setPwError(''); setView('changepassword'); }}
+            onLogout={logout}
+          />
+        )}
+
         {/* HEADER */}
-        {view !== 'auth' && view !== 'forgotpassword' && (
+        {view !== 'auth' && view !== 'forgotpassword' && !isBizDash && (
           <div className="flex items-center justify-between px-5 pt-6 pb-2">
             <div className="flex items-center gap-2">
               <Logo size={28} />
@@ -3540,7 +3556,7 @@ export default function BlicPayApp() {
           </div>
         )}
 
-        {view === 'dashboard' && (
+        {view === 'dashboard' && !isBizDash && (
           <div className="fadein px-5 pb-28 pt-2">
             <p className="text-sm mt-2" style={{ color: C.muted }}>{tr('welcome')}</p>
             <div className="flex items-center gap-1.5">
@@ -5791,7 +5807,7 @@ export default function BlicPayApp() {
         )}
 
         {/* bottom nav */}
-        {view === 'dashboard' && (
+        {view === 'dashboard' && !isBizDash && (
           <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto flex items-center justify-between px-6 py-2.5"
             style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
             <button className="flex flex-col items-center gap-1.5">
