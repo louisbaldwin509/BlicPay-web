@@ -2,6 +2,22 @@ import React, { useState } from 'react';
 import BusinessApp from './business/BusinessApp.jsx';
 import ReceiveQR from './ReceiveQR.jsx';
 import { CATEGORY_ART } from './CategoryArt.jsx';
+import { WEB_DICT } from './i18n/webDict.js';
+
+// Lang aktif la (ht | fr | en) — mete ajou nan chak rann BlicPayApp.
+// tt("tèks kreyòl", ...valè) → tradiksyon an fr/en (oswa kreyòl la menm si pa jwenn).
+let CURRENT_LANG = 'ht';
+const LANG_IDX = { fr: 0, en: 1 };
+function tt(s, ...args) {
+  // "tèks@@kontèks" — menm tèks kreyòl, sans diferan (egz. Verifye = vèb oswa adjektif).
+  let out = typeof s === 'string' && s.includes('@@') ? s.split('@@')[0] : s;
+  if (CURRENT_LANG !== 'ht' && typeof s === 'string') {
+    const row = WEB_DICT[s];
+    if (row && row[LANG_IDX[CURRENT_LANG]]) out = row[LANG_IDX[CURRENT_LANG]];
+  }
+  if (args.length) out = String(out).replace(/\{(\d+)\}/g, (m, i) => (args[i] ?? m));
+  return out;
+}
 import {
   Bell, Wallet, ArrowUpRight, ArrowDownLeft, Clock, Settings, Home,
   ArrowLeftRight, Plus, Check, Copy, ChevronRight, ArrowLeft, ShieldCheck,
@@ -26,10 +42,10 @@ function splitDataUrl(dataUrl) {
 function compressImageFile(file, maxDim = 1280, quality = 0.82) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error('Nou pa t ka li foto a.'));
+    reader.onerror = () => reject(new Error(tt("Nou pa t ka li foto a.")));
     reader.onload = () => {
       const img = new Image();
-      img.onerror = () => reject(new Error('Foto a domaje oswa nan yon fòma nou pa sipòte.'));
+      img.onerror = () => reject(new Error(tt("Foto a domaje oswa nan yon fòma nou pa sipòte.")));
       img.onload = () => {
         let { width, height } = img;
         if (width > maxDim || height > maxDim) {
@@ -117,6 +133,7 @@ async function apiFetch(path, { method = 'GET', body, token } = {}) {
     method,
     headers: {
       'Content-Type': 'application/json',
+      'X-BLIC-Lang': CURRENT_LANG,
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: body ? JSON.stringify(body) : undefined,
@@ -775,7 +792,7 @@ function SolWheel({ maxMembers, currentTurn, myTurnIndex, potAmount }) {
           );
         })}
         <text x={cx} y={cy - 6} textAnchor="middle" fontSize="9.5" fill={C.muted} style={{ fontFamily: 'Inter, sans-serif' }}>
-          POT LA VO
+          {tt("POT LA VO")}
         </text>
         <text x={cx} y={cy + 13} textAnchor="middle" fontSize="15" fontWeight="700" fill={C.ink} style={fontMono}>
           {(potAmount || 0).toLocaleString('fr-FR')}
@@ -784,7 +801,7 @@ function SolWheel({ maxMembers, currentTurn, myTurnIndex, potAmount }) {
       {myTurnIndex != null && (
         <div className="flex items-center justify-center gap-1.5" style={{ marginTop: 6 }}>
           <span style={{ width: 9, height: 9, borderRadius: '50%', border: `2px solid ${C.gold}`, display: 'inline-block' }} />
-          <span className="text-xs" style={{ color: C.muted }}>Sa se pozisyon OU — lòt sèk yo anonim</span>
+          <span className="text-xs" style={{ color: C.muted }}>{tt("Sa se pozisyon OU — lòt sèk yo anonim")}</span>
         </div>
       )}
     </div>
@@ -951,7 +968,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Logo size={28} />
-            <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 18 }}>BLIC<span style={{ color: C.sky }}>Pay</span></span>
+            <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 18 }}>{tt("BLIC")}<span style={{ color: C.sky }}>{tt("Pay")}</span></span>
           </div>
           <div className="hidden md:flex items-center gap-7">
             <a href="#features" className="lp-nav-link text-sm font-medium" style={{ color: C.ink }}>{tr('lp_navFeatures')}</a>
@@ -1041,7 +1058,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
         </Reveal>
 
         <Reveal delay={150} className="relative">
-          <img src="/hero-mockup.png" alt="Aplikasyon BLICPay sou telefòn ak òdinatè"
+          <img src="/hero-mockup.png" alt={tt("Aplikasyon BLICPay sou telefòn ak òdinatè")}
             className="lp-mock w-full h-auto md:w-[135%]" style={{ display: 'block', margin: '0 auto' }} />
         </Reveal>
       </div>
@@ -1058,7 +1075,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#FEBC2E', display: 'inline-block' }} />
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#28C840', display: 'inline-block' }} />
               <div className="mx-auto px-4 py-1 rounded-md text-[10px]" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
-                blicpayht.com
+                {tt("blicpayht.com")}
               </div>
               <div style={{ width: 30 }} />
             </div>
@@ -1066,7 +1083,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
             <div className="flex items-center justify-between px-6 py-3" style={{ background: '#0F2038' }}>
               <div className="flex items-center gap-2">
                 <Logo size={20} />
-                <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 13, color: '#fff' }}>BLIC<span style={{ color: C.sky }}>Pay</span></span>
+                <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 13, color: '#fff' }}>{tt("BLIC")}<span style={{ color: C.sky }}>{tt("Pay")}</span></span>
               </div>
               <div className="flex items-center gap-4">
                 <div className="relative">
@@ -1100,7 +1117,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
               {/* wallet card */}
               <div className="rounded-2xl p-5" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.75)' }}>{tr('lp_mockBalance')}</p>
-                <p style={{ ...fontDisplay, fontWeight: 800, fontSize: 26, color: '#fff', marginTop: 4 }}>45,200 HTG</p>
+                <p style={{ ...fontDisplay, fontWeight: 800, fontSize: 26, color: '#fff', marginTop: 4 }}>{tt("45,200 HTG")}</p>
                 <div className="mt-4 flex gap-2">
                   <span className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>{tr('tileDeposit')}</span>
                   <span className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>{tr('tileWithdraw')}</span>
@@ -1140,12 +1157,12 @@ function LandingPage({ onStart, lang, setLang, tr }) {
               {/* BLIC Sòl panel — showcasing the real 90-group structure */}
               <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-bold" style={{ color: C.muted }}>BLIC SÒL</p>
+                  <p className="text-xs font-bold" style={{ color: C.muted }}>{tt("BLIC SÒL")}</p>
                   <span className="text-[10px] font-semibold" style={{ color: C.sky }}>{tr('lp_stat1')}: 90</span>
                 </div>
                 <div className="mt-3 p-3 rounded-xl" style={{ background: C.bg }}>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold">Sòl Basic #3</span>
+                    <span className="text-xs font-semibold">{tt("Sòl Basic #3")}</span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#E4F5EF', color: C.mint }}>7/10</span>
                   </div>
                   <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: C.border }}>
@@ -1186,7 +1203,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
                         </div>
                       </div>
                       <div className="pt-0.5">
-                        <p style={{ ...fontDisplay, fontWeight: 800, fontSize: 17, color: '#fff', lineHeight: 1 }}>BLIC<span style={{ fontStyle: 'italic' }}>Pay</span></p>
+                        <p style={{ ...fontDisplay, fontWeight: 800, fontSize: 17, color: '#fff', lineHeight: 1 }}>{tt("BLIC")}<span style={{ fontStyle: 'italic' }}>{tt("Pay")}</span></p>
                         <p className="mt-1" style={{ fontSize: 7, color: 'rgba(255,255,255,0.8)', letterSpacing: 0.8 }}>{tr('lp_cardTagline')}</p>
                       </div>
                     </div>
@@ -1199,7 +1216,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
                     <div className="mt-4 flex items-end justify-between relative">
                       <div>
                         <p className="flex items-baseline gap-1.5">
-                          <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.75)' }}>EXRID</span>
+                          <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.75)' }}>{tt("EXRID")}</span>
                           <span style={{ fontSize: 11, color: '#fff', fontFamily: 'monospace' }}>12/99</span>
                         </p>
                         <p className="mt-1" style={{ fontSize: 10, color: '#fff', letterSpacing: 0.5 }}>{tr('lp_cardHolder')}</p>
@@ -1210,7 +1227,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
                           <div style={{ position: 'absolute', left: 0, width: 20, height: 20, borderRadius: '50%', background: '#EB5757' }} />
                           <div style={{ position: 'absolute', left: 12, width: 20, height: 20, borderRadius: '50%', background: '#F2A93B' }} />
                         </div>
-                        <p className="mt-1" style={{ fontSize: 7, color: 'rgba(255,255,255,0.7)', letterSpacing: 0.5 }}>DEBIT</p>
+                        <p className="mt-1" style={{ fontSize: 7, color: 'rgba(255,255,255,0.7)', letterSpacing: 0.5 }}>{tt("DEBIT")}</p>
                       </div>
                     </div>
                   </div>
@@ -1323,7 +1340,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
                 <div className="px-4 pb-5">
                   <div className="rounded-2xl p-4" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">Sòl Standard #5</span>
+                      <span className="text-xs font-bold text-white">{tt("Sòl Standard #5")}</span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>6/10</span>
                     </div>
                     <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.25)' }}>
@@ -1388,7 +1405,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
                 ) : (
                   <span className="flex items-center gap-1.5">
                     <Logo size={16} />
-                    <span className="text-xs font-bold" style={{ color: '#fff' }}>BLICPay</span>
+                    <span className="text-xs font-bold" style={{ color: '#fff' }}>{tt("BLICPay")}</span>
                   </span>
                 )}
               </span>
@@ -1594,7 +1611,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
           <div className="md:col-span-2">
             <div className="flex items-center gap-2">
               <Logo size={26} />
-              <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 16 }}>BLIC<span style={{ color: C.sky }}>Pay</span></span>
+              <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 16 }}>{tt("BLIC")}<span style={{ color: C.sky }}>{tt("Pay")}</span></span>
             </div>
             <p className="mt-3 text-xs leading-relaxed" style={{ color: C.muted, maxWidth: 260 }}>
               {tr('lp_footDesc')}
@@ -1626,7 +1643,7 @@ function LandingPage({ onStart, lang, setLang, tr }) {
         </div>
         <div style={{ borderTop: `1px solid ${C.border}` }}>
           <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-            <p className="text-xs" style={{ color: C.muted }}>© {new Date().getFullYear()} BLICPay. {tr('lp_footRights')}</p>
+            <p className="text-xs" style={{ color: C.muted }}>© {new Date().getFullYear()} {tt("BLICPay.")} {tr('lp_footRights')}</p>
           </div>
           <div className="max-w-6xl mx-auto px-6 pb-6">
             <p className="text-[11px] leading-relaxed" style={{ color: C.muted, maxWidth: 640 }}>
@@ -1692,7 +1709,11 @@ function LandingPage({ onStart, lang, setLang, tr }) {
 
 export default function BlicPayApp() {
   const [view, setView] = useState('landing');
-  const [lang, setLang] = useState('ht');
+  const [lang, setLangState] = useState(() => {
+    try { const v = localStorage.getItem('blicpay_lang'); return ['ht', 'fr', 'en'].includes(v) ? v : 'ht'; } catch { return 'ht'; }
+  });
+  const setLang = (l) => { setLangState(l); try { localStorage.setItem('blicpay_lang', l); } catch { /* pa gen anyen pou fè */ } };
+  CURRENT_LANG = lang;
   const [showLangPicker, setShowLangPicker] = useState(false);
   const tr = (key) => T[lang]?.[key] ?? T.ht[key] ?? key;
   const [appOpenFaq, setAppOpenFaq] = useState(null); // akòdeyon FAQ nan Sipò — apa de openFaq nan LandingPage
@@ -1762,24 +1783,24 @@ export default function BlicPayApp() {
   const [promoIndex, setPromoIndex] = useState(0);
   const PROMO_SLIDES = [
     {
-      icon: Users, title: 'Envite yon zanmi, genyen',
-      desc: 'Chak zanmi ki ouvri yon kont BLICPay ba w yon bonis sou pwochen depo w.',
-      action: () => flash('Fonksyon envitasyon ap vini.'), cta: 'Wè plis',
+      icon: Users, title: tt("Envite yon zanmi, genyen"),
+      desc: tt("Chak zanmi ki ouvri yon kont BLICPay ba w yon bonis sou pwochen depo w."),
+      action: () => flash(tt("Fonksyon envitasyon ap vini.")), cta: tt("Wè plis"),
     },
     {
       icon: Users, title: '90 gwoup BLIC Sòl louvri',
-      desc: 'Antre nan yon gwoup Sòl nan nivo Basic, Standard oswa Premium jodi a.',
-      action: () => openSolSection(), cta: 'Gade gwoup yo',
+      desc: tt("Antre nan yon gwoup Sòl nan nivo Basic, Standard oswa Premium jodi a."),
+      action: () => openSolSection(), cta: tt("Gade gwoup yo"),
     },
     {
-      icon: Lock, title: 'Kat BLICPay ap vini',
-      desc: 'N ap travay sou yon patenarya pou ofri kat vityèl ak fizik pou peye nenpòt kote.',
-      action: () => flash('Detay kat la ap vini talè.'), cta: 'Aprann plis',
+      icon: Lock, title: tt("Kat BLICPay ap vini"),
+      desc: tt("N ap travay sou yon patenarya pou ofri kat vityèl ak fizik pou peye nenpòt kote."),
+      action: () => flash(tt("Detay kat la ap vini talè.")), cta: tt("Aprann plis"),
     },
     {
-      icon: PiggyBank, title: 'Fikse yon objektif epay',
-      desc: 'Kreye yon objektif e swiv pwogrè w chak fwa ou mete lajan.',
-      action: () => setView('termdepo'), cta: 'Kòmanse',
+      icon: PiggyBank, title: tt("Fikse yon objektif epay"),
+      desc: tt("Kreye yon objektif e swiv pwogrè w chak fwa ou mete lajan."),
+      action: () => setView('termdepo'), cta: tt("Kòmanse"),
     },
   ];
   React.useEffect(() => {
@@ -1831,9 +1852,9 @@ export default function BlicPayApp() {
         })
         .catch(() => {});
       if (cameFromMoncashSuccess) {
-        setTimeout(() => flash('Depo MonCash ou konfime — li ajoute nan balans ou.'), 400);
+        setTimeout(() => flash(tt("Depo MonCash ou konfime — li ajoute nan balans ou.")), 400);
       } else if (cameFromMoncashFailure) {
-        setTimeout(() => flash('Depo MonCash la pa t reyisi — eseye ankò.', 'error'), 400);
+        setTimeout(() => flash(tt("Depo MonCash la pa t reyisi — eseye ankò."), 'error'), 400);
       }
     }
   }, []);
@@ -2084,19 +2105,19 @@ export default function BlicPayApp() {
     // poko reyèl, sèlman retrè MonCash/NatCash ap fonksyone kounye a.
     const depositDisabled = flowKind === 'deposit' && (m.id === 'moncash' || m.id === 'natcash');
     if (m.comingSoon || depositDisabled) {
-      flash(`${m.name} ap disponib byento pou depo.`);
+      flash(tt("{0} ap disponib byento pou depo.", m.name));
       return;
     }
     if (!amount || Number(amount) <= 0) {
-      flash('Antre yon montan anvan.');
+      flash(tt("Antre yon montan anvan."));
       return;
     }
     if (flowKind === 'deposit' && Number(amount) < 100) {
-      flash('Montan minimòm pou yon depo se 100 HTG.');
+      flash(tt("Montan minimòm pou yon depo se 100 HTG."));
       return;
     }
     if (flowKind === 'withdraw' && Number(amount) < 250) {
-      flash('Montan minimòm pou yon retrè se 250 HTG.');
+      flash(tt("Montan minimòm pou yon retrè se 250 HTG."));
       return;
     }
 
@@ -2111,7 +2132,7 @@ export default function BlicPayApp() {
           setBiwoBranches(branches);
           setBiwoBranchDetails(branchDetails || []);
         } catch (err) {
-          flash(err.message || 'Nou pa t ka chaje lis siikisal yo.', 'error');
+          flash(err.message || tt("Nou pa t ka chaje lis siikisal yo."), 'error');
         } finally {
           setLoadingBiwoBranches(false);
         }
@@ -2121,7 +2142,7 @@ export default function BlicPayApp() {
 
     if (flowKind === 'withdraw' && (m.id === 'moncash' || m.id === 'natcash')) {
       if (Number(amount) > balance) {
-        flash('Ou pa gen ase lajan pou retrè sa a.');
+        flash(tt("Ou pa gen ase lajan pou retrè sa a."));
         return;
       }
       setSelectedMethod(m);
@@ -2133,7 +2154,7 @@ export default function BlicPayApp() {
 
     if (flowKind === 'withdraw') {
       if (Number(amount) > balance) {
-        flash('Ou pa gen ase lajan pou retrè sa a.');
+        flash(tt("Ou pa gen ase lajan pou retrè sa a."));
         return;
       }
       setSelectedMethod(m);
@@ -2145,7 +2166,7 @@ export default function BlicPayApp() {
         setPinError(null);
         setPinScreen(hasPin ? 'withdraw' : 'setup');
       } catch (err) {
-        flash(err.message || 'Nou pa t ka kalkile frè a.', 'error');
+        flash(err.message || tt("Nou pa t ka kalkile frè a."), 'error');
       } finally {
         setProcessing(false);
       }
@@ -2165,7 +2186,7 @@ export default function BlicPayApp() {
         });
         window.location.href = paymentUrl;
       } catch (err) {
-        flash(err.message || 'Nou pa t ka kòmanse peman MonCash la.', 'error');
+        flash(err.message || tt("Nou pa t ka kòmanse peman MonCash la."), 'error');
         setProcessing(false);
       }
       return;
@@ -2215,11 +2236,11 @@ export default function BlicPayApp() {
   // an, tankou yon retrè nòmal, men ak nimewo a anrejistre pou admin/ajan an.
   async function confirmDestinationNumber() {
     if (!destinationNumber.trim()) {
-      flash('Antre nimewo a.');
+      flash(tt("Antre nimewo a."));
       return;
     }
     if (!destinationName.trim()) {
-      flash('Antre non ki sou kont lan.');
+      flash(tt("Antre non ki sou kont lan."));
       return;
     }
     setProcessing(true);
@@ -2231,7 +2252,7 @@ export default function BlicPayApp() {
       setDestinationNumberScreen(false);
       setPinScreen(hasPin ? 'withdraw' : 'setup');
     } catch (err) {
-      flash(err.message || 'Nou pa t ka kalkile frè a.', 'error');
+      flash(err.message || tt("Nou pa t ka kalkile frè a."), 'error');
     } finally {
       setProcessing(false);
     }
@@ -2239,7 +2260,7 @@ export default function BlicPayApp() {
 
   async function confirmBiwoBranch() {
     if (!selectedBiwoBranch) {
-      flash('Chwazi yon siikisal.');
+      flash(tt("Chwazi yon siikisal."));
       return;
     }
 
@@ -2253,7 +2274,7 @@ export default function BlicPayApp() {
         setBiwoBranchScreen(false);
         setPinScreen(hasPin ? 'withdraw' : 'setup');
       } catch (err) {
-        flash(err.message || 'Nou pa t ka kalkile frè a.', 'error');
+        flash(err.message || tt("Nou pa t ka kalkile frè a."), 'error');
       } finally {
         setProcessing(false);
       }
@@ -2272,7 +2293,7 @@ export default function BlicPayApp() {
       setBiwoBranchScreen(false);
       setView('confirm');
     } catch (err) {
-      flash(err.message || 'Nou pa t ka soumèt demand lan.', 'error');
+      flash(err.message || tt("Nou pa t ka soumèt demand lan."), 'error');
     } finally {
       setProcessing(false);
     }
@@ -2292,7 +2313,7 @@ export default function BlicPayApp() {
       const base64 = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = () => reject(new Error('Nou pa t ka li foto a.'));
+        reader.onerror = () => reject(new Error(tt("Nou pa t ka li foto a.")));
         reader.readAsDataURL(file);
       });
 
@@ -2313,11 +2334,11 @@ export default function BlicPayApp() {
 
   async function submitNatcashDeposit() {
     if (!natcashTransactionId.trim()) {
-      flash('Antre ID tranzaksyon an.');
+      flash(tt("Antre ID tranzaksyon an."));
       return;
     }
     if (!natcashProofFile) {
-      flash('Ajoute yon foto resi a.');
+      flash(tt("Ajoute yon foto resi a."));
       return;
     }
     setNatcashSubmitting(true);
@@ -2325,7 +2346,7 @@ export default function BlicPayApp() {
       const base64 = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = () => reject(new Error('Nou pa t ka li foto a.'));
+        reader.onerror = () => reject(new Error(tt("Nou pa t ka li foto a.")));
         reader.readAsDataURL(natcashProofFile);
       });
 
@@ -2346,7 +2367,7 @@ export default function BlicPayApp() {
       setNatcashProofScreen(false);
       setView('confirm');
     } catch (err) {
-      flash(err.message || 'Nou pa t ka soumèt depo a.', 'error');
+      flash(err.message || tt("Nou pa t ka soumèt depo a."), 'error');
     } finally {
       setNatcashSubmitting(false);
     }
@@ -2393,11 +2414,11 @@ export default function BlicPayApp() {
         // Cas imprévu : ne devrait jamais arriver — mais si ça arrive,
         // on le signale au lieu de rester silencieux.
         console.error('submitPin appelé avec un état inattendu:', { pinScreen, pendingWithdraw });
-        setPinError('Yon bagay pa mache. Eseye fèmen epi louvri app la ankò.');
+        setPinError(tt("Yon bagay pa mache. Eseye fèmen epi louvri app la ankò."));
         setPinDigits('');
       }
     } catch (err) {
-      setPinError(err.message || 'Kòd PIN la pa kòrèk.');
+      setPinError(err.message || tt("Kòd PIN la pa kòrèk."));
       setPinDigits('');
     } finally {
       setPinBusy(false);
@@ -2406,11 +2427,11 @@ export default function BlicPayApp() {
 
   async function submitPinSetup() {
     if (!pinSetupPassword) {
-      setPinError('Antre modpas kont ou pou konfime.');
+      setPinError(tt("Antre modpas kont ou pou konfime."));
       return;
     }
     if (pinDigits.length !== 4) {
-      setPinError('Kòd PIN la dwe gen 4 chif.');
+      setPinError(tt("Kòd PIN la dwe gen 4 chif."));
       return;
     }
     setPinBusy(true);
@@ -2427,10 +2448,10 @@ export default function BlicPayApp() {
       } else {
         setPinScreen(null);
         setPinDigits('');
-        flash('Kòd PIN ou kreye.');
+        flash(tt("Kòd PIN ou kreye."));
       }
     } catch (err) {
-      setPinError(err.message || 'Nou pa t ka kreye PIN la.');
+      setPinError(err.message || tt("Nou pa t ka kreye PIN la."));
     } finally {
       setPinBusy(false);
     }
@@ -2449,15 +2470,15 @@ export default function BlicPayApp() {
 
   async function sendTransfer() {
     if (!transferId.trim()) {
-      flash('Antre ID kliyan k ap resevwa a.');
+      flash(tt("Antre ID kliyan k ap resevwa a."));
       return;
     }
     if (!transferAmount || Number(transferAmount) <= 0) {
-      flash('Antre yon montan valab.');
+      flash(tt("Antre yon montan valab."));
       return;
     }
     if (Number(transferAmount) > balance) {
-      flash('Ou pa gen ase lajan pou transfè sa a.');
+      flash(tt("Ou pa gen ase lajan pou transfè sa a."));
       return;
     }
     setTransferProcessing(true);
@@ -2470,13 +2491,13 @@ export default function BlicPayApp() {
       setBalance((b) => b - Number(transferAmount));
       setTx((t) => [{
         id: 'tr-' + Date.now(),
-        method: `Transfè bay ${transferId}`,
+        method: tt("Transfè bay {0}", transferId),
         amount: Number(transferAmount),
         ts: Date.now(), status: 'konfime',
         date: 'jodi a',
         type: 'transfè',
       }, ...t]);
-      flash('Transfè a fèt.');
+      flash(tt("Transfè a fèt."));
       setTransferId('');
       setTransferAmount('');
       setView('dashboard');
@@ -2497,7 +2518,7 @@ export default function BlicPayApp() {
 
   function createPocket() {
     if (!newPocketName.trim()) {
-      flash('Bay pòch la yon non.');
+      flash(tt("Bay pòch la yon non."));
       return;
     }
     apiFetch('/pockets', {
@@ -2509,7 +2530,7 @@ export default function BlicPayApp() {
       setNewPocketName('');
       setNewPocketTarget('');
       setShowNewPocket(false);
-      flash('Pòch la kreye.');
+      flash(tt("Pòch la kreye."));
     }).catch((err) => flash(err.message, 'error'));
   }
 
@@ -2517,15 +2538,15 @@ export default function BlicPayApp() {
     const amt = Number(addMoneyAmount);
     const pocket = pockets.find((p) => p.id === addMoneyPocketId);
     if (!pocket) {
-      flash('Chwazi yon pòch.');
+      flash(tt("Chwazi yon pòch."));
       return;
     }
     if (!amt || amt <= 0) {
-      flash('Antre yon montan valab.');
+      flash(tt("Antre yon montan valab."));
       return;
     }
     if (amt > balance) {
-      flash('Ou pa gen ase nan kont prensipal la.');
+      flash(tt("Ou pa gen ase nan kont prensipal la."));
       return;
     }
     setAddMoneyProcessing(true);
@@ -2533,10 +2554,10 @@ export default function BlicPayApp() {
       const { pocket: updated } = await apiFetch(`/pockets/${pocket.id}/deposit`, { method: 'POST', token, body: { amount: amt } });
       setBalance((b) => b - amt);
       setPockets((ps) => ps.map((p) => p.id === pocket.id ? updated : p));
-      setTx((t) => [{ id: 'pk-' + Date.now(), method: `Epay nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'epay' }, ...t]);
+      setTx((t) => [{ id: 'pk-' + Date.now(), method: tt("Epay nan {0}", pocket.name), amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'epay' }, ...t]);
       setAddMoneyAmount('');
       setShowAddMoney(false);
-      flash('Lajan an ajoute nan pòch la.');
+      flash(tt("Lajan an ajoute nan pòch la."));
     } catch (err) {
       flash(err.message, 'error');
     } finally {
@@ -2546,11 +2567,11 @@ export default function BlicPayApp() {
 
   function createGoalDeposit() {
     if (!newGoalName.trim()) {
-      flash('Bay objektif la yon non.');
+      flash(tt("Bay objektif la yon non."));
       return;
     }
     if (!newGoalTarget || Number(newGoalTarget) <= 0) {
-      flash('Antre yon montan objektif valab.');
+      flash(tt("Antre yon montan objektif valab."));
       return;
     }
     apiFetch('/goals', {
@@ -2562,7 +2583,7 @@ export default function BlicPayApp() {
       setNewGoalName('');
       setNewGoalTarget('');
       setView('termdepo');
-      flash('Objektif kreye.');
+      flash(tt("Objektif kreye."));
     }).catch((err) => flash(err.message, 'error'));
   }
 
@@ -2578,11 +2599,11 @@ export default function BlicPayApp() {
     const gd = goalDeposits.find((g) => g.id === activeGoalId);
     if (!gd) return;
     if (!amt || amt <= 0) {
-      flash('Antre yon montan valab.');
+      flash(tt("Antre yon montan valab."));
       return;
     }
     if (amt > balance) {
-      flash('Ou pa gen ase nan kont prensipal la.');
+      flash(tt("Ou pa gen ase nan kont prensipal la."));
       return;
     }
     setGoalProcessing(true);
@@ -2594,11 +2615,11 @@ export default function BlicPayApp() {
         ? { ...g, current: goal.saved, status: reached ? 'rive' : 'aktif' }
         : g));
       setTx((t) => [{
-        id: 'gd-tx-' + Date.now(), method: `Depo Ak Objektif — ${gd.name}`, amount: amt,
+        id: 'gd-tx-' + Date.now(), method: tt("Depo Ak Objektif — {0}", gd.name), amount: amt,
         ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè',
       }, ...t]);
       setAddGoalAmount('');
-      flash(reached ? 'Objektif la atenn! Ou ka retire lajan an kounye a.' : 'Lajan an ajoute nan objektif la.');
+      flash(reached ? tt("Objektif la atenn! Ou ka retire lajan an kounye a.") : tt("Lajan an ajoute nan objektif la."));
     } catch (err) {
       flash(err.message, 'error');
     } finally {
@@ -2615,11 +2636,11 @@ export default function BlicPayApp() {
       setBalance((b) => b + gd.current);
       setGoalDeposits((list) => list.filter((g) => g.id !== id));
       setTx((t) => [{
-        id: 'gd-out-' + Date.now(), method: `Objektif fini — ${gd.name}`, amount: gd.current,
+        id: 'gd-out-' + Date.now(), method: tt("Objektif fini — {0}", gd.name), amount: gd.current,
         ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo',
       }, ...t]);
       setView('termdepo');
-      flash('Lajan an tounen nan kont prensipal ou.');
+      flash(tt("Lajan an tounen nan kont prensipal ou."));
     } catch (err) {
       flash(err.message, 'error');
     } finally {
@@ -2638,12 +2659,12 @@ export default function BlicPayApp() {
       setBalance((b) => b + net);
       setGoalDeposits((list) => list.filter((g) => g.id !== id));
       setTx((t) => [{
-        id: 'gd-em-' + Date.now(), method: `Retrè ijans — ${gd.name} (frè 4.5%)`, amount: net,
+        id: 'gd-em-' + Date.now(), method: tt("Retrè ijans — {0} (frè 4.5%)", gd.name), amount: net,
         ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo',
       }, ...t]);
       setShowEmergency(false);
       setView('termdepo');
-      flash(`Retrè ijans fèt — ${money(fee)} kenbe kòm frè.`);
+      flash(tt("Retrè ijans fèt — {0} kenbe kòm frè.", money(fee)));
     } catch (err) {
       flash(err.message, 'error');
     } finally {
@@ -2654,7 +2675,7 @@ export default function BlicPayApp() {
   async function requestLoan() {
     const amt = Number(newLoanAmount);
     if (!amt || amt <= 0) {
-      flash('Antre yon montan valab.');
+      flash(tt("Antre yon montan valab."));
       return;
     }
     setLoanProcessing(true);
@@ -2674,7 +2695,7 @@ export default function BlicPayApp() {
       });
       setNewLoanAmount('');
       setView('loan');
-      flash('Demand prè a voye — n ap egzamine li.');
+      flash(tt("Demand prè a voye — n ap egzamine li."));
     } catch (err) {
       flash(err.message, 'error');
     } finally {
@@ -2694,14 +2715,14 @@ export default function BlicPayApp() {
       if (fresh.status === 'active' && loan.status !== 'active') {
         setBalance((b) => b + loan.amount);
         setTx((t) => [{
-          id: 'ln-tx-' + Date.now(), method: 'Prè apwouve', amount: loan.amount,
+          id: 'ln-tx-' + Date.now(), method: tt("Prè apwouve"), amount: loan.amount,
           ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo',
         }, ...t]);
-        flash('Prè a apwouve — lajan an nan kont ou.');
+        flash(tt("Prè a apwouve — lajan an nan kont ou."));
       } else if (fresh.status === 'rejected') {
-        flash('Demand prè a refize.');
+        flash(tt("Demand prè a refize."));
       } else {
-        flash('Pa gen chanjman — l ap tann toujou.');
+        flash(tt("Pa gen chanjman — l ap tann toujou."));
       }
       setLoan((l) => ({
         ...l,
@@ -2720,7 +2741,7 @@ export default function BlicPayApp() {
     const next = loan.installments.find((i) => i.status === 'annatant');
     if (!next) return;
     if (next.amount > balance) {
-      flash('Ou pa gen ase nan kont prensipal la pou vèsman sa a.');
+      flash(tt("Ou pa gen ase nan kont prensipal la pou vèsman sa a."));
       return;
     }
     setLoanProcessing(true);
@@ -2728,7 +2749,7 @@ export default function BlicPayApp() {
       const { finished } = await apiFetch(`/loans/${loan.id}/pay-installment`, { method: 'POST', token, body: {} });
       setBalance((b) => b - next.amount);
       setTx((t) => [{
-        id: 'ln-pay-' + Date.now(), method: `Vèsman prè ${next.n}/${loan.months}`, amount: next.amount,
+        id: 'ln-pay-' + Date.now(), method: tt("Vèsman prè {0}/{1}", next.n, loan.months), amount: next.amount,
         ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'retrè',
       }, ...t]);
       setLoan((l) => {
@@ -2739,7 +2760,7 @@ export default function BlicPayApp() {
         updated.status = finished ? 'fini' : 'aktif';
         return updated;
       });
-      flash(finished ? 'Prè a peye nèt!' : 'Vèsman anrejistre.');
+      flash(finished ? tt("Prè a peye nèt!") : tt("Vèsman anrejistre."));
     } catch (err) {
       flash(err.message, 'error');
     } finally {
@@ -2752,32 +2773,32 @@ export default function BlicPayApp() {
     const pocket = pockets.find((p) => p.id === activePocketId);
     if (!pocket) return;
     if (!amt || amt <= 0) {
-      flash('Antre yon montan valab.');
+      flash(tt("Antre yon montan valab."));
       return;
     }
 
     setPocketProcessing(true);
     try {
       if (pocketMode === 'deposit') {
-        if (amt > balance) { flash('Ou pa gen ase nan kont prensipal la.'); setPocketProcessing(false); return; }
+        if (amt > balance) { flash(tt("Ou pa gen ase nan kont prensipal la.")); setPocketProcessing(false); return; }
         const { pocket: updated } = await apiFetch(`/pockets/${pocket.id}/deposit`, { method: 'POST', token, body: { amount: amt } });
         setBalance((b) => b - amt);
         setPockets((ps) => ps.map((p) => p.id === activePocketId ? updated : p));
-        setTx((t) => [{ id: 'pk-' + Date.now(), method: `Epay nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'epay' }, ...t]);
-        flash('Lajan an mete nan pòch la.');
+        setTx((t) => [{ id: 'pk-' + Date.now(), method: tt("Epay nan {0}", pocket.name), amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'epay' }, ...t]);
+        flash(tt("Lajan an mete nan pòch la."));
       } else if (pocketMode === 'spend') {
-        if (amt > pocket.balance) { flash('Pa gen ase lajan nan pòch sa a.'); setPocketProcessing(false); return; }
+        if (amt > pocket.balance) { flash(tt("Pa gen ase lajan nan pòch sa a.")); setPocketProcessing(false); return; }
         const { pocket: updated } = await apiFetch(`/pockets/${pocket.id}/spend`, { method: 'POST', token, body: { amount: amt } });
         setPockets((ps) => ps.map((p) => p.id === activePocketId ? updated : p));
-        setTx((t) => [{ id: 'pk-' + Date.now(), method: `Retrè soti nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'retrè', pocketId: pocket.id, kind: 'depanse' }, ...t]);
-        flash('Depans anrejistre.');
+        setTx((t) => [{ id: 'pk-' + Date.now(), method: tt("Retrè soti nan {0}", pocket.name), amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'retrè', pocketId: pocket.id, kind: 'depanse' }, ...t]);
+        flash(tt("Depans anrejistre."));
       } else if (pocketMode === 'transfer') {
-        if (amt > pocket.balance) { flash('Pa gen ase lajan nan pòch sa a.'); setPocketProcessing(false); return; }
+        if (amt > pocket.balance) { flash(tt("Pa gen ase lajan nan pòch sa a.")); setPocketProcessing(false); return; }
         const { pocket: updated } = await apiFetch(`/pockets/${pocket.id}/transfer`, { method: 'POST', token, body: { amount: amt, to: pocketTransferTarget } });
         if (pocketTransferTarget === 'main') {
           setBalance((b) => b + amt);
           setPockets((ps) => ps.map((p) => p.id === activePocketId ? updated : p));
-          setTx((t) => [{ id: 'pk-' + Date.now(), method: `Transfè soti nan ${pocket.name} bay Kont prensipal`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo', pocketId: pocket.id, kind: 'transfè-soti' }, ...t]);
+          setTx((t) => [{ id: 'pk-' + Date.now(), method: tt("Transfè soti nan {0} bay Kont prensipal", pocket.name), amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo', pocketId: pocket.id, kind: 'transfè-soti' }, ...t]);
         } else {
           const destName = pockets.find((p) => p.id === pocketTransferTarget)?.name;
           setPockets((ps) => ps.map((p) => {
@@ -2786,12 +2807,12 @@ export default function BlicPayApp() {
             return p;
           }));
           setTx((t) => [
-            { id: 'pk-' + Date.now(), method: `Transfè soti nan ${pocket.name} bay ${destName}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'transfè-soti' },
-            { id: 'pk-' + Date.now() + '-r', method: `Transfè resevwa soti nan ${pocket.name}`, amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo', pocketId: pocketTransferTarget, kind: 'transfè-antre' },
+            { id: 'pk-' + Date.now(), method: tt("Transfè soti nan {0} bay {1}", pocket.name, destName), amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'transfè', pocketId: pocket.id, kind: 'transfè-soti' },
+            { id: 'pk-' + Date.now() + '-r', method: tt("Transfè resevwa soti nan {0}", pocket.name), amount: amt, ts: Date.now(), status: 'konfime', date: nowLabel(), type: 'depo', pocketId: pocketTransferTarget, kind: 'transfè-antre' },
             ...t,
           ]);
         }
-        flash('Transfè fèt.');
+        flash(tt("Transfè fèt."));
       }
       setPocketMode(null);
       setPocketAmount('');
@@ -2822,7 +2843,7 @@ export default function BlicPayApp() {
     });
     setProfileSaving(false);
     setView('settings');
-    flash('Pwofil ou mizajou.');
+    flash(tt("Pwofil ou mizajou."));
   }
 
   async function submitChangePassword() {
@@ -2866,7 +2887,7 @@ export default function BlicPayApp() {
       setSupportMessage('');
       flash(tr('supportSentMsg'));
     } catch (err) {
-      flash(err.message || 'Nou pa t ka voye mesaj ou a.', 'error');
+      flash(err.message || tt("Nou pa t ka voye mesaj ou a."), 'error');
     } finally {
       setSupportSending(false);
     }
@@ -2930,7 +2951,7 @@ export default function BlicPayApp() {
       window.location.href = data.url;
     } catch (e) {
       console.error('Didit start error:', e);
-      flash(e.message || 'Nou pa t ka kòmanse verifikasyon an. Eseye ankò.', 'error');
+      flash(e.message || tt("Nou pa t ka kòmanse verifikasyon an. Eseye ankò."), 'error');
       setKycSubmitting(false);
     }
   }
@@ -2974,7 +2995,7 @@ export default function BlicPayApp() {
           ? await compressImageFile(file)
           : await new Promise((resolve, reject) => {
               const reader = new FileReader();
-              reader.onerror = () => reject(new Error('Nou pa t ka li fichye a.'));
+              reader.onerror = () => reject(new Error(tt("Nou pa t ka li fichye a.")));
               reader.onload = () => resolve(reader.result);
               reader.readAsDataURL(file);
             });
@@ -2986,10 +3007,10 @@ export default function BlicPayApp() {
         method: 'POST', token, body: { fileData, fileMimeType },
       });
       setVrActive(null);
-      flash('Dokiman ou voye — n ap egzamine l.');
+      flash(tt("Dokiman ou voye — n ap egzamine l."));
       await loadVerificationRequests(token);
     } catch (e) {
-      setVrError(e.message || 'Nou pa t ka voye dokiman an.');
+      setVrError(e.message || tt("Nou pa t ka voye dokiman an."));
     } finally {
       setVrBusy(false);
     }
@@ -3025,12 +3046,12 @@ export default function BlicPayApp() {
   function timeAgo(dateStr) {
     const diffMs = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diffMs / 60000);
-    if (mins < 1) return 'kounye a';
-    if (mins < 60) return `sa gen ${mins} min`;
+    if (mins < 1) return tt("kounye a");
+    if (mins < 60) return tt("sa gen {0} min", mins);
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `sa gen ${hours}h`;
+    if (hours < 24) return tt("sa gen {0}h", hours);
     const days = Math.floor(hours / 24);
-    return `sa gen ${days}j`;
+    return tt("sa gen {0}j", days);
   }
 
   async function checkKycStatus() {
@@ -3040,11 +3061,11 @@ export default function BlicPayApp() {
       const s = data.verification?.status;
       setKycStatus(s === 'approved' ? 'verifye' : s === 'pending' ? 'annatant' : 'pa verifye');
       setAccountVerified(!!data.verified);
-      if (data.verified) flash('Kont ou verifye kounye a.');
-      else if (s === 'rejected') flash(data.verification?.rejectionReason || 'Demand verifikasyon w refize — eseye ankò.', 'error');
-      else flash('Pa gen chanjman.', 'info');
+      if (data.verified) flash(tt("Kont ou verifye kounye a."));
+      else if (s === 'rejected') flash(data.verification?.rejectionReason || tt("Demand verifikasyon w refize — eseye ankò."), 'error');
+      else flash(tt("Pa gen chanjman."), 'info');
     } catch (e) {
-      flash(e.message || 'Nou pa t ka verifye estati a.', 'error');
+      flash(e.message || tt("Nou pa t ka verifye estati a."), 'error');
     } finally {
       setRefreshing(false);
     }
@@ -3057,7 +3078,7 @@ export default function BlicPayApp() {
       if (token === DEMO_TOKEN) {
         await new Promise((r) => setTimeout(r, 700));
         if (previouslyPending === 0) {
-          flash('Pa gen nouvo chanjman.');
+          flash(tt("Pa gen nouvo chanjman."));
         } else {
           let confirmedAmount = 0;
           setTx((list) => list.map((t) => {
@@ -3065,15 +3086,15 @@ export default function BlicPayApp() {
             return t;
           }));
           setBalance((b) => b + confirmedAmount);
-          flash('Estati depo yo mizajou.');
+          flash(tt("Estati depo yo mizajou."));
         }
         return;
       }
       await loadWallet(token);
       if (previouslyPending === 0) {
-        flash('Pa gen nouvo chanjman.');
+        flash(tt("Pa gen nouvo chanjman."));
       } else {
-        flash('Estati depo yo mizajou.');
+        flash(tt("Estati depo yo mizajou."));
       }
     } catch (err) {
       flash(err.message, 'error');
@@ -3088,7 +3109,7 @@ export default function BlicPayApp() {
       const { groups } = await apiFetch('/sol/groups', { token });
       setSolGroups(groups);
     } catch (e) {
-      flash(e.message || 'Nou pa t ka chaje gwoup Sòl yo.', 'error');
+      flash(e.message || tt("Nou pa t ka chaje gwoup Sòl yo."), 'error');
     } finally {
       setLoadingSol(false);
     }
@@ -3099,7 +3120,7 @@ export default function BlicPayApp() {
       const { memberships } = await apiFetch('/sol/my', { token });
       setMySolMemberships(memberships);
     } catch (e) {
-      flash(e.message || 'Nou pa t ka chaje Sòl ou yo.', 'error');
+      flash(e.message || tt("Nou pa t ka chaje Sòl ou yo."), 'error');
     }
   }
 
@@ -3107,13 +3128,13 @@ export default function BlicPayApp() {
     setSolJoinProcessing(gid);
     try {
       await apiFetch(`/sol/groups/${gid}/request`, { method: 'POST', token });
-      flash('Demand ou voye — peye frè entegrasyon an kounye a pou admin ka egzamine l.');
+      flash(tt("Demand ou voye — peye frè entegrasyon an kounye a pou admin ka egzamine l."));
       await Promise.all([loadSolGroups(), loadMySol()]);
       // Voye kliyan an dirèkteman kote bouton "peye frè a" ye a — pa kite l
       // sou paj gwoup yo ak sèlman yon mesaj k ap disparèt pou l sonje pita.
       setSolSubView('mine');
     } catch (e) {
-      flash(e.message || 'Nou pa t ka voye demand lan.', 'error');
+      flash(e.message || tt("Nou pa t ka voye demand lan."), 'error');
     } finally {
       setSolJoinProcessing(null);
     }
@@ -3124,10 +3145,10 @@ export default function BlicPayApp() {
     try {
       const { fee } = await apiFetch(`/sol/memberships/${membershipId}/pay-integration-fee`, { method: 'POST', token });
       setBalance((b) => b - fee);
-      flash('Frè entegrasyon peye — n ap tann admin apwouve demand ou.');
+      flash(tt("Frè entegrasyon peye — n ap tann admin apwouve demand ou."));
       await loadMySol();
     } catch (e) {
-      flash(e.message || 'Nou pa t ka trete peman an.', 'error');
+      flash(e.message || tt("Nou pa t ka trete peman an."), 'error');
     } finally {
       setSolFeeProcessing(null);
     }
@@ -3154,7 +3175,7 @@ export default function BlicPayApp() {
       const { document: doc } = await apiFetch(`/sol/documents/${docId}`, { token });
       setViewingSolDocument(doc);
     } catch (e) {
-      flash(e.message || 'Nou pa t ka chaje dokiman an.', 'error');
+      flash(e.message || tt("Nou pa t ka chaje dokiman an."), 'error');
     }
   }
 
@@ -3226,7 +3247,7 @@ export default function BlicPayApp() {
             <div className="flex items-center gap-2">
               <Logo size={28} />
               <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 18 }}>
-                BLIC<span style={{ color: C.sky }}>Pay</span>
+                {tt("BLIC")}<span style={{ color: C.sky }}>{tt("Pay")}</span>
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -3239,7 +3260,7 @@ export default function BlicPayApp() {
                 <Settings size={15} color={C.muted} />
               </button>
               <div className="relative">
-                <button onClick={openNotifPanel} aria-label="Notifikasyon"
+                <button onClick={openNotifPanel} aria-label={tt("Notifikasyon")}
                   className="w-9 h-9 rounded-full flex items-center justify-center relative" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                   <Bell size={16} color={C.muted} />
                   {unreadCount > 0 && (
@@ -3257,9 +3278,9 @@ export default function BlicPayApp() {
                       background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, zIndex: 41,
                       boxShadow: '0 8px 24px rgba(11,27,51,0.15)',
                     }}>
-                      <p className="text-xs font-bold uppercase px-4 pt-3.5 pb-2" style={{ color: C.muted }}>Notifikasyon</p>
+                      <p className="text-xs font-bold uppercase px-4 pt-3.5 pb-2" style={{ color: C.muted }}>{tt("Notifikasyon")}</p>
                       {notifications.length === 0 ? (
-                        <p className="text-sm px-4 pb-4" style={{ color: C.muted }}>Ou pa gen notifikasyon.</p>
+                        <p className="text-sm px-4 pb-4" style={{ color: C.muted }}>{tt("Ou pa gen notifikasyon.")}</p>
                       ) : notifications.map((n, i) => (
                         <div key={n.id} className="px-4 py-3" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
                           <div className="flex items-start justify-between gap-2">
@@ -3305,9 +3326,9 @@ export default function BlicPayApp() {
             <div className="flex flex-col items-center text-center">
               <Logo size={44} />
               <h1 className="mt-3" style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>
-                BLIC<span style={{ color: C.sky }}>Pay</span>
+                {tt("BLIC")}<span style={{ color: C.sky }}>{tt("Pay")}</span>
               </h1>
-              <p className="mt-1 text-xs tracking-wide" style={{ color: C.muted }}>GLOBAL · SECURE · DIGITAL</p>
+              <p className="mt-1 text-xs tracking-wide" style={{ color: C.muted }}>{tt("GLOBAL · SECURE · DIGITAL")}</p>
             </div>
 
             <div className="mt-8 flex rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
@@ -3586,18 +3607,18 @@ export default function BlicPayApp() {
             <div className="flex items-center gap-1.5">
               <h1 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{user?.fullName || '...'}</h1>
               {accountVerified ? (
-                <span title="Kont verifye (KYC)"><BadgeCheck size={19} color={C.sky} fill={C.navy} /></span>
+                <span title={tt("Kont verifye (KYC)")}><BadgeCheck size={19} color={C.sky} fill={C.navy} /></span>
               ) : kycStatus === 'annatant' ? (
-                <Badge tone="amber">Annatant</Badge>
+                <Badge tone="amber">{tt("Annatant")}</Badge>
               ) : (
                 <button onClick={() => { setKycStep('entwo'); setView('kyc'); }} className="text-xs font-semibold underline" style={{ color: C.navy }}>
-                  Verifye kont ou
+                  {tt("Verifye kont ou")}
                 </button>
               )}
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">
               <p className="text-xs" style={{ ...fontMono, color: C.muted }}>ID: {getClientId(user)}</p>
-              <button onClick={() => { navigator.clipboard?.writeText(getClientId(user)); flash('ID kopye.'); }} aria-label="Kopye ID">
+              <button onClick={() => { navigator.clipboard?.writeText(getClientId(user)); flash(tt("ID kopye.")); }} aria-label={tt("Kopye ID")}>
                 <Copy size={12} color={C.muted} />
               </button>
               {user?.clientId && (
@@ -3619,7 +3640,7 @@ export default function BlicPayApp() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold tracking-wide" style={{ color: 'rgba(255,255,255,0.75)' }}>{tr('balanceLabel')}</span>
                   <div className="flex items-center gap-2.5">
-                    <button onClick={() => setHideBalance((h) => !h)} aria-label={hideBalance ? 'Montre sòld' : 'Kache sòld'}>
+                    <button onClick={() => setHideBalance((h) => !h)} aria-label={hideBalance ? tt("Montre sòld") : tt("Kache sòld")}>
                       {hideBalance
                         ? <EyeOff size={16} color="rgba(255,255,255,0.75)" />
                         : <Eye size={16} color="rgba(255,255,255,0.75)" />}
@@ -3631,7 +3652,7 @@ export default function BlicPayApp() {
                   <p style={{ ...fontMono, fontSize: 32, fontWeight: 500, color: '#fff' }}>
                     {hideBalance ? '••••••' : money(balance)}
                   </p>
-                  <button onClick={refreshTransactions} aria-label="Rafrechi sòld"
+                  <button onClick={refreshTransactions} aria-label={tt("Rafrechi sòld")}
                     className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
                     style={{ background: 'rgba(255,255,255,0.15)' }}>
                     <RefreshCw size={13} color="#fff" style={refreshing ? { animation: 'spin 0.8s linear infinite' } : undefined} />
@@ -3706,7 +3727,7 @@ export default function BlicPayApp() {
               </button>
               <button onClick={() => setView('loan')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center relative"
                 style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold" style={{ background: C.amber, color: '#fff' }}>Talè</span>
+                <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold" style={{ background: C.amber, color: '#fff' }}>{tt("Talè")}</span>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E6F0FB' }}>
                   <HandCoins size={16} color={C.navy} fill={C.navy} strokeWidth={1.4} />
                 </div>
@@ -3723,21 +3744,21 @@ export default function BlicPayApp() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold" style={{ color: '#946115' }}>
-                    {kycStatus === 'annatant' ? 'N ap verifye dokiman ou' : 'Verifye kont ou'}
+                    {kycStatus === 'annatant' ? tt("N ap verifye dokiman ou") : tt("Verifye kont ou")}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: '#946115' }}>
-                    {kycStatus === 'annatant' ? 'Sa ka pran kèk moman.' : 'Ajoute yon pyès idantite pou dekaplaf kont ou.'}
+                    {kycStatus === 'annatant' ? tt("Sa ka pran kèk moman.") : tt("Ajoute yon pyès idantite pou dekaplaf kont ou.")}
                   </p>
                 </div>
                 {kycStatus === 'annatant' ? (
-                  <button onClick={checkKycStatus} aria-label="Tcheke estati"
+                  <button onClick={checkKycStatus} aria-label={tt("Tcheke estati")}
                     className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: '#fff' }}>
                     <RefreshCw size={14} color="#946115" style={refreshing ? { animation: 'spin 0.8s linear infinite' } : undefined} />
                   </button>
                 ) : (
                   <button onClick={() => { setKycStep('entwo'); setView('kyc'); }}
                     className="text-xs font-semibold px-3 py-2 rounded-lg shrink-0" style={{ background: '#946115', color: '#fff' }}>
-                    Kòmanse
+                    {tt("Kòmanse")}
                   </button>
                 )}
               </div>
@@ -3752,10 +3773,10 @@ export default function BlicPayApp() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold" style={{ color: C.danger }}>
-                    {VR_TYPE_LABELS[r.type] || 'Dokiman mande'}
+                    {tt(VR_TYPE_LABELS[r.type]) || tt("Dokiman mande")}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: C.danger }}>
-                    {r.status === 'rejected' ? (r.rejectionReason || 'Refize — eseye ankò.') : (r.note || 'Yon admin mande sa a.')}
+                    {r.status === 'rejected' ? (r.rejectionReason || tt("Refize — eseye ankò.")) : (r.note || tt("Yon admin mande sa a."))}
                   </p>
                 </div>
                 <button
@@ -3764,7 +3785,7 @@ export default function BlicPayApp() {
                     else { setVrError(''); setVrActive(r); }
                   }}
                   className="text-xs font-semibold px-3 py-2 rounded-lg shrink-0" style={{ background: C.danger, color: '#fff' }}>
-                  {r.type === 'identity_reverify' ? 'Kòmanse' : 'Voye'}
+                  {r.type === 'identity_reverify' ? tt("Kòmanse") : tt("Voye")}
                 </button>
               </div>
             ))}
@@ -3774,8 +3795,8 @@ export default function BlicPayApp() {
                   <Clock size={16} color={C.muted} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold" style={{ color: C.navy }}>{VR_TYPE_LABELS[r.type] || 'Dokiman voye'}</p>
-                  <p className="text-xs mt-0.5" style={{ color: C.muted }}>N ap egzamine sa ou voye a.</p>
+                  <p className="text-sm font-semibold" style={{ color: C.navy }}>{tt(VR_TYPE_LABELS[r.type]) || tt("Dokiman voye")}</p>
+                  <p className="text-xs mt-0.5" style={{ color: C.muted }}>{tt("N ap egzamine sa ou voye a.")}</p>
                 </div>
               </div>
             ))}
@@ -3803,7 +3824,7 @@ export default function BlicPayApp() {
             </div>
             <div className="mt-3 flex items-center justify-center gap-1.5">
               {PROMO_SLIDES.map((_, i) => (
-                <button key={i} onClick={() => setPromoIndex(i)} aria-label={`Wè ofr ${i + 1}`}
+                <button key={i} onClick={() => setPromoIndex(i)} aria-label={tt("Wè ofr {0}", i + 1)}
                   className="rounded-full transition-all" style={{
                     width: i === promoIndex ? 16 : 6, height: 6,
                     background: i === promoIndex ? C.navy : C.border,
@@ -3817,7 +3838,7 @@ export default function BlicPayApp() {
               <h3 className="font-semibold text-sm" style={{ color: C.muted }}>{tr('recentTx')}</h3>
               {tx.length > 5 ? (
                 <button onClick={() => setView('history')} className="text-xs font-semibold" style={{ color: C.navy }}>
-                  Wè tout
+                  {tt("Wè tout")}
                 </button>
               ) : (
                 <Clock size={14} color={C.muted} />
@@ -3847,11 +3868,11 @@ export default function BlicPayApp() {
                         )}
                       </div>
                       <div>
-                      <p className="text-sm font-semibold">{t.method}</p>
+                      <p className="text-sm font-semibold">{tt(t.method)}</p>
                       <p className="text-xs mt-0.5" style={{ color: C.muted }}>
                         {t.date}
                         {TX_TYPE_LABELS[t.type] && (
-                          <> · <span style={{ color: TX_TYPE_LABELS[t.type].color, fontWeight: 600 }}>{TX_TYPE_LABELS[t.type].label}</span></>
+                          <> · <span style={{ color: TX_TYPE_LABELS[t.type].color, fontWeight: 600 }}>{tt(TX_TYPE_LABELS[t.type].label)}</span></>
                         )}
                       </p>
                       </div>
@@ -3861,7 +3882,7 @@ export default function BlicPayApp() {
                         {isOutgoing ? '-' : '+'}{money(t.amount)}
                       </span>
                       <Badge tone={t.status === 'konfime' ? 'mint' : t.status === 'rejte' ? 'danger' : 'amber'}>
-                        {t.status === 'konfime' ? 'Konfime' : t.status === 'rejte' ? 'Rejte' : 'Annatant'}
+                        {t.status === 'konfime' ? tt("Konfime") : t.status === 'rejte' ? tt("Rejte") : tt("Annatant")}
                       </Badge>
                     </div>
                   </div>
@@ -3881,26 +3902,26 @@ export default function BlicPayApp() {
                 else setView('dashboard');
               }}
               className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Retounen
+              <ArrowLeft size={15} /> {tt("Retounen")}
             </button>
 
             {solSubView === 'mine' && (
               <>
                 <div className="flex items-center justify-between">
-                  <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>Sòl <em style={{ fontStyle: 'italic', color: C.sky }}>mwen yo</em></h2>
+                  <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{tt("Sòl")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt("mwen yo")}</em></h2>
                   <button onClick={() => setSolSubView('browse')} className="text-xs font-semibold" style={{ color: C.navy }}>
-                    + Antre nan yon lòt
+                    {tt("+ Antre nan yon lòt")}
                   </button>
                 </div>
-                <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Ou gen {mySolMemberships.length} demand/adezyon Sòl.</p>
+                <p className="mt-1.5 text-sm" style={{ color: C.muted }}>{tt("Ou gen")} {mySolMemberships.length} {tt("demand/adezyon Sòl.")}</p>
                 <button onClick={openSolDocuments} className="mt-2 text-xs font-semibold flex items-center gap-1" style={{ color: C.navy }}>
-                  <FileText size={13} /> Dokiman Sòl mwen yo
+                  <FileText size={13} /> {tt("Dokiman Sòl mwen yo")}
                 </button>
                 <div className="mt-5 space-y-3">
                   {loadingSol ? (
-                    <p className="text-sm p-6 text-center" style={{ color: C.muted }}>Ap chaje...</p>
+                    <p className="text-sm p-6 text-center" style={{ color: C.muted }}>{tt("Ap chaje...")}</p>
                   ) : mySolMemberships.length === 0 ? (
-                    <p className="text-sm p-5 rounded-xl" style={{ color: C.muted, background: C.card, border: `1px solid ${C.border}` }}>Ou poko gen okenn demand Sòl.</p>
+                    <p className="text-sm p-5 rounded-xl" style={{ color: C.muted, background: C.card, border: `1px solid ${C.border}` }}>{tt("Ou poko gen okenn demand Sòl.")}</p>
                   ) : mySolMemberships.map((m) => (
                     <div key={m.id} className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                       <button onClick={() => openSolDetail(m.group.id)} className="bp-btn w-full text-left flex items-center justify-between">
@@ -3910,17 +3931,17 @@ export default function BlicPayApp() {
                             <Badge tone={m.group.tier === 'Premium' ? 'premium' : m.group.tier === 'Standard' ? 'navy' : 'muted'}>{m.group.tier}</Badge>
                           </div>
                           <p className="mt-1 text-xs" style={{ color: C.muted }}>
-                            {m.group.frequency} · {money(m.group.amount)}
+                            {tt(m.group.frequency)} · {money(m.group.amount)}
                           </p>
                           <Badge tone={m.status === 'approved' ? 'mint' : m.status === 'rejected' ? 'danger' : 'amber'}>
-                            {m.status === 'approved' ? 'Manm apwouve' : m.status === 'rejected' ? 'Refize' : 'Annatant'}
+                            {m.status === 'approved' ? tt("Manm apwouve") : m.status === 'rejected' ? tt("Refize") : tt("Annatant")}
                           </Badge>
                           {m.currentContribution && (
                             <Badge tone={m.currentContribution.status === 'paid' ? 'mint' : m.currentContribution.status === 'overdue' ? 'danger' : 'amber'}>
-                              {m.currentContribution.status === 'paid' ? 'Kotizasyon peye ✓'
-                                : m.currentContribution.status === 'overdue' ? 'Kotizasyon an reta serye'
-                                : m.currentContribution.status === 'late' ? 'Kotizasyon an reta'
-                                : 'Kotizasyon ap tann'}
+                              {m.currentContribution.status === 'paid' ? tt("Kotizasyon peye ✓")
+                                : m.currentContribution.status === 'overdue' ? tt("Kotizasyon an reta serye")
+                                : m.currentContribution.status === 'late' ? tt("Kotizasyon an reta")
+                                : tt("Kotizasyon ap tann")}
                             </Badge>
                           )}
                         </div>
@@ -3931,13 +3952,13 @@ export default function BlicPayApp() {
                         m.integrationFeePaid ? (
                           <div className="mt-3 flex items-center gap-2 p-2.5 rounded-lg" style={{ background: '#E4F5EF' }}>
                             <Check size={14} color={C.mint} />
-                            <p className="text-xs font-semibold" style={{ color: C.mint }}>Frè entegrasyon peye — n ap tann admin</p>
+                            <p className="text-xs font-semibold" style={{ color: C.mint }}>{tt("Frè entegrasyon peye — n ap tann admin")}</p>
                           </div>
                         ) : (
                           <button onClick={() => payIntegrationFee(m.id)} disabled={solFeeProcessing === m.id}
                             className="bp-btn mt-3 w-full py-2.5 rounded-lg text-sm font-semibold text-white"
                             style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: solFeeProcessing === m.id ? 0.7 : 1 }}>
-                            {solFeeProcessing === m.id ? 'Ap trete...' : `Peye frè entegrasyon an (${money(m.integrationFee)})`}
+                            {solFeeProcessing === m.id ? tt("Ap trete...") : tt("Peye frè entegrasyon an ({0})", money(m.integrationFee))}
                           </button>
                         )
                       )}
@@ -3949,17 +3970,17 @@ export default function BlicPayApp() {
 
             {solSubView === 'browse' && (
               <>
-                <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>BLIC <em style={{ fontStyle: 'italic', color: C.sky }}>Sòl</em></h2>
+                <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{tt("BLIC")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt("Sòl")}</em></h2>
                 <p className="mt-1.5 text-sm" style={{ color: C.muted }}>
-                  {mySolMemberships.length > 0 ? 'Ou ka antre nan plizyè sòl an menm tan.' : 'Ou poko manm okenn sòl. Chwazi youn pou kòmanse.'}
+                  {mySolMemberships.length > 0 ? tt("Ou ka antre nan plizyè sòl an menm tan.") : tt("Ou poko manm okenn sòl. Chwazi youn pou kòmanse.")}
                 </p>
 
                 <a href="https://blicpayht.com/BLIC_Global_Fiche_Solde_Remplissable.pdf" target="_blank" rel="noreferrer"
                   className="bp-btn mt-3 flex items-center gap-2.5 p-3 rounded-xl" style={{ background: '#E6F0FB' }}>
                   <FileText size={16} color={C.navy} className="shrink-0" />
                   <div className="text-left">
-                    <p className="text-xs font-semibold" style={{ color: C.navy }}>Telechaje fòm enskripsyon an</p>
-                    <p className="text-xs mt-0.5" style={{ color: C.muted }}>Ranpli l epi voye l pa email, WhatsApp, oswa nan biwo a.</p>
+                    <p className="text-xs font-semibold" style={{ color: C.navy }}>{tt("Telechaje fòm enskripsyon an")}</p>
+                    <p className="text-xs mt-0.5" style={{ color: C.muted }}>{tt("Ranpli l epi voye l pa email, WhatsApp, oswa nan biwo a.")}</p>
                   </div>
                 </a>
 
@@ -3970,7 +3991,7 @@ export default function BlicPayApp() {
                       style={solFreqFilter === f.id
                         ? { background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, color: '#fff' }
                         : { background: C.card, color: C.muted, border: `1px solid ${C.border}` }}>
-                      {f.label}
+                      {tt(f.label)}
                     </button>
                   ))}
                 </div>
@@ -3988,7 +4009,7 @@ export default function BlicPayApp() {
 
                 <div className="mt-4 space-y-3">
                   {loadingSol ? (
-                    <p className="text-sm p-6 text-center" style={{ color: C.muted }}>Ap chaje...</p>
+                    <p className="text-sm p-6 text-center" style={{ color: C.muted }}>{tt("Ap chaje...")}</p>
                   ) : solGroups.filter((g) => g.frequencyId === solFreqFilter && g.tierId === solTierFilter).map((g) => {
                     const isFull = !g.isOpen && g.myStatus !== 'approved' && g.myStatus !== 'pending';
                     const alreadyIn = !!g.myStatus;
@@ -4001,27 +4022,27 @@ export default function BlicPayApp() {
                           </div>
                           <Badge tone={!g.isOpen && !alreadyIn ? 'mint' : 'muted'}>{g.memberCount}/{g.maxMembers}</Badge>
                         </div>
-                        <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{g.frequency} · {money(g.amount)} pa moun</p>
+                        <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{tt(g.frequency)} · {money(g.amount)} {tt("pa moun")}</p>
                         <div className="mt-1.5 flex items-center justify-between rounded-lg px-2.5 py-1.5" style={{ background: C.bg }}>
-                          <span className="text-xs" style={{ color: C.muted }}>Frè entegrasyon</span>
+                          <span className="text-xs" style={{ color: C.muted }}>{tt("Frè entegrasyon")}</span>
                           <span className="text-xs font-semibold" style={{ color: C.ink }}>{money(g.integrationFee)}</span>
                         </div>
                         {!alreadyIn && (
                           <p className="mt-1.5 text-xs font-medium" style={{ color: !g.isOpen ? C.muted : C.amber }}>
-                            {!g.isOpen ? <><Lock size={11} className="inline mr-1" />Fèmen pou kounye a</> : `${g.maxMembers - g.memberCount} plas ki rete`}
+                            {!g.isOpen ? <><Lock size={11} className="inline mr-1" />{tt("Fèmen pou kounye a")}</> : tt("{0} plas ki rete", g.maxMembers - g.memberCount)}
                           </p>
                         )}
                         {alreadyIn ? (
                           <button onClick={() => openSolDetail(g.id)}
                             className="bp-btn mt-3 w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5"
                             style={{ background: C.bg, color: C.navy, border: `1px solid ${C.border}` }}>
-                            {g.myStatus === 'approved' ? 'Deja manm' : g.myStatus === 'rejected' ? 'Demand refize' : 'Demand annatant'} — wè detay <ChevronRight size={14} />
+                            {g.myStatus === 'approved' ? tt("Deja manm") : g.myStatus === 'rejected' ? tt("Demand refize") : tt("Demand annatant")} {tt("— wè detay")} <ChevronRight size={14} />
                           </button>
                         ) : (
                           <button onClick={() => requestJoinSol(g.id)} disabled={!g.isOpen || solJoinProcessing === g.id}
                             className="bp-btn mt-3 w-full py-2.5 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-1.5"
                             style={{ background: !g.isOpen ? C.border : `linear-gradient(135deg, ${C.navy}, ${C.sky})`, color: !g.isOpen ? C.muted : '#fff', cursor: !g.isOpen ? 'not-allowed' : 'pointer', opacity: solJoinProcessing === g.id ? 0.7 : 1 }}>
-                            {solJoinProcessing === g.id ? 'Ap voye...' : !g.isOpen ? <><Lock size={13} /> Fèmen pou kounye a</> : <>Antre nan sòl la <ChevronRight size={14} /></>}
+                            {solJoinProcessing === g.id ? tt("Ap voye...") : !g.isOpen ? <><Lock size={13} /> {tt("Fèmen pou kounye a")}</> : <>{tt("Antre nan sòl la")} <ChevronRight size={14} /></>}
                           </button>
                         )}
                       </div>
@@ -4039,19 +4060,19 @@ export default function BlicPayApp() {
                     {userSolGroup.tier}
                   </Badge>
                 </div>
-                <p className="mt-1 text-sm" style={{ color: C.muted }}>{userSolGroup.frequency} · {money(userSolGroup.amount)} pa moun</p>
+                <p className="mt-1 text-sm" style={{ color: C.muted }}>{tt(userSolGroup.frequency)} · {money(userSolGroup.amount)} {tt("pa moun")}</p>
 
                 {userSolMembership && (
                   <div className="mt-4 p-4 rounded-xl flex items-center gap-3" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                     <Badge tone={userSolMembership.status === 'approved' ? 'mint' : userSolMembership.status === 'rejected' ? 'danger' : 'amber'}>
-                      {userSolMembership.status === 'approved' ? 'Manm apwouve' : userSolMembership.status === 'rejected' ? 'Demand refize' : 'Demand annatant'}
+                      {userSolMembership.status === 'approved' ? tt("Manm apwouve") : userSolMembership.status === 'rejected' ? tt("Demand refize") : tt("Demand annatant")}
                     </Badge>
                     {userSolMembership.status === 'approved' && userSolMembership.turnIndex != null && (
                       <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0" style={{ background: C.navy, color: '#fff' }}>
                           {userSolMembership.turnIndex + 1}
                         </div>
-                        <p className="text-xs" style={{ color: C.muted }}>Pozisyon ou nan wotasyon an</p>
+                        <p className="text-xs" style={{ color: C.muted }}>{tt("Pozisyon ou nan wotasyon an")}</p>
                       </div>
                     )}
                   </div>
@@ -4072,13 +4093,13 @@ export default function BlicPayApp() {
                   userSolMembership.integrationFeePaid ? (
                     <div className="mt-3 flex items-center gap-2 p-3 rounded-xl" style={{ background: '#E4F5EF' }}>
                       <Check size={15} color={C.mint} />
-                      <p className="text-sm font-semibold" style={{ color: C.mint }}>Frè entegrasyon peye — n ap tann admin egzamine demand ou</p>
+                      <p className="text-sm font-semibold" style={{ color: C.mint }}>{tt("Frè entegrasyon peye — n ap tann admin egzamine demand ou")}</p>
                     </div>
                   ) : (
                     <button onClick={() => payIntegrationFee(userSolMembership.id)} disabled={solFeeProcessing === userSolMembership.id}
                       className="bp-btn mt-3 w-full py-3 rounded-xl text-sm font-semibold text-white"
                       style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: solFeeProcessing === userSolMembership.id ? 0.7 : 1 }}>
-                      {solFeeProcessing === userSolMembership.id ? 'Ap trete...' : `Peye frè entegrasyon an (${money(userSolMembership.integrationFee)})`}
+                      {solFeeProcessing === userSolMembership.id ? tt("Ap trete...") : tt("Peye frè entegrasyon an ({0})", money(userSolMembership.integrationFee))}
                     </button>
                   )
                 )}
@@ -4091,10 +4112,10 @@ export default function BlicPayApp() {
                       <p className="text-sm font-semibold" style={{
                         color: userSolMembership.currentContribution.status === 'paid' ? C.mint : userSolMembership.currentContribution.status === 'overdue' ? C.danger : '#946115',
                       }}>
-                        {userSolMembership.currentContribution.status === 'paid' ? 'Kotizasyon mwa sa a peye ✓'
-                          : userSolMembership.currentContribution.status === 'overdue' ? 'Kotizasyon an reta serye'
-                          : userSolMembership.currentContribution.status === 'late' ? 'Kotizasyon an reta'
-                          : 'Kotizasyon mwa sa a ap tann'}
+                        {userSolMembership.currentContribution.status === 'paid' ? tt("Kotizasyon mwa sa a peye ✓")
+                          : userSolMembership.currentContribution.status === 'overdue' ? tt("Kotizasyon an reta serye")
+                          : userSolMembership.currentContribution.status === 'late' ? tt("Kotizasyon an reta")
+                          : tt("Kotizasyon mwa sa a ap tann")}
                       </p>
                       <p className="text-sm font-semibold" style={{ color: C.ink }}>
                         {money(userSolMembership.currentContribution.amount + (userSolMembership.currentContribution.penaltyAmount || 0))}
@@ -4102,12 +4123,12 @@ export default function BlicPayApp() {
                     </div>
                     {userSolMembership.currentContribution.penaltyAmount > 0 && (
                       <p className="mt-1 text-xs" style={{ color: '#946115' }}>
-                        Sa gen ladan {money(userSolMembership.currentContribution.penaltyAmount)} penalite pou reta.
+                        {tt("Sa gen ladan")} {money(userSolMembership.currentContribution.penaltyAmount)} {tt("penalite pou reta.")}
                       </p>
                     )}
                     {userSolMembership.currentContribution.status === 'overdue' && (
                       <p className="mt-1 text-xs" style={{ color: C.danger }}>
-                        Delè gras la pase — yon admin BLICPay ap kontakte w byento.
+                        {tt("Delè gras la pase — yon admin BLICPay ap kontakte w byento.")}
                       </p>
                     )}
                   </div>
@@ -4117,50 +4138,50 @@ export default function BlicPayApp() {
                   <div className="mt-3 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#E6F0FB', color: C.navy }}>
                     <Calendar size={15} className="shrink-0 mt-0.5" />
                     <div>
-                      <p>Dat limit kotizasyon: <strong>{userSolMembership.currentPeriodDates.deadline}</strong></p>
-                      <p className="mt-0.5">Dat prevwa vèsman: <strong>{userSolMembership.currentPeriodDates.payoutDate}</strong></p>
+                      <p>{tt("Dat limit kotizasyon:")} <strong>{userSolMembership.currentPeriodDates.deadline}</strong></p>
+                      <p className="mt-0.5">{tt("Dat prevwa vèsman:")} <strong>{userSolMembership.currentPeriodDates.payoutDate}</strong></p>
                     </div>
                   </div>
                 ) : (
                   <div className="mt-3 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#FBF0DE', color: '#946115' }}>
                     <AlertCircle size={15} className="shrink-0 mt-0.5" />
-                    Dat ak montan peman rotasyon an ap anonse pa BLICPay pita.
+                    {tt("Dat ak montan peman rotasyon an ap anonse pa BLICPay pita.")}
                   </div>
                 )}
 
                 <button onClick={openSolDocuments}
                   className="bp-btn mt-4 w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5"
                   style={{ background: C.card, color: C.navy, border: `1px solid ${C.border}` }}>
-                  <FileText size={15} /> Dokiman Sòl mwen yo
+                  <FileText size={15} /> {tt("Dokiman Sòl mwen yo")}
                 </button>
               </>
             )}
 
             {solSubView === 'documents' && (
               <>
-                <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>Dokiman <em style={{ fontStyle: 'italic', color: C.sky }}>Sòl mwen yo</em></h2>
-                <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Dokiman ou siyen pou chak Sòl — ou ka gade yo, ou pa ka modifye yo.</p>
+                <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{tt("Dokiman")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt("Sòl mwen yo")}</em></h2>
+                <p className="mt-1.5 text-sm" style={{ color: C.muted }}>{tt("Dokiman ou siyen pou chak Sòl — ou ka gade yo, ou pa ka modifye yo.")}</p>
 
                 <a href="https://blicpayht.com/BLIC_Global_Fiche_Solde_Remplissable.pdf" target="_blank" rel="noreferrer"
                   className="bp-btn mt-3 flex items-center gap-2.5 p-3 rounded-xl" style={{ background: '#E6F0FB' }}>
                   <FileText size={16} color={C.navy} className="shrink-0" />
                   <div className="text-left">
-                    <p className="text-xs font-semibold" style={{ color: C.navy }}>Telechaje fòm enskripsyon an</p>
-                    <p className="text-xs mt-0.5" style={{ color: C.muted }}>Ranpli l epi voye l pa email, WhatsApp, oswa nan biwo a.</p>
+                    <p className="text-xs font-semibold" style={{ color: C.navy }}>{tt("Telechaje fòm enskripsyon an")}</p>
+                    <p className="text-xs mt-0.5" style={{ color: C.muted }}>{tt("Ranpli l epi voye l pa email, WhatsApp, oswa nan biwo a.")}</p>
                   </div>
                 </a>
 
                 <div className="mt-5 space-y-4">
                   {mySolMemberships.length === 0 ? (
-                    <p className="text-sm p-5 rounded-xl" style={{ color: C.muted, background: C.card, border: `1px solid ${C.border}` }}>Ou poko gen okenn demand Sòl.</p>
+                    <p className="text-sm p-5 rounded-xl" style={{ color: C.muted, background: C.card, border: `1px solid ${C.border}` }}>{tt("Ou poko gen okenn demand Sòl.")}</p>
                   ) : mySolMemberships.map((m) => (
                     <div key={m.id} className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-sm">{m.group.name}</h3>
-                        <Badge tone={m.formApproved ? 'mint' : 'amber'}>{m.formApproved ? 'Konfime' : 'Annatant'}</Badge>
+                        <Badge tone={m.formApproved ? 'mint' : 'amber'}>{m.formApproved ? tt("Konfime") : tt("Annatant")}</Badge>
                       </div>
                       {(m.documents || []).length === 0 ? (
-                        <p className="mt-2 text-xs" style={{ color: C.muted }}>Poko gen dokiman telechaje pou Sòl sa a.</p>
+                        <p className="mt-2 text-xs" style={{ color: C.muted }}>{tt("Poko gen dokiman telechaje pou Sòl sa a.")}</p>
                       ) : (
                         <div className="mt-2.5 flex flex-col gap-2">
                           {m.documents.map((doc) => (
@@ -4192,7 +4213,7 @@ export default function BlicPayApp() {
               borderRadius: 16, zIndex: 51, padding: 20, maxWidth: 420, margin: '0 auto',
             }}>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-bold">{VR_TYPE_LABELS[vrActive.type] || 'Voye dokiman'}</p>
+                <p className="text-sm font-bold">{tt(VR_TYPE_LABELS[vrActive.type]) || tt("Voye dokiman")}</p>
                 <button onClick={() => !vrBusy && setVrActive(null)} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: C.bg }}>
                   <X size={14} color={C.muted} />
                 </button>
@@ -4202,11 +4223,11 @@ export default function BlicPayApp() {
               <label className="flex flex-col items-center justify-center gap-2 rounded-xl py-8 cursor-pointer"
                 style={{ border: `1.5px dashed ${C.border}`, background: C.bg }}>
                 <FileText size={22} color={C.muted} />
-                <span className="text-xs font-semibold" style={{ color: C.navy }}>Chwazi yon foto oswa PDF</span>
+                <span className="text-xs font-semibold" style={{ color: C.navy }}>{tt("Chwazi yon foto oswa PDF")}</span>
                 <input type="file" accept="image/*,application/pdf" className="hidden" disabled={vrBusy}
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) submitVerificationRequest(vrActive.id, f); }} />
               </label>
-              {vrBusy && <p className="text-xs text-center mt-3" style={{ color: C.muted }}>Ap voye...</p>}
+              {vrBusy && <p className="text-xs text-center mt-3" style={{ color: C.muted }}>{tt("Ap voye...")}</p>}
             </div>
           </>
         )}
@@ -4234,7 +4255,7 @@ export default function BlicPayApp() {
                       <FileText size={28} color={C.navy} />
                     </div>
                     <p className="text-sm text-center px-6" style={{ color: C.muted }}>
-                      Dokiman sa a se yon fichye PDF — louvri l pou ka gade l byen.
+                      {tt("Dokiman sa a se yon fichye PDF — louvri l pou ka gade l byen.")}
                     </p>
                     <button
                       onClick={() => {
@@ -4246,12 +4267,12 @@ export default function BlicPayApp() {
                           const url = URL.createObjectURL(blob);
                           window.open(url, '_blank');
                         } catch (e) {
-                          flash('Nou pa t ka louvri dokiman an.', 'error');
+                          flash(tt("Nou pa t ka louvri dokiman an."), 'error');
                         }
                       }}
                       className="bp-btn px-5 py-3 rounded-xl text-sm font-semibold text-white"
                       style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-                      Louvri dokiman an
+                      {tt("Louvri dokiman an")}
                     </button>
                   </div>
                 )}
@@ -4276,28 +4297,28 @@ export default function BlicPayApp() {
                       <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.18)' }}>
                         <ShieldCheck size={15} color="#fff" />
                       </div>
-                      <span className="text-white text-sm font-semibold">BLICPay Sekirite</span>
+                      <span className="text-white text-sm font-semibold">{tt("BLICPay Sekirite")}</span>
                     </div>
                     {pinScreen === 'withdraw' && pendingWithdraw ? (
                       <>
-                        <p style={{ position: 'relative', margin: '16px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>Konfime retrè</p>
+                        <p style={{ position: 'relative', margin: '16px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>{tt("Konfime retrè")}</p>
                         <p style={{ position: 'relative', margin: '2px 0 0', color: '#fff', fontSize: 28, fontWeight: 700 }}>{money(pendingWithdraw.amount)}</p>
-                        <p style={{ position: 'relative', margin: '2px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>Vè {pendingWithdraw.method.name}</p>
+                        <p style={{ position: 'relative', margin: '2px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>{tt("Vè")} {pendingWithdraw.method.name}</p>
                         <div style={{ position: 'relative', marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
                           <div className="flex items-center justify-between">
-                            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11.5 }}>Frè</span>
-                            <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: 11.5 }}>{pendingWithdraw.fee > 0 ? money(pendingWithdraw.fee) : 'Gratis'}</span>
+                            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11.5 }}>{tt("Frè")}</span>
+                            <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: 11.5 }}>{pendingWithdraw.fee > 0 ? money(pendingWithdraw.fee) : tt("Gratis")}</span>
                           </div>
                           <div className="flex items-center justify-between" style={{ marginTop: 2 }}>
-                            <span style={{ color: '#fff', fontSize: 12.5, fontWeight: 600 }}>Total ki soti nan balans ou</span>
+                            <span style={{ color: '#fff', fontSize: 12.5, fontWeight: 600 }}>{tt("Total ki soti nan balans ou")}</span>
                             <span style={{ color: '#fff', fontSize: 12.5, fontWeight: 700 }}>{money(pendingWithdraw.amount + (pendingWithdraw.fee || 0))}</span>
                           </div>
                         </div>
                       </>
                     ) : (
                       <>
-                        <p style={{ position: 'relative', margin: '16px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>Premye etap</p>
-                        <p style={{ position: 'relative', margin: '2px 0 0', color: '#fff', fontSize: 18, fontWeight: 700 }}>Kreye kòd PIN ou</p>
+                        <p style={{ position: 'relative', margin: '16px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>{tt("Premye etap")}</p>
+                        <p style={{ position: 'relative', margin: '2px 0 0', color: '#fff', fontSize: 18, fontWeight: 700 }}>{tt("Kreye kòd PIN ou")}</p>
                       </>
                     )}
                   </div>
@@ -4308,20 +4329,20 @@ export default function BlicPayApp() {
                     <div className="w-15 h-15 rounded-full flex items-center justify-center mx-auto" style={{ position: 'relative', width: 60, height: 60, background: 'rgba(255,255,255,0.15)', fontSize: 20, fontWeight: 700, color: '#fff' }}>
                       {(user?.fullName || '').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()}
                     </div>
-                    <p style={{ position: 'relative', margin: '12px 0 0', color: '#fff', fontSize: 15, fontWeight: 600 }}>Byenvini, {(user?.fullName || '').split(' ')[0]}</p>
-                    <p style={{ position: 'relative', margin: '3px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>BLICPay</p>
+                    <p style={{ position: 'relative', margin: '12px 0 0', color: '#fff', fontSize: 15, fontWeight: 600 }}>{tt("Byenvini,")} {(user?.fullName || '').split(' ')[0]}</p>
+                    <p style={{ position: 'relative', margin: '3px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>{tt("BLICPay")}</p>
                   </div>
                 )}
 
                 <div style={{ padding: '22px 20px 24px' }}>
                   {pinScreen === 'setup' && (
                     <input type="password" value={pinSetupPassword} onChange={(e) => setPinSetupPassword(e.target.value)}
-                      placeholder="Modpas kont ou (pou konfime)"
+                      placeholder={tt("Modpas kont ou (pou konfime)")}
                       className="w-full mb-4 px-3 py-2.5 rounded-lg text-sm" style={{ border: `1px solid ${C.border}` }} />
                   )}
 
                   <p className="text-center text-sm mb-3.5" style={{ color: C.ink }}>
-                    {pinScreen === 'setup' ? 'Chwazi yon kòd PIN 4 chif' : pinScreen === 'unlock' ? 'Antre kòd PIN ou pou kontinye' : 'Antre kòd PIN 4 chif ou'}
+                    {pinScreen === 'setup' ? tt("Chwazi yon kòd PIN 4 chif") : pinScreen === 'unlock' ? tt("Antre kòd PIN ou pou kontinye") : tt("Antre kòd PIN 4 chif ou")}
                   </p>
 
                   <div className="flex justify-center gap-3.5 mb-5">
@@ -4358,24 +4379,24 @@ export default function BlicPayApp() {
                     <button onClick={submitPinSetup} disabled={pinBusy}
                       className="bp-btn mt-4 w-full py-2.5 rounded-lg text-sm font-semibold text-white"
                       style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: pinBusy ? 0.7 : 1 }}>
-                      {pinBusy ? 'Ap konfime...' : 'Kreye kòd PIN'}
+                      {pinBusy ? tt("Ap konfime...") : tt("Kreye kòd PIN")}
                     </button>
                   )}
 
                   {pinScreen === 'unlock' ? (
                     <button onClick={() => { localStorage.removeItem('blicpay_session'); window.location.reload(); }}
                       className="mt-4 w-full text-center text-xs font-semibold" style={{ color: C.navy, background: 'transparent', border: 'none' }}>
-                      Sòti — konekte ak modpas ou pito
+                      {tt("Sòti — konekte ak modpas ou pito")}
                     </button>
                   ) : (
                     <button onClick={cancelPinScreen} className="mt-4 w-full text-center text-xs font-semibold" style={{ color: C.muted, background: 'transparent', border: 'none' }}>
-                      Anile
+                      {tt("Anile")}
                     </button>
                   )}
 
                   <div className="flex items-center justify-center gap-1.5 mt-4">
                     <Lock size={12} color={C.muted} />
-                    <p className="text-xs" style={{ color: C.muted }}>Kòd sa a rete ant ou ak BLICPay sèlman</p>
+                    <p className="text-xs" style={{ color: C.muted }}>{tt("Kòd sa a rete ant ou ak BLICPay sèlman")}</p>
                   </div>
                 </div>
               </div>
@@ -4387,16 +4408,16 @@ export default function BlicPayApp() {
         {view === 'kyc' && kycStep === 'entwo' && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('dashboard')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Retounen
+              <ArrowLeft size={15} /> {tt("Retounen")}
             </button>
 
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
                 <ShieldCheck size={28} color="#fff" />
               </div>
-              <h2 className="mt-3" style={{ ...fontDisplay, fontWeight: 800, fontSize: 20 }}>Verifye <em style={{ fontStyle: 'italic', color: C.sky }}>idantite ou</em></h2>
+              <h2 className="mt-3" style={{ ...fontDisplay, fontWeight: 800, fontSize: 20 }}>{tt("Verifye@@verb")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt("idantite ou")}</em></h2>
               <p className="mt-1.5 text-sm max-w-xs" style={{ color: C.muted }}>
-                Nou sèvi ak yon patnè sekirize (Didit) pou verifye dokiman w ak yon foto vivan — pran sèlman kèk minit.
+                {tt("Nou sèvi ak yon patnè sekirize (Didit) pou verifye dokiman w ak yon foto vivan — pran sèlman kèk minit.")}
               </p>
             </div>
 
@@ -4414,9 +4435,9 @@ export default function BlicPayApp() {
 
             <div className="mt-6 flex flex-col gap-3">
               {[
-                'Prepare paspò w, CIN, oswa lisans chofè w.',
-                'Ou pral pran yon foto dokiman an ak yon selfi vivan sou platfòm Didit.',
-                'Rezilta a rive an kèk minit — men yon admin BLICPay dwe konfime l anvan kont ou verifye nèt.',
+                tt("Prepare paspò w, CIN, oswa lisans chofè w."),
+                tt("Ou pral pran yon foto dokiman an ak yon selfi vivan sou platfòm Didit."),
+                tt("Rezilta a rive an kèk minit — men yon admin BLICPay dwe konfime l anvan kont ou verifye nèt."),
               ].map((tip, i) => (
                 <div key={i} className="flex items-start gap-2.5">
                   <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: C.bg }}>
@@ -4430,10 +4451,10 @@ export default function BlicPayApp() {
             <button onClick={startDiditVerification} disabled={kycSubmitting}
               className="bp-btn mt-7 w-full py-3.5 rounded-xl font-semibold text-white"
               style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: kycSubmitting ? 0.7 : 1 }}>
-              {kycSubmitting ? 'Ap prepare...' : 'Kòmanse verifikasyon'}
+              {kycSubmitting ? tt("Ap prepare...") : tt("Kòmanse verifikasyon")}
             </button>
             <p className="mt-3 text-xs text-center" style={{ color: C.muted }}>
-              Ou pral kite BLICPay pou yon moman pou konplete verifikasyon an sou Didit.
+              {tt("Ou pral kite BLICPay pou yon moman pou konplete verifikasyon an sou Didit.")}
             </p>
           </div>
         )}
@@ -4444,28 +4465,28 @@ export default function BlicPayApp() {
               <Check size={38} color="#fff" />
             </div>
             <h2 className="mt-5" style={{ ...fontDisplay, fontWeight: 800, fontSize: 21 }}>
-              Verifikasyon <em style={{ fontStyle: 'italic', color: C.mint }}>resevwa</em>
+              {tt("Verifikasyon")} <em style={{ fontStyle: 'italic', color: C.mint }}>{tt("resevwa")}</em>
             </h2>
             <p className="mt-2 text-sm max-w-xs" style={{ color: C.muted }}>
-              Nou resevwa rezilta verifikasyon w. Yon admin BLICPay ap egzamine l anvan konfimasyon final — sa ka pran kèk moman jiska kèk èdtan.
+              {tt("Nou resevwa rezilta verifikasyon w. Yon admin BLICPay ap egzamine l anvan konfimasyon final — sa ka pran kèk moman jiska kèk èdtan.")}
             </p>
 
             <div className="mt-7 w-full max-w-xs p-4 rounded-xl text-left" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-              <p className="text-xs font-bold uppercase" style={{ color: C.muted }}>Pwochèn etap</p>
+              <p className="text-xs font-bold uppercase" style={{ color: C.muted }}>{tt("Pwochèn etap")}</p>
               <div className="mt-3 flex items-start gap-2.5">
                 <Badge tone="amber">1</Badge>
-                <p className="text-sm mt-0.5">Admin BLICPay ap egzamine rapò verifikasyon an.</p>
+                <p className="text-sm mt-0.5">{tt("Admin BLICPay ap egzamine rapò verifikasyon an.")}</p>
               </div>
               <div className="mt-2.5 flex items-start gap-2.5">
                 <Badge tone="amber">2</Badge>
-                <p className="text-sm mt-0.5">W ap resevwa yon notifikasyon lè estati w chanje.</p>
+                <p className="text-sm mt-0.5">{tt("W ap resevwa yon notifikasyon lè estati w chanje.")}</p>
               </div>
             </div>
 
             <button onClick={() => setView('dashboard')}
               className="bp-btn mt-8 w-full max-w-xs py-3.5 rounded-xl font-semibold text-white"
               style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-              Retounen nan akèy
+              {tt("Retounen nan akèy")}
             </button>
           </div>
         )}
@@ -4473,15 +4494,15 @@ export default function BlicPayApp() {
         {view === 'blicdepo' && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('dashboard')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Retounen
+              <ArrowLeft size={15} /> {tt("Retounen")}
             </button>
             <div className="flex items-center justify-between">
-              <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>BLIC <em style={{ fontStyle: 'italic', color: C.sky }}>Depo</em></h2>
+              <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{tt("BLIC")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt("Depo")}</em></h2>
               <button onClick={() => { setShowNewPocket((s) => !s); setShowAddMoney(false); }} className="text-xs font-semibold flex items-center gap-1" style={{ color: C.navy }}>
-                <Plus size={13} /> Nouvo pòch
+                <Plus size={13} /> {tt("Nouvo pòch")}
               </button>
             </div>
-            <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Epay, transfere, epi retire lajan ou nan pòch separe.</p>
+            <p className="mt-1.5 text-sm" style={{ color: C.muted }}>{tt("Epay, transfere, epi retire lajan ou nan pòch separe.")}</p>
 
             <button onClick={() => {
               setAddMoneyPocketId(pockets[0]?.id || null);
@@ -4491,16 +4512,16 @@ export default function BlicPayApp() {
             }}
               className="bp-btn mt-4 w-full py-3 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2"
               style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-              <ArrowDownLeft size={16} /> Ajoute lajan
+              <ArrowDownLeft size={16} /> {tt("Ajoute lajan")}
             </button>
 
             {showAddMoney && (
               <div className="mt-3 p-4 rounded-xl space-y-2.5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                 {pockets.length === 0 ? (
-                  <p className="text-sm" style={{ color: C.muted }}>Kreye yon pòch anvan pou ka ajoute lajan.</p>
+                  <p className="text-sm" style={{ color: C.muted }}>{tt("Kreye yon pòch anvan pou ka ajoute lajan.")}</p>
                 ) : (
                   <>
-                    <p className="text-xs font-semibold" style={{ color: C.muted }}>NAN KIYÈS PÒCH</p>
+                    <p className="text-xs font-semibold" style={{ color: C.muted }}>{tt("NAN KIYÈS PÒCH")}</p>
                 <div className="space-y-2">
                   {pockets.map((p) => (
                     <button key={p.id} onClick={() => setAddMoneyPocketId(p.id)}
@@ -4511,7 +4532,7 @@ export default function BlicPayApp() {
                     </button>
                   ))}
                 </div>
-                <p className="text-xs font-semibold pt-1" style={{ color: C.muted }}>MONTAN (SOTI NAN KONT PRENSIPAL)</p>
+                <p className="text-xs font-semibold pt-1" style={{ color: C.muted }}>{tt("MONTAN (SOTI NAN KONT PRENSIPAL)")}</p>
                 <div className="relative">
                   <input value={addMoneyAmount} onChange={(e) => setAddMoneyAmount(e.target.value.replace(/[^0-9.]/g, ''))}
                     placeholder="0.00" inputMode="decimal"
@@ -4520,12 +4541,12 @@ export default function BlicPayApp() {
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 font-semibold text-xs" style={{ color: C.muted }}>HTG</span>
                 </div>
                 <p className="text-xs" style={{ color: C.muted }}>
-                  Sòld disponib: <span style={{ ...fontMono, color: C.ink, fontWeight: 600 }}>{money(balance)}</span>
+                  {tt("Sòld disponib:")} <span style={{ ...fontMono, color: C.ink, fontWeight: 600 }}>{money(balance)}</span>
                 </p>
                 <button onClick={addMoneyToPocket} disabled={addMoneyProcessing}
                   className="bp-btn w-full py-2.5 rounded-lg text-sm font-semibold text-white"
                   style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: addMoneyProcessing ? 0.7 : 1 }}>
-                  {addMoneyProcessing ? 'Ap trete...' : 'Konfime'}
+                  {addMoneyProcessing ? tt("Ap trete...") : tt("Konfime@@btn")}
                 </button>
                   </>
                 )}
@@ -4535,15 +4556,15 @@ export default function BlicPayApp() {
             {showNewPocket && (
               <div className="mt-4 p-4 rounded-xl space-y-2.5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                 <input value={newPocketName} onChange={(e) => setNewPocketName(e.target.value)}
-                  placeholder="Non pòch la (egz. Lekòl)"
+                  placeholder={tt("Non pòch la (egz. Lekòl)")}
                   className="w-full px-3.5 py-2.5 rounded-lg text-sm" style={{ background: C.bg, border: `1px solid ${C.border}` }} />
                 <input value={newPocketTarget} onChange={(e) => setNewPocketTarget(e.target.value.replace(/[^0-9]/g, ''))}
-                  placeholder="Objektif an HTG (opsyonèl)"
+                  placeholder={tt("Objektif an HTG (opsyonèl)")}
                   className="w-full px-3.5 py-2.5 rounded-lg text-sm" style={{ background: C.bg, border: `1px solid ${C.border}` }} />
                 <button onClick={createPocket}
                   className="bp-btn w-full py-2.5 rounded-lg text-sm font-semibold text-white"
                   style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-                  Kreye pòch la
+                  {tt("Kreye pòch la")}
                 </button>
               </div>
             )}
@@ -4570,10 +4591,10 @@ export default function BlicPayApp() {
                         <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: C.bg }}>
                           <div style={{ width: `${pct}%`, height: '100%', background: C.mint }} />
                         </div>
-                        <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{pct}% sou objektif {money(p.target)}</p>
+                        <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{pct}{tt("% sou objektif")} {money(p.target)}</p>
                       </>
                     ) : (
-                      <p className="mt-1.5 text-xs" style={{ color: C.muted }}>Pa gen objektif mete</p>
+                      <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{tt("Pa gen objektif mete")}</p>
                     )}
                   </button>
                 );
@@ -4591,7 +4612,7 @@ export default function BlicPayApp() {
           return (
             <div className="fadein px-5 pb-10 pt-2">
               <button onClick={() => { setPocketMode(null); setView('blicdepo'); }} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-                <ArrowLeft size={15} /> Retounen
+                <ArrowLeft size={15} /> {tt("Retounen")}
               </button>
 
               <div className="flex flex-col items-center text-center">
@@ -4605,7 +4626,7 @@ export default function BlicPayApp() {
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background: C.bg }}>
                       <div style={{ width: `${pct}%`, height: '100%', background: C.mint }} />
                     </div>
-                    <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{pct}% sou objektif {money(pocket.target)}</p>
+                    <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{pct}{tt("% sou objektif")} {money(pocket.target)}</p>
                   </div>
                 )}
               </div>
@@ -4617,29 +4638,29 @@ export default function BlicPayApp() {
                     <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E4F5EF' }}>
                       <ArrowDownLeft size={16} color={C.mint} />
                     </div>
-                    <span className="text-xs font-semibold">Epay</span>
+                    <span className="text-xs font-semibold">{tt("Epay")}</span>
                   </button>
                   <button onClick={() => setPocketMode('transfer')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
                     style={{ background: C.card, border: `1px solid ${C.border}` }}>
                     <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E6F0FB' }}>
                       <ArrowLeftRight size={16} color={C.navy} />
                     </div>
-                    <span className="text-xs font-semibold">Transfere</span>
+                    <span className="text-xs font-semibold">{tt("Transfere")}</span>
                   </button>
                   <button onClick={() => setPocketMode('spend')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
                     style={{ background: C.card, border: `1px solid ${C.border}` }}>
                     <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#FBEAEA' }}>
                       <ArrowUpRight size={16} color={C.danger} />
                     </div>
-                    <span className="text-xs font-semibold">Retire</span>
+                    <span className="text-xs font-semibold">{tt("Retire")}</span>
                   </button>
                 </div>
               ) : (
                 <div className="mt-6">
                   <p className="text-xs font-semibold mb-1.5" style={{ color: C.muted }}>
-                    {pocketMode === 'deposit' ? 'MONTAN POU EPAY (SOTI NAN KONT PRENSIPAL)'
-                      : pocketMode === 'spend' ? 'MONTAN POU RETIRE'
-                      : 'MONTAN POU TRANSFERE'}
+                    {pocketMode === 'deposit' ? tt("MONTAN POU EPAY (SOTI NAN KONT PRENSIPAL)")
+                      : pocketMode === 'spend' ? tt("MONTAN POU RETIRE")
+                      : tt("MONTAN POU TRANSFERE")}
                   </p>
                   <div className="relative">
                     <input value={pocketAmount} onChange={(e) => setPocketAmount(e.target.value.replace(/[^0-9.]/g, ''))}
@@ -4651,12 +4672,12 @@ export default function BlicPayApp() {
 
                   {pocketMode === 'transfer' && (
                     <>
-                      <p className="text-xs font-semibold mt-4 mb-1.5" style={{ color: C.muted }}>KOTE POU VOYE L</p>
+                      <p className="text-xs font-semibold mt-4 mb-1.5" style={{ color: C.muted }}>{tt("KOTE POU VOYE L")}</p>
                       <div className="space-y-2">
                         <button onClick={() => setPocketTransferTarget('main')}
                           className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm"
                           style={{ background: C.card, border: `1px solid ${pocketTransferTarget === 'main' ? C.navy : C.border}` }}>
-                          Kont prensipal
+                          {tt("Kont prensipal")}
                           {pocketTransferTarget === 'main' && <Check size={15} color={C.navy} />}
                         </button>
                         {otherPockets.map((p) => (
@@ -4674,23 +4695,23 @@ export default function BlicPayApp() {
                   <div className="flex gap-2.5 mt-5">
                     <button onClick={() => setPocketMode(null)}
                       className="bp-btn flex-1 py-3 rounded-xl font-semibold text-sm" style={{ border: `1px solid ${C.border}`, color: C.muted }}>
-                      Anile
+                      {tt("Anile")}
                     </button>
                     <button onClick={confirmPocketAction} disabled={pocketProcessing}
                       className="bp-btn flex-1 py-3 rounded-xl font-semibold text-sm text-white"
                       style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: pocketProcessing ? 0.7 : 1 }}>
-                      {pocketProcessing ? 'Ap trete...' : 'Konfime'}
+                      {pocketProcessing ? tt("Ap trete...") : tt("Konfime@@btn")}
                     </button>
                   </div>
                 </div>
               )}
 
               <div className="mt-7 flex items-center justify-between">
-                <h3 className="font-semibold text-sm" style={{ color: C.muted }}>ISTWA TRANZAKSYON</h3>
+                <h3 className="font-semibold text-sm" style={{ color: C.muted }}>{tt("ISTWA TRANZAKSYON")}</h3>
               </div>
               <div className="mt-3 rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
                 {pocketTx.length === 0 ? (
-                  <p className="text-sm p-4" style={{ color: C.muted, background: C.card }}>Pa gen tranzaksyon nan pòch sa a.</p>
+                  <p className="text-sm p-4" style={{ color: C.muted, background: C.card }}>{tt("Pa gen tranzaksyon nan pòch sa a.")}</p>
                 ) : pocketTx.map((t, i) => {
                   const isOutgoing = t.kind === 'depanse' || t.kind === 'transfè-soti';
                   const KindIcon = t.kind === 'epay' ? ArrowDownLeft
@@ -4706,7 +4727,7 @@ export default function BlicPayApp() {
                           <KindIcon size={13} color={isOutgoing ? C.danger : C.mint} />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">{t.method}</p>
+                          <p className="text-sm font-medium">{tt(t.method)}</p>
                           <p className="text-xs mt-0.5" style={{ color: C.muted }}>{t.date}</p>
                         </div>
                       </div>
@@ -4724,22 +4745,22 @@ export default function BlicPayApp() {
         {view === 'termdepo' && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('dashboard')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Retounen
+              <ArrowLeft size={15} /> {tt("Retounen")}
             </button>
             <div className="flex items-center justify-between">
-              <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>Depo Ak <em style={{ fontStyle: 'italic', color: C.sky }}>Objektif</em></h2>
+              <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{tt("Depo Ak")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt("Objektif")}</em></h2>
               <button onClick={() => setView('termdepo-new')} className="text-xs font-semibold flex items-center gap-1" style={{ color: C.navy }}>
-                <Plus size={13} /> Nouvo objektif
+                <Plus size={13} /> {tt("Nouvo objektif")}
               </button>
             </div>
             <p className="mt-1.5 text-sm" style={{ color: C.muted }}>
-              Fikse yon objektif — lajan an rete bloke jistan ou atenn li.
+              {tt("Fikse yon objektif — lajan an rete bloke jistan ou atenn li.")}
             </p>
 
             <div className="mt-5 space-y-3">
               {goalDeposits.length === 0 && (
                 <p className="text-sm p-4 rounded-xl" style={{ color: C.muted, background: C.card, border: `1px solid ${C.border}` }}>
-                  Ou poko gen okenn objektif.
+                  {tt("Ou poko gen okenn objektif.")}
                 </p>
               )}
               {goalDeposits.map((gd) => {
@@ -4756,13 +4777,13 @@ export default function BlicPayApp() {
                         </div>
                         <span className="text-sm font-semibold">{gd.name}</span>
                       </div>
-                      <Badge tone={reached ? 'mint' : 'premium'}>{reached ? 'Atenn' : 'Bloke'}</Badge>
+                      <Badge tone={reached ? 'mint' : 'premium'}>{reached ? tt("Atenn") : tt("Bloke")}</Badge>
                     </div>
                     <p className="mt-2.5" style={{ ...fontMono, fontSize: 18, fontWeight: 600 }}>{money(gd.current)}</p>
                     <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: C.bg }}>
                       <div style={{ width: `${pct}%`, height: '100%', background: reached ? C.mint : '#6D3FD1' }} />
                     </div>
-                    <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{pct}% sou objektif {money(gd.target)}</p>
+                    <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{pct}{tt("% sou objektif")} {money(gd.target)}</p>
                   </button>
                 );
               })}
@@ -4773,17 +4794,17 @@ export default function BlicPayApp() {
         {view === 'termdepo-new' && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('termdepo')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Retounen
+              <ArrowLeft size={15} /> {tt("Retounen")}
             </button>
-            <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>Nouvo <em style={{ fontStyle: 'italic', color: C.sky }}>Objektif</em></h2>
-            <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Bay objektif la yon non ak yon montan pou atenn.</p>
+            <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{tt("Nouvo")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt("Objektif")}</em></h2>
+            <p className="mt-1.5 text-sm" style={{ color: C.muted }}>{tt("Bay objektif la yon non ak yon montan pou atenn.")}</p>
 
-            <p className="text-xs font-semibold mt-6 mb-2" style={{ color: C.muted }}>NON OBJEKTIF LA</p>
+            <p className="text-xs font-semibold mt-6 mb-2" style={{ color: C.muted }}>{tt("NON OBJEKTIF LA")}</p>
             <input value={newGoalName} onChange={(e) => setNewGoalName(e.target.value)}
-              placeholder="Egz. Machin, Lekòl, Kay..."
+              placeholder={tt("Egz. Machin, Lekòl, Kay...")}
               className="w-full px-4 py-3.5 rounded-xl text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
 
-            <p className="text-xs font-semibold mt-5 mb-2" style={{ color: C.muted }}>MONTAN OBJEKTIF LA</p>
+            <p className="text-xs font-semibold mt-5 mb-2" style={{ color: C.muted }}>{tt("MONTAN OBJEKTIF LA")}</p>
             <div className="relative">
               <input value={newGoalTarget} onChange={(e) => setNewGoalTarget(e.target.value.replace(/[^0-9.]/g, ''))}
                 placeholder="0.00" inputMode="decimal"
@@ -4794,13 +4815,13 @@ export default function BlicPayApp() {
 
             <div className="mt-4 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#FBF0DE', color: '#946115' }}>
               <AlertCircle size={15} className="shrink-0 mt-0.5" />
-              Lajan ou mete la a ap rete bloke — pa gen retrè ni transfè jistan ou atenn montan objektif la.
+              {tt("Lajan ou mete la a ap rete bloke — pa gen retrè ni transfè jistan ou atenn montan objektif la.")}
             </div>
 
             <button onClick={createGoalDeposit}
               className="bp-btn mt-5 w-full py-3.5 rounded-xl font-semibold text-white"
               style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-              Kreye objektif la
+              {tt("Kreye objektif la")}
             </button>
           </div>
         )}
@@ -4813,7 +4834,7 @@ export default function BlicPayApp() {
           return (
             <div className="fadein px-5 pb-10 pt-2">
               <button onClick={() => setView('termdepo')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-                <ArrowLeft size={15} /> Retounen
+                <ArrowLeft size={15} /> {tt("Retounen")}
               </button>
 
               <div className="flex flex-col items-center text-center">
@@ -4826,7 +4847,7 @@ export default function BlicPayApp() {
                   <div className="h-1.5 rounded-full overflow-hidden" style={{ background: C.bg }}>
                     <div style={{ width: `${pct}%`, height: '100%', background: reached ? C.mint : '#6D3FD1' }} />
                   </div>
-                  <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{pct}% sou objektif {money(gd.target)}</p>
+                  <p className="mt-1.5 text-xs" style={{ color: C.muted }}>{pct}{tt("% sou objektif")} {money(gd.target)}</p>
                 </div>
               </div>
 
@@ -4834,17 +4855,17 @@ export default function BlicPayApp() {
                 <>
                   <div className="mt-5 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#E4F5EF', color: C.mint }}>
                     <Check size={15} className="shrink-0 mt-0.5" />
-                    Objektif la atenn — lajan an disponib kounye a.
+                    {tt("Objektif la atenn — lajan an disponib kounye a.")}
                   </div>
                   <button onClick={() => withdrawGoal(gd.id)} disabled={goalProcessing}
                     className="bp-btn mt-4 w-full py-3.5 rounded-xl font-semibold text-white"
                     style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: goalProcessing ? 0.7 : 1 }}>
-                    {goalProcessing ? 'Ap trete...' : 'Retire nan kont prensipal'}
+                    {goalProcessing ? tt("Ap trete...") : tt("Retire nan kont prensipal")}
                   </button>
                 </>
               ) : (
                 <>
-                  <p className="text-xs font-semibold mt-6 mb-2" style={{ color: C.muted }}>AJOUTE LAJAN (SOTI NAN KONT PRENSIPAL)</p>
+                  <p className="text-xs font-semibold mt-6 mb-2" style={{ color: C.muted }}>{tt("AJOUTE LAJAN (SOTI NAN KONT PRENSIPAL)")}</p>
                   <div className="relative">
                     <input value={addGoalAmount} onChange={(e) => setAddGoalAmount(e.target.value.replace(/[^0-9.]/g, ''))}
                       placeholder="0.00" inputMode="decimal"
@@ -4853,16 +4874,16 @@ export default function BlicPayApp() {
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-sm" style={{ color: C.muted }}>HTG</span>
                   </div>
                   <p className="mt-2 text-xs" style={{ color: C.muted }}>
-                    Sòld disponib: <span style={{ ...fontMono, color: C.ink, fontWeight: 600 }}>{money(balance)}</span>
+                    {tt("Sòld disponib:")} <span style={{ ...fontMono, color: C.ink, fontWeight: 600 }}>{money(balance)}</span>
                   </p>
                   <div className="mt-4 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#FBF0DE', color: '#946115' }}>
                     <AlertCircle size={15} className="shrink-0 mt-0.5" />
-                    Ou pa ka retire ni transfere lajan sa a jistan objektif la atenn. Nan ka ijans gen yon frè 4,5 % kap soti sou montan w ap retire a.
+                    {tt("Ou pa ka retire ni transfere lajan sa a jistan objektif la atenn. Nan ka ijans gen yon frè 4,5 % kap soti sou montan w ap retire a.")}
                   </div>
                   <button onClick={addToGoal} disabled={goalProcessing}
                     className="bp-btn mt-4 w-full py-3.5 rounded-xl font-semibold text-white"
                     style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: goalProcessing ? 0.7 : 1 }}>
-                    {goalProcessing ? 'Ap trete...' : 'Ajoute nan objektif la'}
+                    {goalProcessing ? tt("Ap trete...") : tt("Ajoute nan objektif la")}
                   </button>
 
                   {gd.current > 0 && (
@@ -4870,37 +4891,37 @@ export default function BlicPayApp() {
                       <button onClick={() => setShowEmergency(true)}
                         className="bp-btn mt-2.5 w-full py-3 rounded-xl font-semibold text-sm"
                         style={{ border: `1px solid ${C.border}`, color: C.danger }}>
-                        Retrè ijans (frè 4.5%)
+                        {tt("Retrè ijans (frè 4.5%)")}
                       </button>
                     ) : (
                       <div className="mt-3 p-4 rounded-xl" style={{ background: '#FBEAEA', border: `1px solid #F3CFCC` }}>
-                        <p className="text-xs font-semibold" style={{ color: C.danger }}>RETRÈ IJANS</p>
+                        <p className="text-xs font-semibold" style={{ color: C.danger }}>{tt("RETRÈ IJANS")}</p>
                         <p className="mt-1.5 text-xs" style={{ color: '#8A3530' }}>
-                          Yon frè 4.5% ap prelve sou lajan ki nan objektif la si ou retire l anvan li atenn.
+                          {tt("Yon frè 4.5% ap prelve sou lajan ki nan objektif la si ou retire l anvan li atenn.")}
                         </p>
                         <div className="mt-3 space-y-1.5 text-sm">
                           <div className="flex items-center justify-between">
-                            <span style={{ color: '#8A3530' }}>Lajan nan objektif la</span>
+                            <span style={{ color: '#8A3530' }}>{tt("Lajan nan objektif la")}</span>
                             <span style={fontMono}>{money(gd.current)}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span style={{ color: '#8A3530' }}>Frè (4.5%)</span>
+                            <span style={{ color: '#8A3530' }}>{tt("Frè (4.5%)")}</span>
                             <span style={{ ...fontMono, color: C.danger }}>-{money(Math.round(gd.current * EMERGENCY_FEE_RATE))}</span>
                           </div>
                           <div className="flex items-center justify-between pt-1.5" style={{ borderTop: '1px solid #F3CFCC' }}>
-                            <span className="font-semibold" style={{ color: '#8A3530' }}>Ou ap resevwa</span>
+                            <span className="font-semibold" style={{ color: '#8A3530' }}>{tt("Ou ap resevwa")}</span>
                             <span style={{ ...fontMono, fontWeight: 700 }}>{money(gd.current - Math.round(gd.current * EMERGENCY_FEE_RATE))}</span>
                           </div>
                         </div>
                         <div className="flex gap-2 mt-4">
                           <button onClick={() => setShowEmergency(false)}
                             className="bp-btn flex-1 py-2.5 rounded-lg text-xs font-semibold" style={{ border: `1px solid ${C.border}`, color: C.muted }}>
-                            Anile
+                            {tt("Anile")}
                           </button>
                           <button onClick={() => emergencyWithdrawGoal(gd.id)} disabled={goalProcessing}
                             className="bp-btn flex-1 py-2.5 rounded-lg text-xs font-semibold text-white"
                             style={{ background: C.danger, opacity: goalProcessing ? 0.7 : 1 }}>
-                            {goalProcessing ? 'Ap trete...' : 'Konfime retrè ijans'}
+                            {goalProcessing ? tt("Ap trete...") : tt("Konfime retrè ijans")}
                           </button>
                         </div>
                       </div>
@@ -4915,7 +4936,7 @@ export default function BlicPayApp() {
         {view === 'loan' && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('dashboard')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Retounen
+              <ArrowLeft size={15} /> {tt("Retounen")}
             </button>
 
             {!loan && (
@@ -4924,29 +4945,29 @@ export default function BlicPayApp() {
                   <HandCoins size={28} color={C.navy} />
                 </div>
                 <h2 className="mt-4" style={{ ...fontDisplay, fontWeight: 800, fontSize: 20 }}>
-                  BLIC Prè <em style={{ fontStyle: 'italic', color: C.sky }}>ap vini talè</em>
+                  {tt("BLIC Prè")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt("ap vini talè")}</em>
                 </h2>
                 <p className="mt-2 text-sm max-w-xs" style={{ color: C.muted }}>
-                  N ap travay pou mete fonksyonalite sa a disponib. Rete branche — n ap avize w lè li pare.
+                  {tt("N ap travay pou mete fonksyonalite sa a disponib. Rete branche — n ap avize w lè li pare.")}
                 </p>
-                <Badge tone="amber">Talè</Badge>
+                <Badge tone="amber">{tt("Talè")}</Badge>
               </div>
             )}
 
             {loan && loan.status === 'annatant' && (
               <>
-                <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>Demand <em style={{ fontStyle: 'italic', color: C.sky }}>Prè</em></h2>
+                <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{tt("Demand")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt("Prè")}</em></h2>
                 <div className="mt-5 p-5 rounded-2xl text-center" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                   <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto" style={{ background: '#FBF0DE' }}>
                     <Clock size={24} color={C.amber} />
                   </div>
-                  <p className="mt-3 font-semibold text-sm">N ap egzamine demand ou</p>
-                  <p className="mt-1 text-xs" style={{ color: C.muted }}>{money(loan.amount)} · {loan.months} mwa</p>
+                  <p className="mt-3 font-semibold text-sm">{tt("N ap egzamine demand ou")}</p>
+                  <p className="mt-1 text-xs" style={{ color: C.muted }}>{money(loan.amount)} · {loan.months} {tt("mwa")}</p>
                   <button onClick={checkLoanStatus}
                     className="bp-btn mt-4 w-full py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5"
                     style={{ border: `1px solid ${C.border}`, color: C.muted }}>
                     <RefreshCw size={13} style={checkingLoan ? { animation: 'spin 0.8s linear infinite' } : undefined} />
-                    {checkingLoan ? 'Ap tcheke...' : 'Tcheke estati'}
+                    {checkingLoan ? tt("Ap tcheke...") : tt("Tcheke estati")}
                   </button>
                 </div>
               </>
@@ -4959,23 +4980,23 @@ export default function BlicPayApp() {
               return (
                 <>
                   <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>
-                    Prè <em style={{ fontStyle: 'italic', color: C.sky }}>{loan.status === 'fini' ? 'Peye' : 'Aktif'}</em>
+                    {tt("Prè")} <em style={{ fontStyle: 'italic', color: C.sky }}>{loan.status === 'fini' ? tt("Peye") : tt("Aktif")}</em>
                   </h2>
                   <div className="mt-5 grid grid-cols-2 gap-3">
                     <div className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                      <p className="text-xs" style={{ color: C.muted }}>Kapital</p>
+                      <p className="text-xs" style={{ color: C.muted }}>{tt("Kapital")}</p>
                       <p className="mt-1" style={{ ...fontMono, fontSize: 17, fontWeight: 600 }}>{money(loan.amount)}</p>
                     </div>
                     <div className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                      <p className="text-xs" style={{ color: C.muted }}>Vèsman chak mwa</p>
+                      <p className="text-xs" style={{ color: C.muted }}>{tt("Vèsman chak mwa")}</p>
                       <p className="mt-1" style={{ ...fontMono, fontSize: 17, fontWeight: 600 }}>{money(loan.installmentAmount)}</p>
                     </div>
                   </div>
 
                   <div className="mt-4 p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                     <div className="flex items-center justify-between text-xs" style={{ color: C.muted }}>
-                      <span>Pwogrè ranbousman</span>
-                      <span>{paidCount}/{loan.months} vèsman</span>
+                      <span>{tt("Pwogrè ranbousman")}</span>
+                      <span>{paidCount}/{loan.months} {tt("vèsman")}</span>
                     </div>
                     <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: C.bg }}>
                       <div style={{ width: `${pct}%`, height: '100%', background: loan.status === 'fini' ? C.mint : C.navy }} />
@@ -4985,17 +5006,17 @@ export default function BlicPayApp() {
                   {loan.status === 'fini' ? (
                     <div className="mt-4 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#E4F5EF', color: C.mint }}>
                       <Check size={15} className="shrink-0 mt-0.5" />
-                      Prè a peye nèt. Ou ka mande yon lòt lè ou vle.
+                      {tt("Prè a peye nèt. Ou ka mande yon lòt lè ou vle.")}
                     </div>
                   ) : (
                     <button onClick={payLoanInstallment} disabled={loanProcessing}
                       className="bp-btn mt-4 w-full py-3.5 rounded-xl font-semibold text-white"
                       style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: loanProcessing ? 0.7 : 1 }}>
-                      {loanProcessing ? 'Ap trete...' : `Peye vèsman ${next?.n} (${money(next?.amount || 0)})`}
+                      {loanProcessing ? tt("Ap trete...") : tt("Peye vèsman {0} ({1})", next?.n, money(next?.amount || 0))}
                     </button>
                   )}
 
-                  <h3 className="font-semibold text-sm mt-7 mb-3" style={{ color: C.muted }}>ECHEANSYE</h3>
+                  <h3 className="font-semibold text-sm mt-7 mb-3" style={{ color: C.muted }}>{tt("ECHEANSYE")}</h3>
                   <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
                     {loan.installments.map((i, idx) => (
                       <div key={i.n} className="flex items-center justify-between px-4 py-3"
@@ -5005,11 +5026,11 @@ export default function BlicPayApp() {
                             style={{ background: i.status === 'peye' ? '#E4F5EF' : '#EEF1F6' }}>
                             {i.status === 'peye' ? <Check size={14} color={C.mint} /> : <Clock size={14} color={C.muted} />}
                           </div>
-                          <span className="text-sm font-medium">Vèsman {i.n} · {i.month}</span>
+                          <span className="text-sm font-medium">{tt("Vèsman")} {i.n} · {i.month}</span>
                         </div>
                         <div className="flex items-center gap-2.5">
                           <span style={fontMono} className="text-sm">{money(i.amount)}</span>
-                          <Badge tone={i.status === 'peye' ? 'mint' : 'muted'}>{i.status === 'peye' ? 'Peye' : 'Annatant'}</Badge>
+                          <Badge tone={i.status === 'peye' ? 'mint' : 'muted'}>{i.status === 'peye' ? tt("Peye") : tt("Annatant")}</Badge>
                         </div>
                       </div>
                     ))}
@@ -5019,7 +5040,7 @@ export default function BlicPayApp() {
                     <button onClick={() => { setLoan(null); }}
                       className="bp-btn mt-5 w-full py-3 rounded-xl font-semibold text-sm"
                       style={{ border: `1px solid ${C.border}`, color: C.navy }}>
-                      Mande yon nouvo prè
+                      {tt("Mande yon nouvo prè")}
                     </button>
                   )}
                 </>
@@ -5046,14 +5067,14 @@ export default function BlicPayApp() {
                   {accountVerified && <BadgeCheck size={15} color={C.sky} fill={C.navy} />}
                 </div>
                 <p className="text-xs mt-0.5" style={{ color: C.muted }}>{user?.phone}</p>
-                <button onClick={() => { navigator.clipboard?.writeText(getClientId(user)); flash('ID kopye.'); }}
+                <button onClick={() => { navigator.clipboard?.writeText(getClientId(user)); flash(tt("ID kopye.")); }}
                   className="flex items-center gap-1 mt-0.5" style={{ ...fontMono, color: C.navy }}>
                   <span className="text-xs">ID: {getClientId(user)}</span>
                   <Copy size={11} />
                 </button>
               </div>
               <Badge tone={accountVerified ? 'mint' : kycStatus === 'annatant' ? 'amber' : 'muted'}>
-                {accountVerified ? 'Verifye' : kycStatus === 'annatant' ? 'Annatant' : 'Pa verifye'}
+                {accountVerified ? tt("Verifye") : kycStatus === 'annatant' ? tt("Annatant") : tt("Pa verifye")}
               </Badge>
             </div>
 
@@ -5077,7 +5098,7 @@ export default function BlicPayApp() {
                 </div>
                 {accountVerified ? (
                   <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: C.mint }}>
-                    <BadgeCheck size={14} /> Verifye
+                    <BadgeCheck size={14} /> {tt("Verifye")}
                   </span>
                 ) : (
                   <ChevronRight size={15} color={C.muted} />
@@ -5145,8 +5166,8 @@ export default function BlicPayApp() {
             {/* about section */}
             <p className="mt-6 text-xs font-semibold" style={{ color: C.muted }}>{tr('aboutSection')}</p>
             <div className="mt-2 p-4 rounded-xl flex items-center justify-between" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-              <span className="text-sm" style={{ color: C.muted }}>BLICPay</span>
-              <span className="text-sm" style={{ ...fontMono, color: C.muted }}>v1.0.0</span>
+              <span className="text-sm" style={{ color: C.muted }}>{tt("BLICPay")}</span>
+              <span className="text-sm" style={{ ...fontMono, color: C.muted }}>{tt("v1.0.0")}</span>
             </div>
 
             <button onClick={logout}
@@ -5301,7 +5322,7 @@ export default function BlicPayApp() {
                   <option value="depo">{tr('tileDeposit')}</option>
                   <option value="sol">{tr('tileSol')}</option>
                   <option value="pre">{tr('tileLoan')}</option>
-                  <option value="lot">{lang === 'fr' ? 'Autre' : lang === 'en' ? 'Other' : 'Lòt'}</option>
+                  <option value="lot">{lang === 'fr' ? tt("Autre") : lang === 'en' ? tt("Other") : tt("Lòt")}</option>
                 </select>
                 <textarea value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)}
                   placeholder={tr('messagePh')} rows={4}
@@ -5339,7 +5360,7 @@ export default function BlicPayApp() {
             </div>
 
             <p className="mt-6 text-xs text-center" style={{ color: C.muted }}>
-              {lang === 'fr' ? 'Vous ne trouvez pas votre réponse ?' : lang === 'en' ? "Can't find your answer?" : 'Ou pa jwenn repons ou?'}{' '}
+              {lang === 'fr' ? tt("Vous ne trouvez pas votre réponse ?") : lang === 'en' ? tt("Can't find your answer?") : tt("Ou pa jwenn repons ou?")}{' '}
               <button onClick={() => { setSupportSent(false); setView('support'); }} className="font-semibold underline" style={{ color: C.navy }}>
                 {tr('contactSupport')}
               </button>
@@ -5459,11 +5480,11 @@ export default function BlicPayApp() {
                           )}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold">{t.method}</p>
+                          <p className="text-sm font-semibold">{tt(t.method)}</p>
                           <p className="text-xs mt-0.5" style={{ color: C.muted }}>
                             {t.date}
                             {TX_TYPE_LABELS[t.type] && (
-                              <> · <span style={{ color: TX_TYPE_LABELS[t.type].color, fontWeight: 600 }}>{TX_TYPE_LABELS[t.type].label}</span></>
+                              <> · <span style={{ color: TX_TYPE_LABELS[t.type].color, fontWeight: 600 }}>{tt(TX_TYPE_LABELS[t.type].label)}</span></>
                             )}
                           </p>
                         </div>
@@ -5473,7 +5494,7 @@ export default function BlicPayApp() {
                           {outgoing ? '-' : '+'}{money(t.amount)}
                         </span>
                         <Badge tone={t.status === 'konfime' ? 'mint' : 'amber'}>
-                          {t.status === 'konfime' ? 'Konfime' : 'Annatant'}
+                          {t.status === 'konfime' ? tt("Konfime") : tt("Annatant")}
                         </Badge>
                       </div>
                     </div>
@@ -5485,7 +5506,7 @@ export default function BlicPayApp() {
                 <button onClick={() => setHistoryVisibleCount((n) => n + 10)}
                   className="mt-3 w-full py-3 rounded-xl text-sm font-semibold"
                   style={{ background: C.card, border: `1px solid ${C.border}`, color: C.navy }}>
-                  Wè 10 lòt ({filtered.length - historyVisibleCount} rete)
+                  {tt("Wè 10 lòt (")}{filtered.length - historyVisibleCount} {tt("rete)")}
                 </button>
               )}
             </div>
@@ -5495,27 +5516,27 @@ export default function BlicPayApp() {
         {view === 'transfer' && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('dashboard')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Retounen
+              <ArrowLeft size={15} /> {tt("Retounen")}
             </button>
-            <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>Transfere <em style={{ fontStyle: 'italic', color: C.sky }}>lajan</em></h2>
-            <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Voye HTG bay yon lòt itilizatè BLICPay avèk ID kliyan li.</p>
+            <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{tt("Transfere")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt("lajan")}</em></h2>
+            <p className="mt-1.5 text-sm" style={{ color: C.muted }}>{tt("Voye HTG bay yon lòt itilizatè BLICPay avèk ID kliyan li.")}</p>
 
             <div className="mt-6 space-y-3">
               <div>
-                <p className="text-xs font-semibold mb-1.5" style={{ color: C.muted }}>ID KLIYAN DESTINATÈ</p>
+                <p className="text-xs font-semibold mb-1.5" style={{ color: C.muted }}>{tt("ID KLIYAN DESTINATÈ")}</p>
                 <input
                   value={transferId}
                   onChange={(e) => setTransferId(e.target.value.toUpperCase())}
-                  placeholder="BP-______"
+                  placeholder={tt("BP-______")}
                   className="w-full px-4 py-3.5 rounded-xl text-sm"
                   style={{ ...fontMono, background: C.card, border: `1px solid ${C.border}` }}
                 />
                 <p className="mt-1.5 text-xs" style={{ color: C.muted }}>
-                  Chak kliyan gen yon ID pa yo — ou ka jwenn pa w la nan Paramèt.
+                  {tt("Chak kliyan gen yon ID pa yo — ou ka jwenn pa w la nan Paramèt.")}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold mb-1.5" style={{ color: C.muted }}>MONTAN</p>
+                <p className="text-xs font-semibold mb-1.5" style={{ color: C.muted }}>{tt("MONTAN")}</p>
                 <div className="relative">
                   <input
                     value={transferAmount}
@@ -5531,13 +5552,13 @@ export default function BlicPayApp() {
             </div>
 
             <p className="mt-3 text-xs" style={{ color: C.muted }}>
-              Sòld disponib: <span style={{ ...fontMono, color: C.ink, fontWeight: 600 }}>{money(balance)}</span>
+              {tt("Sòld disponib:")} <span style={{ ...fontMono, color: C.ink, fontWeight: 600 }}>{money(balance)}</span>
             </p>
 
             <button onClick={sendTransfer} disabled={transferProcessing}
               className="bp-btn mt-6 w-full py-3.5 rounded-xl font-semibold text-white"
               style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: transferProcessing ? 0.7 : 1 }}>
-              {transferProcessing ? 'Ap voye...' : 'Voye lajan an'}
+              {transferProcessing ? tt("Ap voye...") : tt("Voye lajan an")}
             </button>
           </div>
         )}
@@ -5545,10 +5566,10 @@ export default function BlicPayApp() {
         {view === 'deposit' && !natcashProofScreen && !biwoBranchScreen && !destinationNumberScreen && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('dashboard')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Retounen
+              <ArrowLeft size={15} /> {tt("Retounen")}
             </button>
             <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>
-              Konbyen ou vle <em style={{ fontStyle: 'italic', color: C.sky }}>{flowKind === 'withdraw' ? 'retire?' : 'depoze?'}</em>
+              {tt("Konbyen ou vle")} <em style={{ fontStyle: 'italic', color: C.sky }}>{flowKind === 'withdraw' ? tt("retire?") : tt("depoze?")}</em>
             </h2>
 
             <div className="mt-4 relative">
@@ -5620,10 +5641,10 @@ export default function BlicPayApp() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold">{m.name}</p>
-                        {disabled && <Badge tone="amber">{flowKind === 'deposit' && depositDisabled ? 'Sèlman pou retrè' : 'Coming soon'}</Badge>}
+                        <p className="text-sm font-semibold">{tt(m.name)}</p>
+                        {disabled && <Badge tone="amber">{flowKind === 'deposit' && depositDisabled ? tt("Sèlman pou retrè") : tt("Coming soon")}</Badge>}
                       </div>
-                      <p className="text-xs mt-0.5" style={{ color: C.muted }}>{m.desc}</p>
+                      <p className="text-xs mt-0.5" style={{ color: C.muted }}>{tt(m.desc)}</p>
                     </div>
                     {!disabled && (processing && selectedMethod?.id === m.id
                       ? <RefreshCw size={16} color={C.muted} style={{ animation: 'spin 0.8s linear infinite' }} />
@@ -5641,49 +5662,49 @@ export default function BlicPayApp() {
         {view === 'deposit' && destinationNumberScreen && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setDestinationNumberScreen(false)} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Chanje metòd
+              <ArrowLeft size={15} /> {tt("Chanje metòd")}
             </button>
 
             <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>
-              Nimewo <em style={{ fontStyle: 'italic', color: C.sky }}>{selectedMethod?.name}</em> ou
+              {tt("Nimewo")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt(selectedMethod?.name)}</em> {tt("ou")}
             </h2>
             <p className="mt-1.5 text-sm" style={{ color: C.muted }}>
-              {money(Number(amount))} · Kote pou nou voye lajan an
+              {money(Number(amount))} {tt("· Kote pou nou voye lajan an")}
             </p>
 
             <label className="block mt-5 text-xs font-semibold" style={{ color: C.muted }}>
-              NIMEWO {selectedMethod?.name?.toUpperCase()} OU
+              {tt("NIMEWO")} {selectedMethod?.name?.toUpperCase()} {tt("OU@@caps")}
             </label>
             <input
               value={destinationNumber}
               onChange={(e) => setDestinationNumber(e.target.value.replace(/[^0-9]/g, ''))}
-              placeholder="Egzanp: 50912345678"
+              placeholder={tt("Egzanp: 50912345678")}
               inputMode="numeric"
               className="w-full mt-1.5 px-3.5 py-3 rounded-xl text-sm"
               style={{ background: C.card, border: `1px solid ${C.border}` }}
             />
             <p className="mt-2 text-xs" style={{ color: C.muted }}>
-              Verifye nimewo a byen — nou pral voye lajan an dirèkteman la.
+              {tt("Verifye nimewo a byen — nou pral voye lajan an dirèkteman la.")}
             </p>
 
             <label className="block mt-4 text-xs font-semibold" style={{ color: C.muted }}>
-              NON KI SOU KONT {selectedMethod?.name?.toUpperCase()} SA A
+              {tt("NON KI SOU KONT")} {selectedMethod?.name?.toUpperCase()} {tt("SA A")}
             </label>
             <input
               value={destinationName}
               onChange={(e) => setDestinationName(e.target.value)}
-              placeholder="Non konplè"
+              placeholder={tt("Non konplè")}
               className="w-full mt-1.5 px-3.5 py-3 rounded-xl text-sm"
               style={{ background: C.card, border: `1px solid ${C.border}` }}
             />
             <p className="mt-2 text-xs" style={{ color: C.muted }}>
-              Dwe menm non ak sou pwòp kont ou — pou sekirite.
+              {tt("Dwe menm non ak sou pwòp kont ou — pou sekirite.")}
             </p>
 
             <button onClick={confirmDestinationNumber} disabled={!destinationNumber.trim() || !destinationName.trim() || processing}
               className="bp-btn mt-6 w-full py-3.5 rounded-xl text-sm font-semibold text-white"
               style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: (!destinationNumber.trim() || !destinationName.trim() || processing) ? 0.6 : 1 }}>
-              {processing ? 'Ap trete...' : 'Kontinye'}
+              {processing ? tt("Ap trete...") : tt("Kontinye")}
             </button>
           </div>
         )}
@@ -5691,21 +5712,21 @@ export default function BlicPayApp() {
         {view === 'deposit' && biwoBranchScreen && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setBiwoBranchScreen(false)} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Chanje metòd
+              <ArrowLeft size={15} /> {tt("Chanje metòd")}
             </button>
 
             <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>
-              Chwazi <em style={{ fontStyle: 'italic', color: C.sky }}>siikisal</em> la
+              {tt("Chwazi")} <em style={{ fontStyle: 'italic', color: C.sky }}>{tt("siikisal")}</em> {tt("la")}
             </h2>
             <p className="mt-1.5 text-sm" style={{ color: C.muted }}>
-              {money(Number(amount))} · {flowKind === 'withdraw' ? 'Retrè' : 'Depo'} nan biwo
+              {money(Number(amount))} · {flowKind === 'withdraw' ? tt("Retrè") : tt("Depo")} {tt("nan biwo")}
             </p>
 
             {loadingBiwoBranches ? (
-              <p className="mt-6 text-sm text-center" style={{ color: C.muted }}>Ap chaje...</p>
+              <p className="mt-6 text-sm text-center" style={{ color: C.muted }}>{tt("Ap chaje...")}</p>
             ) : biwoBranches.length === 0 ? (
               <p className="mt-6 text-sm p-4 rounded-xl" style={{ color: C.muted, background: C.card, border: `1px solid ${C.border}` }}>
-                Pa gen okenn siikisal disponib toujou.
+                {tt("Pa gen okenn siikisal disponib toujou.")}
               </p>
             ) : (
               <div className="mt-5 space-y-2.5">
@@ -5726,7 +5747,7 @@ export default function BlicPayApp() {
             {flowKind === 'withdraw' && user?.clientId && (
               <div className="mt-5 p-3.5 rounded-xl" style={{ background: '#E6F0FB', border: `1px solid ${C.border}` }}>
                 <p className="text-xs" style={{ color: C.navy }}>
-                  Nan biwo a, ajan an ap mande kòd BLICPay ou pou verifye idantite w:
+                  {tt("Nan biwo a, ajan an ap mande kòd BLICPay ou pou verifye idantite w:")}
                 </p>
                 <p className="mt-1 text-base font-bold" style={{ ...fontMono, color: C.navy }}>{user.clientId}</p>
               </div>
@@ -5735,7 +5756,7 @@ export default function BlicPayApp() {
             <button onClick={confirmBiwoBranch} disabled={!selectedBiwoBranch || processing}
               className="bp-btn mt-6 w-full py-3.5 rounded-xl text-sm font-semibold text-white"
               style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: (!selectedBiwoBranch || processing) ? 0.6 : 1 }}>
-              {processing ? 'Ap trete...' : 'Kontinye'}
+              {processing ? tt("Ap trete...") : tt("Kontinye")}
             </button>
           </div>
         )}
@@ -5743,33 +5764,33 @@ export default function BlicPayApp() {
         {view === 'deposit' && natcashProofScreen && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setNatcashProofScreen(false)} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Chanje metòd
+              <ArrowLeft size={15} /> {tt("Chanje metòd")}
             </button>
 
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#fff', border: `1px solid ${C.border}` }}>
-                <img src="/logos/natcash-icon.png" alt="NatCash" className="w-full h-full object-cover" />
+                <img src="/logos/natcash-icon.png" alt={tt("NatCash")} className="w-full h-full object-cover" />
               </div>
               <div>
-                <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 19 }}>Depo NatCash</h2>
+                <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 19 }}>{tt("Depo NatCash")}</h2>
                 <p className="text-xs" style={{ color: C.muted }}>{money(Number(amount))}</p>
               </div>
             </div>
 
             <p className="mt-4 text-xs p-3 rounded-lg" style={{ background: '#E6F0FB', color: C.navy }}>
-              Voye {money(Number(amount))} sou nimewo NatCash BLICPay a, epi ajoute ID tranzaksyon an ak yon kapti resi a anba a.
+              {tt("Voye")} {money(Number(amount))} {tt("sou nimewo NatCash BLICPay a, epi ajoute ID tranzaksyon an ak yon kapti resi a anba a.")}
             </p>
 
-            <label className="block mt-4 text-xs font-semibold" style={{ color: C.muted }}>ID TRANZAKSYON AN</label>
+            <label className="block mt-4 text-xs font-semibold" style={{ color: C.muted }}>{tt("ID TRANZAKSYON AN")}</label>
             <input
               value={natcashTransactionId}
               onChange={(e) => setNatcashTransactionId(e.target.value)}
-              placeholder="Egzanp: TXN123456789"
+              placeholder={tt("Egzanp: TXN123456789")}
               className="w-full mt-1.5 px-3.5 py-3 rounded-xl text-sm"
               style={{ background: C.card, border: `1px solid ${C.border}` }}
             />
 
-            <label className="block mt-4 text-xs font-semibold" style={{ color: C.muted }}>KAPTI RESI A</label>
+            <label className="block mt-4 text-xs font-semibold" style={{ color: C.muted }}>{tt("KAPTI RESI A")}</label>
             <input
               type="file"
               accept="image/*"
@@ -5778,14 +5799,14 @@ export default function BlicPayApp() {
             />
             {natcashScanning && (
               <p className="mt-1.5 text-xs flex items-center gap-1.5" style={{ color: C.muted }}>
-                <RefreshCw size={12} style={{ animation: 'spin 0.8s linear infinite' }} /> Ap li resi a pou ranpli chan yo otomatikman...
+                <RefreshCw size={12} style={{ animation: 'spin 0.8s linear infinite' }} /> {tt("Ap li resi a pou ranpli chan yo otomatikman...")}
               </p>
             )}
 
             <button onClick={submitNatcashDeposit} disabled={natcashSubmitting}
               className="bp-btn mt-6 w-full py-3.5 rounded-xl text-sm font-semibold text-white"
               style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: natcashSubmitting ? 0.7 : 1 }}>
-              {natcashSubmitting ? 'Ap verifye resi a...' : 'Soumèt depo a'}
+              {natcashSubmitting ? tt("Ap verifye resi a...") : tt("Soumèt depo a")}
             </button>
           </div>
         )}
@@ -5793,7 +5814,7 @@ export default function BlicPayApp() {
         {view === 'confirm' && selectedMethod && (
           <div className="fadein px-5 pb-10 pt-2">
             <button onClick={() => setView('deposit')} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: C.muted }}>
-              <ArrowLeft size={15} /> Chanje metòd
+              <ArrowLeft size={15} /> {tt("Chanje metòd")}
             </button>
 
             <div className="flex flex-col items-center text-center mt-2">
@@ -5801,20 +5822,20 @@ export default function BlicPayApp() {
                 {selectedMethod.logo ? <img src={selectedMethod.logo} alt={selectedMethod.name} className="w-full h-full object-cover" /> : <selectedMethod.icon size={26} color="#fff" />}
               </div>
               <h2 className="mt-4" style={{ ...fontDisplay, fontWeight: 800, fontSize: 20 }}>
-                {flowKind === 'withdraw' ? 'Retrè ' : 'Depo '}<em style={{ fontStyle: 'italic', color: C.sky }}>{selectedMethod.name}</em>
+                {flowKind === 'withdraw' ? tt("Retrè ") : tt("Depo ")}<em style={{ fontStyle: 'italic', color: C.sky }}>{tt(selectedMethod.name)}</em>
               </h2>
-              <p className="mt-1 text-sm" style={{ color: C.muted }}>Montan: <span style={{ ...fontMono, color: C.ink, fontWeight: 600 }}>{money(Number(amount))}</span></p>
+              <p className="mt-1 text-sm" style={{ color: C.muted }}>{tt("Montan:")} <span style={{ ...fontMono, color: C.ink, fontWeight: 600 }}>{money(Number(amount))}</span></p>
             </div>
 
             <div className="mt-6 rounded-xl p-4" style={{ background: C.card, border: `1px solid ${C.border}` }}>
               {selectedMethod.kind === 'mobile' && (
                 <>
                   <p className="text-sm" style={{ color: C.muted }}>
-                    Ajoute nimewo sa a nan bous mobil {selectedMethod.name} ou epi otorize depo a:
+                    {tt("Ajoute nimewo sa a nan bous mobil")} {selectedMethod.name} {tt("ou epi otorize depo a:")}
                   </p>
                   <div className="mt-3 flex items-center justify-between py-3 px-3 rounded-lg" style={{ background: C.bg }}>
                     <span style={{ ...fontMono, fontSize: 17 }}>+509 4000 1212</span>
-                    <button onClick={() => { navigator.clipboard?.writeText('+50940001212'); flash('Nimewo kopye.'); }}>
+                    <button onClick={() => { navigator.clipboard?.writeText('+50940001212'); flash(tt("Nimewo kopye.")); }}>
                       <Copy size={16} color={C.muted} />
                     </button>
                   </div>
@@ -5822,10 +5843,10 @@ export default function BlicPayApp() {
               )}
               {selectedMethod.kind === 'crypto' && (
                 <>
-                  <p className="text-sm" style={{ color: C.muted }}>Voye USDT (rezo TRC20) nan adrès sa a:</p>
+                  <p className="text-sm" style={{ color: C.muted }}>{tt("Voye USDT (rezo TRC20) nan adrès sa a:")}</p>
                   <div className="mt-3 flex items-center justify-between py-3 px-3 rounded-lg" style={{ background: C.bg }}>
-                    <span style={{ ...fontMono, fontSize: 12 }}>TXn9pQz4Rk8s2LmVw7Ht3FybGc1DqEo6Rp</span>
-                    <button onClick={() => { navigator.clipboard?.writeText('TXn9pQz4Rk8s2LmVw7Ht3FybGc1DqEo6Rp'); flash('Adrès kopye.'); }}>
+                    <span style={{ ...fontMono, fontSize: 12 }}>{tt("TXn9pQz4Rk8s2LmVw7Ht3FybGc1DqEo6Rp")}</span>
+                    <button onClick={() => { navigator.clipboard?.writeText('TXn9pQz4Rk8s2LmVw7Ht3FybGc1DqEo6Rp'); flash(tt("Adrès kopye.")); }}>
                       <Copy size={16} color={C.muted} />
                     </button>
                   </div>
@@ -5833,10 +5854,10 @@ export default function BlicPayApp() {
               )}
               {selectedMethod.kind === 'bank' && (
                 <>
-                  <p className="text-sm" style={{ color: C.muted }}>Voye depo a ak Zelle nan imèl sa a:</p>
+                  <p className="text-sm" style={{ color: C.muted }}>{tt("Voye depo a ak Zelle nan imèl sa a:")}</p>
                   <div className="mt-3 flex items-center justify-between py-3 px-3 rounded-lg" style={{ background: C.bg }}>
-                    <span style={{ ...fontMono, fontSize: 14 }}>paiement@blicpay.com</span>
-                    <button onClick={() => { navigator.clipboard?.writeText('paiement@blicpay.com'); flash('Imèl kopye.'); }}>
+                    <span style={{ ...fontMono, fontSize: 14 }}>{tt("paiement@blicpay.com")}</span>
+                    <button onClick={() => { navigator.clipboard?.writeText('paiement@blicpay.com'); flash(tt("Imèl kopye.")); }}>
                       <Copy size={16} color={C.muted} />
                     </button>
                   </div>
@@ -5846,16 +5867,16 @@ export default function BlicPayApp() {
                 <>
                   <p className="text-sm" style={{ color: C.muted }}>
                     {flowKind === 'withdraw'
-                      ? 'Prezante kòd referans sa a nan youn nan biwo nou yo pou resevwa kach ou:'
-                      : 'Prezante kòd referans sa a lè w ap peye kach nan youn nan biwo nou yo:'}
+                      ? tt("Prezante kòd referans sa a nan youn nan biwo nou yo pou resevwa kach ou:")
+                      : tt("Prezante kòd referans sa a lè w ap peye kach nan youn nan biwo nou yo:")}
                   </p>
                   <div className="mt-3 flex items-center justify-between py-3 px-3 rounded-lg" style={{ background: C.bg }}>
                     <span style={{ ...fontMono, fontSize: 17, letterSpacing: 1 }}>{reference}</span>
-                    <button onClick={() => { navigator.clipboard?.writeText(reference); flash('Referans kopye.'); }}>
+                    <button onClick={() => { navigator.clipboard?.writeText(reference); flash(tt("Referans kopye.")); }}>
                       <Copy size={16} color={C.muted} />
                     </button>
                   </div>
-                  <p className="mt-4 text-xs font-semibold" style={{ color: C.muted }}>BIWO DISPONIB</p>
+                  <p className="mt-4 text-xs font-semibold" style={{ color: C.muted }}>{tt("BIWO DISPONIB")}</p>
                   <div className="mt-2 space-y-1.5">
                     {biwoBranchDetails.length > 0 ? biwoBranchDetails.map((b) => (
                       <div key={b.name} className="flex items-start gap-2 text-sm">
@@ -5872,21 +5893,21 @@ export default function BlicPayApp() {
                 </>
               )}
               {selectedMethod.kind !== 'office' && (
-                <p className="mt-3 text-xs" style={{ ...fontMono, color: C.muted }}>Referans: {reference}</p>
+                <p className="mt-3 text-xs" style={{ ...fontMono, color: C.muted }}>{tt("Referans:")} {reference}</p>
               )}
             </div>
 
             <div className="mt-4 flex items-start gap-2 text-xs p-3 rounded-lg" style={{ background: '#FBF0DE', color: '#946115' }}>
               <AlertCircle size={15} className="shrink-0 mt-0.5" />
               {flowKind === 'withdraw'
-                ? 'Retrè a ap parèt kòm "Annatant" jistan yon admin konfime li nan biwo a.'
-                : 'Depo a ap parèt kòm "Annatant" jistan nou konfime li resevwa.'}
+                ? tt("Retrè a ap parèt kòm \"Annatant\" jistan yon admin konfime li nan biwo a.")
+                : tt("Depo a ap parèt kòm \"Annatant\" jistan nou konfime li resevwa.")}
             </div>
 
             <button onClick={() => setView('dashboard')}
               className="bp-btn mt-6 w-full py-3.5 rounded-xl font-semibold text-white"
               style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-              Bon
+              {tt("Bon")}
             </button>
           </div>
         )}
