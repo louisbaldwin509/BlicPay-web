@@ -160,10 +160,10 @@ const TX_TYPE_LABELS = {
 };
 
 const methods = [
-  { id: 'moncash', name: 'Mon Cash', desc: 'Depoze kach nan pwen Digicel ou', color: '#1E9E7C', icon: DollarSign, logo: '/logos/moncash.jpg', kind: 'mobile' },
-  { id: 'natcash', name: 'NatCash', desc: 'Depoze ak bous mobil NatCash ou', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash.jpg', kind: 'mobile' },
-  { id: 'usdt', name: 'USDT', desc: 'Depoze dola ameriken an stablecoin (Tether)', color: '#0E9E86', icon: Banknote, logo: '/logos/usdt.jpg', kind: 'crypto', comingSoon: true },
-  { id: 'zelle', name: 'Zelle', desc: 'Depoze dirèkteman soti nan kont labank ou', color: '#6D3FD1', icon: ArrowLeftRight, logo: '/logos/zelle.png', kind: 'bank', comingSoon: true },
+  { id: 'moncash', name: 'Mon Cash', desc: 'Depoze kach nan pwen Digicel ou', color: '#1E9E7C', icon: DollarSign, logo: '/logos/moncash-icon.png', kind: 'mobile' },
+  { id: 'natcash', name: 'NatCash', desc: 'Depoze ak bous mobil NatCash ou', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash-icon.png', kind: 'mobile' },
+  { id: 'usdt', name: 'USDT', desc: 'Depoze dola ameriken an stablecoin (Tether)', color: '#0E9E86', icon: Banknote, logo: '/logos/usdt-icon.png', kind: 'crypto', comingSoon: true },
+  { id: 'zelle', name: 'Zelle', desc: 'Depoze dirèkteman soti nan kont labank ou', color: '#6D3FD1', icon: ArrowLeftRight, logo: '/logos/zelle-icon.png', kind: 'bank', comingSoon: true },
   { id: 'biwo', name: 'Nan biwo', desc: 'Ale peye kach nan yonn nan biwo nou yo', color: '#946115', icon: Building2, logo: null, kind: 'office' },
 ];
 
@@ -873,10 +873,10 @@ function LandingPage({ onStart, lang, setLang, tr }) {
   const [F0Icon, F1Icon, F2Icon, F3Icon, F4Icon, F5Icon] = FEATURES.map((f) => f.icon);
 
   const DEPOSIT_METHODS = [
-    { name: 'MonCash', color: '#E4032E', logo: '/logos/moncash.jpg' },
-    { name: 'NatCash', color: '#0072BC', logo: '/logos/natcash.jpg' },
-    { name: 'USDT', color: '#26A17B', logo: '/logos/usdt.jpg' },
-    { name: 'Zelle', color: '#6D1ED4', logo: '/logos/zelle.png' },
+    { name: 'MonCash', color: '#E4032E', logo: '/logos/moncash-wide.png' },
+    { name: 'NatCash', color: '#0072BC', logo: '/logos/natcash-wide.png' },
+    { name: 'USDT', color: '#26A17B', logo: '/logos/usdt-wide.png' },
+    { name: 'Zelle', color: '#6D1ED4', logo: '/logos/zelle-wide.png' },
     { name: 'Depo Biwo', color: C.navy, logo: null },
   ];
 
@@ -1359,10 +1359,10 @@ function LandingPage({ onStart, lang, setLang, tr }) {
         <div className="flex items-center gap-6" style={{ width: 'max-content', animation: 'lpTicker 24s linear infinite' }}>
           {[...Array(2)].flatMap((_, dup) =>
             [
-              { name: 'MonCash', logo: '/logos/moncash.jpg' },
-              { name: 'NatCash', logo: '/logos/natcash.jpg' },
-              { name: 'USDT', logo: '/logos/usdt.jpg' },
-              { name: 'Zelle', logo: '/logos/zelle.png' },
+              { name: 'MonCash', logo: '/logos/moncash-wide.png' },
+              { name: 'NatCash', logo: '/logos/natcash-wide.png' },
+              { name: 'USDT', logo: '/logos/usdt-wide.png' },
+              { name: 'Zelle', logo: '/logos/zelle-wide.png' },
               { name: 'BLICPay', logo: null },
             ].map((p, i) => (
               <span key={dup + '-' + i} className="inline-flex items-center gap-2.5 px-3">
@@ -3817,7 +3817,7 @@ export default function BlicPayApp() {
                     style={{ background: C.card, borderTop: i ? `1px solid ${C.border}` : 'none' }}>
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden"
-                        style={{ background: logo ? C.bg : t.type === 'transfè' ? '#E6F0FB' : isOutgoing ? '#FBEAEA' : '#E4F5EF' }}>
+                        style={{ background: logo ? '#fff' : t.type === 'transfè' ? '#E6F0FB' : isOutgoing ? '#FBEAEA' : '#E4F5EF', border: logo ? `1px solid ${C.border}` : 'none' }}>
                         {logo ? (
                           <img src={logo} alt={t.method} className="w-full h-full object-cover" />
                         ) : t.type === 'transfè' ? (
@@ -5429,7 +5429,7 @@ export default function BlicPayApp() {
                       style={{ background: C.card, borderTop: i ? `1px solid ${C.border}` : 'none' }}>
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden"
-                          style={{ background: logo ? C.bg : t.type === 'transfè' ? '#E6F0FB' : outgoing ? '#FBEAEA' : '#E4F5EF' }}>
+                          style={{ background: logo ? '#fff' : t.type === 'transfè' ? '#E6F0FB' : outgoing ? '#FBEAEA' : '#E4F5EF', border: logo ? `1px solid ${C.border}` : 'none' }}>
                           {logo ? (
                             <img src={logo} alt={t.method} className="w-full h-full object-cover" />
                           ) : t.type === 'transfè' ? (
@@ -5684,7 +5684,7 @@ export default function BlicPayApp() {
 
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#fff', border: `1px solid ${C.border}` }}>
-                <img src="/logos/natcash.jpg" alt="NatCash" className="w-full h-full object-cover" />
+                <img src="/logos/natcash-icon.png" alt="NatCash" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 19 }}>Depo NatCash</h2>

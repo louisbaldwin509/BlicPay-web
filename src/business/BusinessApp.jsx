@@ -89,8 +89,23 @@ function StatusPill({ status, t }) {
   );
 }
 
-function OpIcon({ kind }) {
+const METHOD_LOGOS = { moncash: '/logos/moncash-icon.png', natcash: '/logos/natcash-icon.png' };
+
+function OpIcon({ kind, method }) {
   const incoming = kind === 'deposit' || kind === 'in';
+  const logo = (kind === 'deposit' || kind === 'withdraw') && METHOD_LOGOS[method];
+  if (logo) {
+    const Arrow = incoming ? ArrowDownLeft : ArrowUpRight;
+    return (
+      <span className="relative w-9 h-9 shrink-0">
+        <img src={logo} alt={method} className="w-9 h-9 rounded-xl object-cover border" style={{ borderColor: K.border }} />
+        <span className="absolute -bottom-1 -left-1 w-4 h-4 rounded-full flex items-center justify-center border-2 border-white"
+          style={{ background: incoming ? K.mint : K.navy, color: '#fff' }}>
+          <Arrow size={9} strokeWidth={3} />
+        </span>
+      </span>
+    );
+  }
   const Icon = kind === 'in' || kind === 'out' ? (incoming ? ArrowDownLeft : Send) : incoming ? ArrowDownLeft : ArrowUpRight;
   return (
     <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
@@ -353,7 +368,7 @@ function DashboardPage({ ctx }) {
                   const plus = o.kind === 'deposit' || o.kind === 'in';
                   return (
                     <div key={o.kind + o.id} className="flex items-center gap-3 py-3">
-                      <OpIcon kind={o.kind} />
+                      <OpIcon kind={o.kind} method={o.method} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold truncate">{d.title}</p>
                         <p className="text-xs truncate" style={{ color: K.muted }}>{d.sub} • {dateFmt(o.date)}</p>
@@ -582,7 +597,7 @@ function ActivityPage({ ctx }) {
                     const plus = o.kind === 'deposit' || o.kind === 'in';
                     return (
                       <tr key={o.kind + o.id} className="border-t" style={{ borderColor: K.border }}>
-                        <td className="py-3 px-2"><div className="flex items-center gap-3"><OpIcon kind={o.kind} /><span className="font-semibold">{d.title}</span></div></td>
+                        <td className="py-3 px-2"><div className="flex items-center gap-3"><OpIcon kind={o.kind} method={o.method} /><span className="font-semibold">{d.title}</span></div></td>
                         <td className="py-3 px-2" style={{ color: K.muted }}>{d.sub}</td>
                         <td className="py-3 px-2 whitespace-nowrap" style={{ color: K.muted }}>{dateFmt(o.date)} <span className="text-xs">{timeFmt(o.date)}</span></td>
                         <td className="py-3 px-2"><StatusPill status={o.status} t={t} /></td>
@@ -600,7 +615,7 @@ function ActivityPage({ ctx }) {
                 const plus = o.kind === 'deposit' || o.kind === 'in';
                 return (
                   <div key={o.kind + o.id} className="flex items-center gap-3 py-3">
-                    <OpIcon kind={o.kind} />
+                    <OpIcon kind={o.kind} method={o.method} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate">{d.title}</p>
                       <p className="text-xs truncate" style={{ color: K.muted }}>{d.sub} • {dateFmt(o.date)}</p>
