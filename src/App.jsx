@@ -1952,7 +1952,7 @@ export default function BlicPayApp() {
         method: methods.find((m) => m.id === t.method)?.name || t.method,
         amount: t.amount,
         status: t.status === 'confirmed' ? 'konfime' : t.status === 'rejected' ? 'rejte' : 'annatant',
-        date: new Date(t.createdAt).toLocaleDateString('fr-FR'),
+        date: new Date(t.createdAt).toLocaleDateString(CURRENT_LANG === 'en' ? 'en-US' : 'fr-FR'),
       })));
       setPockets(p);
       setGoalDeposits(goals.map((g) => ({
@@ -4192,7 +4192,7 @@ export default function BlicPayApp() {
                                 <FileText size={14} color={C.navy} />
                                 <span className="text-xs font-medium">{doc.title}</span>
                               </div>
-                              <span className="text-xs" style={{ color: C.muted }}>{new Date(doc.uploadedAt).toLocaleDateString('fr-FR')}</span>
+                              <span className="text-xs" style={{ color: C.muted }}>{new Date(doc.uploadedAt).toLocaleDateString(CURRENT_LANG === 'en' ? 'en-US' : 'fr-FR')}</span>
                             </button>
                           ))}
                         </div>
