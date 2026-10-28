@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import BusinessApp from './business/BusinessApp.jsx';
 import ReceiveQR from './ReceiveQR.jsx';
+import { CATEGORY_ART } from './CategoryArt.jsx';
 import {
   Bell, Wallet, ArrowUpRight, ArrowDownLeft, Clock, Settings, Home,
   ArrowLeftRight, Plus, Check, Copy, ChevronRight, ArrowLeft, ShieldCheck,
   DollarSign, Smartphone, Banknote, X, AlertCircle, Building2, Eye, EyeOff, RefreshCw, Users, BadgeCheck, PiggyBank,
-  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode, Landmark, LayoutGrid
+  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode
 } from 'lucide-react';
 
 // Coupe l'URL réelle de ton backend ici une fois qu'il est déployé
@@ -162,9 +163,9 @@ const TX_TYPE_LABELS = {
 // Kategori metòd depo/retrè yo — ekran an montre yo pa gwoup olye yon sèl blòk.
 // Pou ajoute yon nouvo metòd: mete `kind` li ('mobile' | 'bank' | 'crypto' | 'office').
 const METHOD_CATEGORIES = [
-  { id: 'mobile', kinds: ['mobile'], icon: Smartphone, color: '#1E9E7C', soft: '#E4F5EF' },
-  { id: 'bank', kinds: ['bank'], icon: Landmark, color: '#143A73', soft: '#E6F0FB' },
-  { id: 'other', kinds: ['crypto', 'office'], icon: LayoutGrid, color: '#946115', soft: '#FBF0DE' },
+  { id: 'mobile', kinds: ['mobile'], tint: 'linear-gradient(160deg, #E8F7FE 0%, #D3EEFB 100%)' },
+  { id: 'bank', kinds: ['bank'], tint: 'linear-gradient(160deg, #EEF3FB 0%, #DCE6F5 100%)' },
+  { id: 'other', kinds: ['crypto', 'office'], tint: 'linear-gradient(160deg, #EAF8F2 0%, #D4F0E4 100%)' },
 ];
 
 const methods = [
@@ -5573,21 +5574,34 @@ export default function BlicPayApp() {
               return (
                 <>
                   <h3 className="mt-7 font-semibold text-sm uppercase" style={{ color: C.muted }}>{flowKind === 'withdraw' ? tr('chooseCatWithdraw') : tr('chooseCatDeposit')}</h3>
-                  <div className="mt-3 grid grid-cols-3 gap-2">
+                  <div className="mt-3 grid grid-cols-3 gap-2.5">
                     {cats.map((c) => {
                       const on = c.id === active.id;
+                      const Art = CATEGORY_ART[c.id];
                       return (
                         <button key={c.id} onClick={() => setMethodCat(c.id)}
-                          className="bp-btn relative rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center"
-                          style={{ background: on ? C.navy : C.card, border: `1px solid ${on ? C.navy : C.border}`, color: on ? '#fff' : C.ink }}>
-                          <span className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: on ? 'rgba(255,255,255,0.15)' : c.soft }}>
-                            <c.icon size={17} color={on ? '#fff' : c.color} />
-                          </span>
-                          <span className="text-xs font-semibold leading-tight">{tr('cat_' + c.id)}</span>
-                          {c.available === 0 ? (
-                            <span className="text-[10px] font-semibold px-1.5 rounded-full" style={{ background: on ? 'rgba(255,255,255,0.18)' : '#FBF0DE', color: on ? '#fff' : C.amber }}>{tr('cat_soon')}</span>
-                          ) : (
-                            <span className="text-[10px]" style={{ color: on ? 'rgba(255,255,255,0.75)' : C.muted }}>{c.list.map((m) => m.name).join(' · ')}</span>
+                          className="relative rounded-[22px] p-[2px] text-center transition-all duration-200"
+                          style={{
+                            background: on ? `linear-gradient(135deg, ${C.navy}, ${C.sky})` : C.border,
+                            boxShadow: on ? '0 10px 24px -8px rgba(20,58,115,.45)' : '0 1px 2px rgba(11,27,51,.04)',
+                            transform: on ? 'translateY(-2px)' : 'none',
+                          }}>
+                          <div className="h-full rounded-[20px] px-2 pt-2.5 pb-3 flex flex-col items-center" style={{ background: '#fff' }}>
+                            <div className="w-full rounded-2xl flex items-center justify-center py-2" style={{ background: c.tint }}>
+                              <div style={{ opacity: on ? 1 : 0.85, transform: on ? 'scale(1.06)' : 'scale(1)', transition: 'all .2s' }}><Art size={52} /></div>
+                            </div>
+                            <span className="mt-2 text-[13px] font-bold leading-tight" style={{ color: on ? C.navy : C.ink }}>{tr('cat_' + c.id)}</span>
+                            {c.available === 0 ? (
+                              <span className="mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#FDF3E3', color: C.amber }}>{tr('cat_soon')}</span>
+                            ) : (
+                              <span className="mt-1 text-[10px] font-medium leading-snug" style={{ color: C.muted }}>{c.list.map((m) => m.name).join(' · ')}</span>
+                            )}
+                          </div>
+                          {on && (
+                            <span className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center shadow-md"
+                              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, border: '2px solid #fff' }}>
+                              <Check size={12} color="#fff" strokeWidth={3} />
+                            </span>
                           )}
                         </button>
                       );
