@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import BusinessApp from './business/BusinessApp.jsx';
+import ReceiveQR from './ReceiveQR.jsx';
 import {
   Bell, Wallet, ArrowUpRight, ArrowDownLeft, Clock, Settings, Home,
   ArrowLeftRight, Plus, Check, Copy, ChevronRight, ArrowLeft, ShieldCheck,
   DollarSign, Smartphone, Banknote, X, AlertCircle, Building2, Eye, EyeOff, RefreshCw, Users, BadgeCheck, PiggyBank,
-  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText
+  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode
 } from 'lucide-react';
 
 // Coupe l'URL réelle de ton backend ici une fois qu'il est déployé
@@ -211,7 +212,7 @@ const T = {
     balanceLabel: 'SÒLD TOTAL',
     accountLabel: 'Kont BLICPay',
     navHome: 'Akèy', navHistory: 'Istwa', navTransfer: 'Transfè', navSettings: 'Paramèt',
-    tileDeposit: 'Depoze', tileWithdraw: 'Retrè', tileTransfer: 'Transfere',
+    tileDeposit: 'Depoze', tileWithdraw: 'Retrè', tileTransfer: 'Transfere', tileReceive: 'Resevwa', myQr: 'QR mwen',
     tileSol: 'BLIC Sòl', tileDepo: 'BLIC Depo', tileGoal: 'Depo Ak Objektif', tileLoan: 'Prè',
     lp_mockBalance: 'SOLDE KONT', lp_mockQuickAccess: 'AKSÈ RAPID', lp_mockGoalShort: 'Objektif',
     lp_mockRecentActivity: 'AKTIVITE RESAN', lp_mockDepositMoncash: 'Depo MonCash', lp_mockSolContribution: 'Kotizasyon Sòl Basic #3',
@@ -324,7 +325,7 @@ const T = {
     balanceLabel: 'SOLDE TOTAL',
     accountLabel: 'Compte BLICPay',
     navHome: 'Accueil', navHistory: 'Historique', navTransfer: 'Transfert', navSettings: 'Paramètres',
-    tileDeposit: 'Dépôt', tileWithdraw: 'Retrait', tileTransfer: 'Transfert',
+    tileDeposit: 'Dépôt', tileWithdraw: 'Retrait', tileTransfer: 'Transfert', tileReceive: 'Recevoir', myQr: 'Mon QR',
     tileSol: 'BLIC Sòl', tileDepo: 'BLIC Dépo', tileGoal: 'Dépôt Objectif', tileLoan: 'Prêt',
     lp_mockBalance: 'SOLDE DU COMPTE', lp_mockQuickAccess: 'ACCÈS RAPIDE', lp_mockGoalShort: 'Objectif',
     lp_mockRecentActivity: 'ACTIVITÉ RÉCENTE', lp_mockDepositMoncash: 'Dépôt MonCash', lp_mockSolContribution: 'Cotisation Sòl Basic #3',
@@ -437,7 +438,7 @@ const T = {
     balanceLabel: 'TOTAL BALANCE',
     accountLabel: 'BLICPay Account',
     navHome: 'Home', navHistory: 'History', navTransfer: 'Transfer', navSettings: 'Settings',
-    tileDeposit: 'Deposit', tileWithdraw: 'Withdraw', tileTransfer: 'Transfer',
+    tileDeposit: 'Deposit', tileWithdraw: 'Withdraw', tileTransfer: 'Transfer', tileReceive: 'Receive', myQr: 'My QR',
     tileSol: 'BLIC Sòl', tileDepo: 'BLIC Depo', tileGoal: 'Goal Deposit', tileLoan: 'Loan',
     lp_mockBalance: 'ACCOUNT BALANCE', lp_mockQuickAccess: 'QUICK ACCESS', lp_mockGoalShort: 'Goal',
     lp_mockRecentActivity: 'RECENT ACTIVITY', lp_mockDepositMoncash: 'MonCash deposit', lp_mockSolContribution: 'Sòl Basic #3 contribution',
@@ -1711,6 +1712,7 @@ export default function BlicPayApp() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
+  const [showMyQr, setShowMyQr] = useState(false); // kòd QR pèsonèl (resevwa lajan)
   const [kycSelfieFile, setKycSelfieFile] = useState(null);
   const [profile, setProfile] = useState({
     firstName: '', lastName: '', email: '', address: '', city: '', country: '', department: '',
@@ -3184,6 +3186,10 @@ export default function BlicPayApp() {
         ) : (
         <>
 
+        {showMyQr && !isBizDash && view === 'dashboard' && (
+          <ReceiveQR user={user} lang={lang} flash={flash} onClose={() => setShowMyQr(false)} />
+        )}
+
         {isBizDash && (
           <BusinessApp
             token={token} user={user} lang={lang} setLang={setLang} balance={balance} apiFetch={apiFetch} flash={flash}
@@ -3576,6 +3582,12 @@ export default function BlicPayApp() {
               <button onClick={() => { navigator.clipboard?.writeText(getClientId(user)); flash('ID kopye.'); }} aria-label="Kopye ID">
                 <Copy size={12} color={C.muted} />
               </button>
+              {user?.clientId && (
+                <button onClick={() => setShowMyQr(true)} className="ml-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                  style={{ background: '#E6F0FB', color: C.navy }}>
+                  <QrCode size={11} /> {tr('myQr')}
+                </button>
+              )}
             </div>
 
             {/* balance card */}
@@ -3644,6 +3656,15 @@ export default function BlicPayApp() {
                 </div>
                 <span className="text-xs font-semibold">{tr('tileTransfer')}</span>
               </button>
+              {user?.clientId && (
+                <button onClick={() => setShowMyQr(true)} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
+                  style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E6F6FD' }}>
+                    <QrCode size={16} color={C.navy} />
+                  </div>
+                  <span className="text-xs font-semibold">{tr('tileReceive')}</span>
+                </button>
+              )}
               <button onClick={openSolSection} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
                 style={{ background: C.card, border: `1px solid ${C.border}` }}>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#FBF0DE' }}>
