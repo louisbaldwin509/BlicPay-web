@@ -180,8 +180,58 @@ function AuthField({ label, icon: Icon, hint, children }) {
 
 const authInputCls = 'w-full bg-transparent outline-none text-[15px] py-3.5 pr-4';
 
-function AuthInput({ icon, ...props }) {
-  return <input {...props} className={authInputCls} style={{ paddingLeft: icon ? 42 : 16, color: C.ink }} />;
+// Lis chwa pou enfòmasyon idantifikasyon kliyan an (kòd yo menm ak sèvè a).
+const REG_COUNTRIES = [['HT', 'Ayiti'], ['US', 'Etazini'], ['CA', 'Kanada'], ['FR', 'Frans'], ['DO', 'Repiblik Dominikèn'], ['CL', 'Chili'], ['BR', 'Brezil'], ['OTHER', 'Lòt peyi']];
+const REG_DEPTS = ['Ouest', 'Nord', 'Nord-Est', 'Nord-Ouest', 'Artibonite', 'Centre', 'Sud', 'Sud-Est', "Grand'Anse", 'Nippes'];
+const REG_ID_TYPES = [['cin', 'Kat idantifikasyon nasyonal (CIN)'], ['nif', 'NIF'], ['passport', 'Paspò'], ['license', 'Lisans kondwi']];
+const REG_OCCUPATIONS = [['employed', 'Anplwaye'], ['self_employed', 'Travayè endepandan / komèsan'], ['business_owner', 'Pwopriyetè biznis'], ['student', 'Etidyan'], ['unemployed', 'San travay'], ['retired', 'Retrete'], ['other', 'Lòt@@occ']];
+const REG_FUNDS = [['salary', 'Salè'], ['business', 'Revni biznis'], ['remittances', 'Transfè fanmi (dyaspora)'], ['savings', 'Epay@@funds'], ['pension', 'Pansyon'], ['other', 'Lòt@@occ']];
+const REG_VOLUMES = [['lt25k', 'Mwens pase 25 000 HTG'], ['25k_100k', '25 000 – 100 000 HTG'], ['100k_500k', '100 000 – 500 000 HTG'], ['gt500k', 'Plis pase 500 000 HTG']];
+const REG_STEPS = ['Idantite', 'Kowòdone', 'Pyès idantite', 'Pwofil finansye', 'Sekirite@@step', 'Verifikasyon@@step'];
+const optLabel = (list, v) => { const f = list.find(([k]) => k === v); return f ? tt(f[1]) : ''; };
+
+function AuthSelect({ value, onChange, options, placeholder = '—' }) {
+  return (
+    <>
+      <select value={value} onChange={onChange} className={authInputCls} style={{ paddingLeft: 16, paddingRight: 38, color: value ? C.ink : '#94A0B2' }}>
+        <option value="" disabled>{placeholder}</option>
+        {options.map(([k, label]) => <option key={k} value={k}>{tt(label)}</option>)}
+      </select>
+      <ChevronRight size={15} color="#94A0B2" className="absolute right-3.5 pointer-events-none" style={{ transform: 'rotate(90deg)' }} />
+    </>
+  );
+}
+
+function ChoiceGroup({ value, onChange, options, cols = 2 }) {
+  return (
+    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+      {options.map(([k, label]) => {
+        const on = value === k;
+        return (
+          <button key={String(k)} type="button" onClick={() => onChange(k)}
+            className="min-h-[46px] px-3 py-2 rounded-xl text-sm font-semibold text-left flex items-center gap-2.5 transition-all"
+            style={{ background: on ? '#EEF3FB' : '#fff', border: `1.5px solid ${on ? C.navy : C.border}`, color: on ? C.navy : C.ink }}>
+            <span className="w-4 h-4 rounded-full shrink-0 flex items-center justify-center" style={{ border: `1.5px solid ${on ? C.navy : '#B8C1CF'}` }}>
+              {on && <span className="w-2 h-2 rounded-full" style={{ background: C.navy }} />}
+            </span>
+            {tt(label)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function RegNote({ icon: Icon = ShieldCheck, children }) {
+  return (
+    <div className="flex items-start gap-2.5 px-3.5 py-3 rounded-xl text-[12.5px] leading-relaxed" style={{ background: '#F2F7FD', border: '1px solid #D9E7F7', color: '#33507A' }}>
+      <Icon size={15} className="shrink-0 mt-0.5" /> <span>{children}</span>
+    </div>
+  );
+}
+
+function AuthInput({ icon, style, ...props }) {
+  return <input {...props} className={authInputCls} style={{ paddingLeft: icon ? 42 : 16, color: C.ink, ...style }} />;
 }
 
 function PasswordInput({ value, onChange, placeholder, autoComplete }) {
@@ -232,7 +282,7 @@ function AuthShell({ lang, onLang, onHome, children }) {
         .auth-field select { -webkit-appearance: none; appearance: none; }
       `}</style>
       {/* Panno mak la (gwo ekran sèlman) */}
-      <aside className="hidden lg:flex flex-col justify-between relative overflow-hidden" style={{ width: '44%', maxWidth: 620, padding: '40px 48px', background: 'linear-gradient(160deg, #0B1F45 0%, #143A73 55%, #1C6FA8 100%)', color: '#fff' }}>
+      <aside className="hidden lg:flex flex-col justify-between relative overflow-hidden" style={{ position: 'sticky', top: 0, height: '100vh', alignSelf: 'flex-start', width: '44%', maxWidth: 620, padding: '40px 48px', background: 'linear-gradient(160deg, #0B1F45 0%, #143A73 55%, #1C6FA8 100%)', color: '#fff' }}>
         <div style={{ position: 'absolute', right: -160, top: -160, width: 460, height: 460, borderRadius: '50%', background: 'radial-gradient(circle, rgba(41,182,232,.35), transparent 65%)' }} />
         <div style={{ position: 'absolute', left: -120, bottom: -180, width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(41,182,232,.18), transparent 65%)' }} />
         <button onClick={onHome} className="relative flex items-center gap-3 self-start">
@@ -1033,8 +1083,12 @@ export default function BlicPayApp() {
   const [betaNotice, setBetaNotice] = useState(''); // mod tès prive: mesaj apre enskripsyon
   const [authForm, setAuthForm] = useState({
     lastName: '', firstName: '', phone: '', email: '',
-    country: '', address: '', city: '', department: '', password: '',
+    country: 'HT', address: '', city: '', department: '', password: '',
+    dateOfBirth: '', gender: '', nationality: 'HT', birthPlace: '',
+    idType: '', idNumber: '', idExpiry: '',
+    occupation: '', employer: '', sourceOfFunds: '', expectedMonthlyVolume: '', isPep: null,
   });
+  const [certifiedAccurate, setCertifiedAccurate] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [registerStep, setRegisterStep] = useState(1);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -1319,30 +1373,63 @@ export default function BlicPayApp() {
 
   function goRegisterStep(step) {
     setAuthError('');
+    const f = authForm;
     if (step > registerStep) {
       if (registerStep === 1) {
-        if (!authForm.lastName.trim() || !authForm.firstName.trim()) { setAuthError(tr('errFullName')); return; }
-        if (!authForm.phone.trim()) { setAuthError(tr('errPhone')); return; }
+        if (!f.firstName.trim() || !f.lastName.trim()) { setAuthError(tt('Non ak siyati obligatwa.')); return; }
+        if (!f.dateOfBirth) { setAuthError(tt('Dat nesans lan obligatwa.')); return; }
+        const age = (Date.now() - new Date(f.dateOfBirth).getTime()) / (365.25 * 86400000);
+        if (!(age >= 18)) { setAuthError(tt('Ou dwe gen omwen 18 an pou louvri yon kont.')); return; }
+        if (!f.gender) { setAuthError(tt('Chwazi sèks ou.')); return; }
+        if (!f.nationality) { setAuthError(tt('Chwazi nasyonalite ou.')); return; }
+        if (!f.birthPlace.trim()) { setAuthError(tt('Kote ou fèt obligatwa.')); return; }
       }
       if (registerStep === 2) {
-        if (authForm.password.length < 6) { setAuthError(tr('errPasswordShort')); return; }
-        if (authForm.password !== confirmPassword) { setAuthError(tr('errPasswordMatch')); return; }
+        if (!f.phone.trim()) { setAuthError(tr('errPhone')); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim())) { setAuthError(tt('Imèl la pa valab.')); return; }
+        if (!f.address.trim() || !f.city.trim()) { setAuthError(tt('Adrès ak vil obligatwa.')); return; }
+        if (!f.country) { setAuthError(tt('Chwazi peyi kote ou rete a.')); return; }
+        if (f.country === 'HT' && !f.department) { setAuthError(tt('Chwazi depatman ou.')); return; }
+      }
+      if (registerStep === 3) {
+        if (!f.idType || f.idNumber.trim().length < 5) { setAuthError(tt('Tip ak nimewo pyès idantite a obligatwa.')); return; }
+        if (f.idExpiry && new Date(f.idExpiry).getTime() < Date.now()) { setAuthError(tt('Pyès idantite a ekspire.')); return; }
+      }
+      if (registerStep === 4) {
+        if (!f.occupation) { setAuthError(tt('Chwazi okipasyon ou.')); return; }
+        if (!f.sourceOfFunds) { setAuthError(tt('Chwazi sous lajan ou.')); return; }
+        if (!f.expectedMonthlyVolume) { setAuthError(tt('Chwazi konbyen lajan ou panse fè pa mwa.')); return; }
+        if (f.isPep === null) { setAuthError(tt('Reponn kesyon sou moun ki ekspoze politikman an.')); return; }
+      }
+      if (registerStep === 5) {
+        if (f.password.length < 6) { setAuthError(tr('errPasswordShort')); return; }
+        if (f.password !== confirmPassword) { setAuthError(tr('errPasswordMatch')); return; }
       }
     }
     setRegisterStep(step);
+    try { document.querySelector('main')?.scrollTo?.(0, 0); window.scrollTo(0, 0); } catch { /* */ }
   }
 
   async function submitRegistration() {
     setAuthError('');
-    if (!acceptedTerms) {
-      setAuthError(tr('errTerms'));
+    if (!acceptedTerms || !certifiedAccurate) {
+      setAuthError(tt('Ou dwe aksepte kondisyon yo epi sètifye enfòmasyon yo egzak.'));
       return;
     }
     setAuthLoading(true);
     try {
+      const f = authForm;
       const { token: newToken, user: newUser } = await apiFetch('/auth/register', {
         method: 'POST',
-        body: { ...authForm, fullName: `${authForm.firstName} ${authForm.lastName}`.trim() },
+        body: {
+          firstName: f.firstName, lastName: f.lastName, phone: f.phone.trim(), password: f.password,
+          dateOfBirth: f.dateOfBirth, gender: f.gender, nationality: f.nationality, birthPlace: f.birthPlace,
+          email: f.email.trim(), addressLine: f.address, city: f.city, country: f.country, department: f.country === 'HT' ? f.department : '',
+          idType: f.idType, idNumber: f.idNumber, idExpiry: f.idExpiry || undefined,
+          occupation: f.occupation, employer: f.employer, sourceOfFunds: f.sourceOfFunds,
+          expectedMonthlyVolume: f.expectedMonthlyVolume, isPep: f.isPep,
+          acceptedTerms, certifiedAccurate,
+        },
       });
       setToken(newToken);
       setUser(newUser);
@@ -2688,14 +2775,14 @@ export default function BlicPayApp() {
             ) : (
               <div className="mt-7">
                 {/* Endikatè etap */}
-                <div className="flex items-center gap-2">
-                  {[1, 2, 3].map((st) => (
-                    <div key={st} className="flex-1 h-1.5 rounded-full" style={{ background: st <= registerStep ? C.navy : C.border }} />
+                <div className="flex items-center gap-1.5">
+                  {REG_STEPS.map((_, i) => (
+                    <div key={i} className="flex-1 h-1.5 rounded-full" style={{ background: i + 1 <= registerStep ? C.navy : C.border }} />
                   ))}
                 </div>
                 <div className="mt-2.5 flex items-center justify-between text-[12.5px]">
-                  <span className="font-semibold" style={{ color: C.ink }}>{registerStep === 1 ? tr('stepInfo') : registerStep === 2 ? tr('stepPassword') : tr('stepTerms')}</span>
-                  <span style={{ color: C.muted }}>{tt('Etap {0} sou 3', registerStep)}</span>
+                  <span className="font-semibold" style={{ color: C.ink }}>{tt(REG_STEPS[registerStep - 1])}</span>
+                  <span style={{ color: C.muted }}>{tt('Etap {0} sou {1}', registerStep, REG_STEPS.length)}</span>
                 </div>
 
                 {registerStep === 1 && (
@@ -2708,35 +2795,92 @@ export default function BlicPayApp() {
                         <AuthInput autoComplete="family-name" value={authForm.lastName} onChange={(e) => setAuthForm((f) => ({ ...f, lastName: e.target.value }))} />
                       </AuthField>
                     </div>
+                    <AuthField label={tt('Dat nesans')} icon={Calendar}>
+                      <AuthInput icon type="date" autoComplete="bday" max={new Date(Date.now() - 18 * 365.25 * 86400000).toISOString().slice(0, 10)} value={authForm.dateOfBirth} onChange={(e) => setAuthForm((f) => ({ ...f, dateOfBirth: e.target.value }))} />
+                    </AuthField>
+                    <div>
+                      <span className="block text-[13px] font-semibold mb-1.5" style={{ color: C.ink }}>{tt('Sèks')}</span>
+                      <ChoiceGroup value={authForm.gender} onChange={(v) => setAuthForm((f) => ({ ...f, gender: v }))} options={[['F', 'Fi'], ['M', 'Gason']]} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <AuthField label={tt('Nasyonalite')}>
+                        <AuthSelect value={authForm.nationality} onChange={(e) => setAuthForm((f) => ({ ...f, nationality: e.target.value }))} options={REG_COUNTRIES} />
+                      </AuthField>
+                      <AuthField label={tt('Kote ou fèt')}>
+                        <AuthInput placeholder={tt('Vil / komin')} value={authForm.birthPlace} onChange={(e) => setAuthForm((f) => ({ ...f, birthPlace: e.target.value }))} />
+                      </AuthField>
+                    </div>
+                    <RegNote>{tt('Lalwa mande nou kolekte enfòmasyon sa yo pou pwoteje kont ou epi konbat blanchiman lajan. Yo rete konfidansyèl.')}</RegNote>
+                  </div>
+                )}
+
+                {registerStep === 2 && (
+                  <div className="mt-6 space-y-4">
                     <AuthField label={tr('phonePh')} icon={Phone}>
                       <AuthInput icon inputMode="tel" autoComplete="tel" placeholder="509 3X XX XXXX" value={authForm.phone} onChange={(e) => setAuthForm((f) => ({ ...f, phone: e.target.value }))} />
                     </AuthField>
                     <AuthField label={tr('emailPh')} icon={Mail}>
                       <AuthInput icon type="email" autoComplete="email" placeholder="nom@exemple.com" value={authForm.email} onChange={(e) => setAuthForm((f) => ({ ...f, email: e.target.value }))} />
                     </AuthField>
-                    <AuthField label={tr('addressPh')}>
+                    <AuthField label={tt('Adrès (ri, nimewo)')}>
                       <AuthInput autoComplete="street-address" value={authForm.address} onChange={(e) => setAuthForm((f) => ({ ...f, address: e.target.value }))} />
                     </AuthField>
                     <div className="grid grid-cols-2 gap-3">
-                      <AuthField label={tr('cityPh')}>
+                      <AuthField label={tt('Vil / komin')}>
                         <AuthInput autoComplete="address-level2" value={authForm.city} onChange={(e) => setAuthForm((f) => ({ ...f, city: e.target.value }))} />
                       </AuthField>
-                      <AuthField label={tr('countryPh')}>
-                        <select value={authForm.country} onChange={(e) => setAuthForm((f) => ({ ...f, country: e.target.value }))}
-                          className={authInputCls} style={{ paddingLeft: 16, color: authForm.country ? C.ink : '#94A0B2' }}>
-                          <option value="" disabled>—</option>
-                          {tr('countries').map((c) => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                        <ChevronRight size={15} color="#94A0B2" className="absolute right-3.5 pointer-events-none" style={{ transform: 'rotate(90deg)' }} />
+                      <AuthField label={tt('Peyi rezidans')}>
+                        <AuthSelect value={authForm.country} onChange={(e) => setAuthForm((f) => ({ ...f, country: e.target.value }))} options={REG_COUNTRIES} />
                       </AuthField>
                     </div>
-                    <AuthField label={tr('departmentPh')}>
-                      <AuthInput autoComplete="address-level1" value={authForm.department} onChange={(e) => setAuthForm((f) => ({ ...f, department: e.target.value }))} />
-                    </AuthField>
+                    {authForm.country === 'HT' && (
+                      <AuthField label={tt('Depatman')}>
+                        <AuthSelect value={authForm.department} onChange={(e) => setAuthForm((f) => ({ ...f, department: e.target.value }))} options={REG_DEPTS.map((d) => [d, d])} />
+                      </AuthField>
+                    )}
                   </div>
                 )}
 
-                {registerStep === 2 && (
+                {registerStep === 3 && (
+                  <div className="mt-6 space-y-4">
+                    <div>
+                      <span className="block text-[13px] font-semibold mb-1.5" style={{ color: C.ink }}>{tt('Tip pyès idantite')}</span>
+                      <ChoiceGroup value={authForm.idType} onChange={(v) => setAuthForm((f) => ({ ...f, idType: v }))} options={REG_ID_TYPES} cols={1} />
+                    </div>
+                    <AuthField label={tt('Nimewo pyès la')} icon={FileText}>
+                      <AuthInput icon autoComplete="off" value={authForm.idNumber} onChange={(e) => setAuthForm((f) => ({ ...f, idNumber: e.target.value }))} style={{ textTransform: 'uppercase' }} />
+                    </AuthField>
+                    <AuthField label={tt('Dat ekspirasyon (si genyen)')} icon={Calendar}>
+                      <AuthInput icon type="date" min={new Date().toISOString().slice(0, 10)} value={authForm.idExpiry} onChange={(e) => setAuthForm((f) => ({ ...f, idExpiry: e.target.value }))} />
+                    </AuthField>
+                    <RegNote icon={Camera}>{tt('Touswit apre, n ap mande w yon foto pyès sa a ak yon selfi pou verifye idantite w (KYC).')}</RegNote>
+                  </div>
+                )}
+
+                {registerStep === 4 && (
+                  <div className="mt-6 space-y-5">
+                    <AuthField label={tt('Okipasyon')}>
+                      <AuthSelect value={authForm.occupation} onChange={(e) => setAuthForm((f) => ({ ...f, occupation: e.target.value }))} options={REG_OCCUPATIONS} />
+                    </AuthField>
+                    <AuthField label={tt('Anplwayè oswa aktivite (opsyonèl)')}>
+                      <AuthInput value={authForm.employer} onChange={(e) => setAuthForm((f) => ({ ...f, employer: e.target.value }))} />
+                    </AuthField>
+                    <AuthField label={tt('Sous lajan ou')}>
+                      <AuthSelect value={authForm.sourceOfFunds} onChange={(e) => setAuthForm((f) => ({ ...f, sourceOfFunds: e.target.value }))} options={REG_FUNDS} />
+                    </AuthField>
+                    <div>
+                      <span className="block text-[13px] font-semibold mb-1.5" style={{ color: C.ink }}>{tt('Konbyen lajan ou panse fè pa mwa?')}</span>
+                      <ChoiceGroup value={authForm.expectedMonthlyVolume} onChange={(v) => setAuthForm((f) => ({ ...f, expectedMonthlyVolume: v }))} options={REG_VOLUMES} />
+                    </div>
+                    <div>
+                      <span className="block text-[13px] font-semibold mb-1" style={{ color: C.ink }}>{tt('Èske ou se yon moun ki ekspoze politikman (PEP)?')}</span>
+                      <span className="block text-[12px] mb-2" style={{ color: C.muted }}>{tt('Yon moun ki gen oswa ki te gen yon gwo fonksyon piblik (minis, palmantè, jij, ofisye wo grad...), oswa yon fanmi pwòch li.')}</span>
+                      <ChoiceGroup value={authForm.isPep} onChange={(v) => setAuthForm((f) => ({ ...f, isPep: v }))} options={[[false, 'Non@@no'], [true, 'Wi']]} />
+                    </div>
+                  </div>
+                )}
+
+                {registerStep === 5 && (
                   <div className="mt-6 space-y-4">
                     <div>
                       <AuthField label={tr('passwordPh')} icon={Lock} hint={tt('Omwen 6 karaktè. Pi bon: lèt, chif ak senbòl.')}>
@@ -2750,25 +2894,51 @@ export default function BlicPayApp() {
                   </div>
                 )}
 
-                {registerStep === 3 && (
-                  <div className="mt-6">
-                    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
-                      <div className="px-4 py-3 text-[12px] font-semibold uppercase tracking-wider" style={{ background: '#F7F9FC', color: C.muted, borderBottom: `1px solid ${C.border}` }}>{tr('reviewInfo')}</div>
-                      {[
+                {registerStep === 6 && (
+                  <div className="mt-6 space-y-3">
+                    {[
+                      [tt('Idantite'), 1, [
                         [tr('fullNamePh'), `${authForm.firstName} ${authForm.lastName}`.trim()],
+                        [tt('Dat nesans'), authForm.dateOfBirth && new Date(authForm.dateOfBirth + 'T12:00:00').toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR')],
+                        [tt('Sèks'), authForm.gender === 'F' ? tt('Fi') : authForm.gender === 'M' ? tt('Gason') : ''],
+                        [tt('Nasyonalite'), optLabel(REG_COUNTRIES, authForm.nationality)],
+                        [tt('Kote ou fèt'), authForm.birthPlace],
+                      ]],
+                      [tt('Kowòdone'), 2, [
                         [tr('phonePh'), authForm.phone],
                         [tr('emailPh'), authForm.email],
-                        [tr('addressPh'), authForm.address],
-                        [`${tr('cityPh')} / ${tr('countryPh')}`, [authForm.city, authForm.country].filter(Boolean).join(' · ')],
-                        [tr('departmentPh'), authForm.department],
-                      ].filter(([, v]) => v).map(([k, v], i) => (
-                        <div key={k} className="flex items-center justify-between gap-4 px-4 py-3 text-sm" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
-                          <span style={{ color: C.muted }}>{k}</span>
-                          <span className="font-semibold text-right" style={{ color: C.ink }}>{v}</span>
+                        [tt('Adrès@@review'), [authForm.address, authForm.city, authForm.country === 'HT' ? authForm.department : '', optLabel(REG_COUNTRIES, authForm.country)].filter(Boolean).join(', ')],
+                      ]],
+                      [tt('Pyès idantite'), 3, [
+                        [optLabel(REG_ID_TYPES, authForm.idType), authForm.idNumber.toUpperCase()],
+                        [tt('Ekspirasyon'), authForm.idExpiry && new Date(authForm.idExpiry + 'T12:00:00').toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR')],
+                      ]],
+                      [tt('Pwofil finansye'), 4, [
+                        [tt('Okipasyon'), [optLabel(REG_OCCUPATIONS, authForm.occupation), authForm.employer].filter(Boolean).join(' · ')],
+                        [tt('Sous lajan ou'), optLabel(REG_FUNDS, authForm.sourceOfFunds)],
+                        [tt('Volim pa mwa'), optLabel(REG_VOLUMES, authForm.expectedMonthlyVolume)],
+                        ['PEP', authForm.isPep ? tt('Wi') : tt('Non@@no')],
+                      ]],
+                    ].map(([title, step, rows]) => (
+                      <div key={title} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+                        <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: '#F7F9FC', borderBottom: `1px solid ${C.border}` }}>
+                          <span className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: C.muted }}>{title}</span>
+                          <button type="button" onClick={() => setRegisterStep(step)} className="text-[12.5px] font-semibold" style={{ color: C.navy }}>{tt('Modifye@@review')}</button>
                         </div>
-                      ))}
-                    </div>
-                    <label className="mt-5 flex items-start gap-3 cursor-pointer p-3.5 rounded-xl" style={{ background: '#F7F9FC', border: `1px solid ${C.border}` }}>
+                        {rows.filter(([, v]) => v).map(([k, v], i) => (
+                          <div key={k + i} className="flex items-start justify-between gap-4 px-4 py-2.5 text-[13.5px]" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
+                            <span style={{ color: C.muted }}>{k}</span>
+                            <span className="font-semibold text-right" style={{ color: C.ink }}>{v}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    <label className="flex items-start gap-3 cursor-pointer p-3.5 rounded-xl" style={{ background: '#F7F9FC', border: `1px solid ${C.border}` }}>
+                      <input type="checkbox" checked={certifiedAccurate} onChange={(e) => setCertifiedAccurate(e.target.checked)}
+                        className="mt-0.5 shrink-0" style={{ width: 17, height: 17, accentColor: C.navy }} />
+                      <span className="text-[13px] leading-relaxed" style={{ color: C.ink }}>{tt('Mwen sètifye tout enfòmasyon mwen bay yo egzak e konplè, e m ap fè BLICPay konnen si yo chanje.')}</span>
+                    </label>
+                    <label className="flex items-start gap-3 cursor-pointer p-3.5 rounded-xl" style={{ background: '#F7F9FC', border: `1px solid ${C.border}` }}>
                       <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)}
                         className="mt-0.5 shrink-0" style={{ width: 17, height: 17, accentColor: C.navy }} />
                       <span className="text-[13px] leading-relaxed" style={{ color: C.ink }}>{tr('termsText')}</span>
@@ -2790,7 +2960,7 @@ export default function BlicPayApp() {
                       <ArrowLeft size={16} /> {tr('back')}
                     </button>
                   )}
-                  {registerStep < 3 ? (
+                  {registerStep < REG_STEPS.length ? (
                     <button onClick={() => goRegisterStep(registerStep + 1)}
                       className="bp-btn flex-1 h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2"
                       style={{ background: C.navy, boxShadow: '0 10px 24px -12px rgba(20,58,115,.7)' }}>
