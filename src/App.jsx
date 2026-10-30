@@ -164,6 +164,24 @@ const C = {
 const fontDisplay = { fontFamily: "'Manrope', sans-serif" };
 const fontMono = { fontFamily: "'IBM Plex Mono', monospace" };
 
+// Idantifyan aparèy sa a (navigatè) — sèvè a sonje aparèy ki deja konfime ak yon kòd imèl.
+function getDeviceId() {
+  try {
+    let id = localStorage.getItem('blicpay_device_id');
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+      localStorage.setItem('blicpay_device_id', id);
+    }
+    return id;
+  } catch { return null; }
+}
+function deviceLabel() {
+  const ua = navigator.userAgent || '';
+  const b = /Edg\//.test(ua) ? 'Edge' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : /Firefox\//.test(ua) ? 'Firefox' : 'Navigateur';
+  const os = /iPhone|iPad/.test(ua) ? 'iOS' : /Android/.test(ua) ? 'Android' : /Mac OS/.test(ua) ? 'macOS' : /Windows/.test(ua) ? 'Windows' : '';
+  return `Web · ${b}${os ? ' · ' + os : ''}`;
+}
+
 // ---------- Ekran koneksyon / kreye kont (vèsyon pwofesyonèl) ----------
 function AuthField({ label, icon: Icon, hint, children }) {
   return (
@@ -1081,6 +1099,16 @@ export default function BlicPayApp() {
   ];
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
   const [betaNotice, setBetaNotice] = useState(''); // mod tès prive: mesaj apre enskripsyon
+  const [otp, setOtp] = useState(null); // { challengeId, email } — kòd imèl pou nouvo aparèy
+  const [otpCode, setOtpCode] = useState('');
+  const [otpCooldown, setOtpCooldown] = useState(0);
+  const [loginId, setLoginId] = useState('');
+  const [forgotChallenge, setForgotChallenge] = useState(null);
+  React.useEffect(() => {
+    if (otpCooldown <= 0) return undefined;
+    const t = setTimeout(() => setOtpCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [otpCooldown]);
   const [authForm, setAuthForm] = useState({
     lastName: '', firstName: '', phone: '', email: '',
     country: 'HT', address: '', city: '', department: '', password: '',
@@ -1343,16 +1371,28 @@ export default function BlicPayApp() {
 
   async function handleAuthSubmit() {
     setAuthError('');
-    if (!authForm.phone.trim() || !authForm.password) {
-      setAuthError(tr('errPhone'));
+    if (!loginId.trim() || !authForm.password) {
+      setAuthError(tt('Antre imèl oswa telefòn ou ak modpas ou.'));
       return;
     }
     setAuthLoading(true);
     try {
-      const { token: newToken, user: newUser } = await apiFetch('/auth/login', {
+      const r = await apiFetch('/auth/login', {
         method: 'POST',
-        body: { phone: authForm.phone, password: authForm.password },
+        body: { identifier: loginId.trim(), password: authForm.password, deviceId: getDeviceId() },
       });
+      if (r.otpRequired) { setOtp({ challengeId: r.challengeId, email: r.email }); setOtpCode(''); setOtpCooldown(60); return; }
+      await enterSession(r.token, r.user);
+    } catch (err) {
+      if (err.code === 'PRIVATE_BETA') setBetaNotice(err.message); else setAuthError(err.message);
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  // Louvri sesyon an apre koneksyon (dirèk oswa apre kòd imèl la).
+  async function enterSession(newToken, newUser) {
+      setOtp(null);
       setToken(newToken);
       setUser(newUser);
       setBalance(newUser.balance);
@@ -1364,11 +1404,30 @@ export default function BlicPayApp() {
       await loadKycStatusSilently(newToken);
       await loadVerificationRequests(newToken);
       await loadNotifications(newToken);
+  }
+
+  async function verifyOtp() {
+    setAuthError('');
+    if (!/^\d{6}$/.test(otpCode)) { setAuthError(tt('Antre 6 chif kòd la.')); return; }
+    setAuthLoading(true);
+    try {
+      const r = await apiFetch('/auth/login/verify', { method: 'POST', body: { challengeId: otp.challengeId, code: otpCode, deviceId: getDeviceId(), deviceLabel: deviceLabel() } });
+      await enterSession(r.token, r.user);
     } catch (err) {
-      if (err.code === 'PRIVATE_BETA') setBetaNotice(err.message); else setAuthError(err.message);
+      if (err.code === 'PRIVATE_BETA') { setOtp(null); setBetaNotice(err.message); } else setAuthError(err.message);
     } finally {
       setAuthLoading(false);
     }
+  }
+
+  async function resendOtp() {
+    setAuthError('');
+    try {
+      const r = await apiFetch('/auth/code/resend', { method: 'POST', body: { challengeId: otp.challengeId } });
+      setOtp((o) => ({ ...o, challengeId: r.challengeId }));
+      setOtpCode(''); setOtpCooldown(60);
+      flash(tt('Nouvo kòd voye.'), 'info');
+    } catch (err) { setAuthError(err.message); }
   }
 
   function goRegisterStep(step) {
@@ -1419,7 +1478,7 @@ export default function BlicPayApp() {
     setAuthLoading(true);
     try {
       const f = authForm;
-      const { token: newToken, user: newUser } = await apiFetch('/auth/register', {
+      const reg = await apiFetch('/auth/register', {
         method: 'POST',
         body: {
           firstName: f.firstName, lastName: f.lastName, phone: f.phone.trim(), password: f.password,
@@ -1431,6 +1490,12 @@ export default function BlicPayApp() {
           acceptedTerms, certifiedAccurate,
         },
       });
+      setProfile({
+        firstName: authForm.firstName, lastName: authForm.lastName, email: authForm.email,
+        address: authForm.address, city: authForm.city, country: authForm.country, department: authForm.department,
+      });
+      if (reg.otpRequired) { setOtp({ challengeId: reg.challengeId, email: reg.email }); setOtpCode(''); setOtpCooldown(60); return; }
+      const { token: newToken, user: newUser } = reg;
       setToken(newToken);
       setUser(newUser);
       setKycStatus('pa verifye');
@@ -2284,14 +2349,19 @@ export default function BlicPayApp() {
   async function sendResetCode() {
     setForgotError('');
     if (!forgotPhone.trim()) {
-      setForgotError(tr('errPhone'));
+      setForgotError(tt('Antre imèl oswa telefòn ou.'));
       return;
     }
     setForgotSending(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setForgotSending(false);
-    setForgotStep(2);
-    flash(tr('sendCodeBtn') + ' ✓');
+    try {
+      const r = await apiFetch('/auth/password/forgot', { method: 'POST', body: { identifier: forgotPhone.trim() } });
+      setForgotChallenge(r.challengeId ? { id: r.challengeId, email: r.email } : { id: null, email: null });
+      setForgotStep(2);
+    } catch (err) {
+      setForgotError(err.message);
+    } finally {
+      setForgotSending(false);
+    }
   }
 
   async function resetPassword() {
@@ -2308,11 +2378,20 @@ export default function BlicPayApp() {
       setForgotError(tr('errPasswordMatch'));
       return;
     }
+    if (!forgotChallenge?.id) {
+      setForgotError(tt('Kòd sa a pa valab ankò — mande yon lòt.'));
+      return;
+    }
     setForgotSending(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setForgotSending(false);
-    setForgotDone(true);
-    flash(tr('resetSuccessMsg'));
+    try {
+      await apiFetch('/auth/password/reset', { method: 'POST', body: { challengeId: forgotChallenge.id, code: forgotCode, newPassword: forgotNewPassword } });
+      setForgotDone(true);
+      flash(tr('resetSuccessMsg'));
+    } catch (err) {
+      setForgotError(err.message);
+    } finally {
+      setForgotSending(false);
+    }
   }
 
   function closeForgotPassword() {
@@ -2703,7 +2782,39 @@ export default function BlicPayApp() {
 
         {view === 'auth' && (
           <AuthShell lang={lang} onLang={() => setShowLangPicker((v) => !v)} onHome={() => setView('landing')}>
-            {betaNotice ? (
+            {otp && !betaNotice ? (
+              <div className="fadein">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: '#E6F4FB' }}><Mail size={26} color={C.navy} /></div>
+                <h1 className="mt-6" style={{ ...fontDisplay, fontWeight: 800, fontSize: 28, letterSpacing: -0.6, color: C.ink }}>{tt('Verifye imèl ou')}</h1>
+                <p className="mt-2 text-[15px] leading-relaxed" style={{ color: C.muted }}>
+                  {tt('Nou voye yon kòd 6 chif bay')} <b style={{ color: C.ink }}>{otp.email}</b>. {tt('Antre l pou konfime se ou menm.')}
+                </p>
+                <form className="mt-7" onSubmit={(e) => { e.preventDefault(); verifyOtp(); }}>
+                  <AuthField label={tt('Kòd konfimasyon')}>
+                    <input autoFocus value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                      inputMode="numeric" autoComplete="one-time-code" placeholder="••••••"
+                      className={authInputCls} style={{ ...fontMono, paddingLeft: 16, letterSpacing: 10, fontSize: 22, color: C.ink, textAlign: 'center' }} />
+                  </AuthField>
+                  {authError && (
+                    <div className="mt-4 px-3.5 py-3 rounded-xl text-[13px] flex items-start gap-2" style={{ background: '#FDF1F1', border: '1px solid #F5CFCF', color: '#9B2C2C' }}>
+                      <AlertCircle size={15} className="shrink-0 mt-px" /> <span>{authError}</span>
+                    </div>
+                  )}
+                  <button type="submit" disabled={authLoading}
+                    className="bp-btn mt-6 w-full h-12 rounded-xl font-semibold text-white"
+                    style={{ background: C.navy, opacity: authLoading ? 0.7 : 1, boxShadow: '0 10px 24px -12px rgba(20,58,115,.7)' }}>
+                    {authLoading ? tr('waitBtn') : tt('Konfime@@otp')}
+                  </button>
+                </form>
+                <div className="mt-5 flex items-center justify-between text-sm">
+                  <button type="button" onClick={() => { setOtp(null); setAuthError(''); }} className="font-semibold flex items-center gap-1.5" style={{ color: C.muted }}><ArrowLeft size={15} /> {tr('back')}</button>
+                  <button type="button" disabled={otpCooldown > 0} onClick={resendOtp} className="font-semibold" style={{ color: otpCooldown > 0 ? '#94A0B2' : C.navy }}>
+                    {otpCooldown > 0 ? tt('Voye yon lòt kòd ({0}s)', otpCooldown) : tt('Voye yon lòt kòd')}
+                  </button>
+                </div>
+                <p className="mt-6 text-[12.5px]" style={{ color: C.muted }}>{tt('Pa wè imèl la? Gade nan dosye Spam oswa Pwomosyon yo.')}</p>
+              </div>
+            ) : betaNotice ? (
               <div className="fadein">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: '#E6F4FB' }}><ShieldCheck size={26} color={C.navy} /></div>
                 <h1 className="mt-6" style={{ ...fontDisplay, fontWeight: 800, fontSize: 28, letterSpacing: -0.6, color: C.ink }}>{tt('Kont ou anrejistre')}</h1>
@@ -2726,9 +2837,9 @@ export default function BlicPayApp() {
             {authMode === 'login' ? (
               <form className="mt-7" onSubmit={(e) => { e.preventDefault(); handleAuthSubmit(); }}>
                 <div className="space-y-4">
-                  <AuthField label={tr('phonePh')} icon={Phone}>
-                    <AuthInput icon inputMode="tel" autoComplete="tel" placeholder="509 3X XX XXXX" value={authForm.phone}
-                      onChange={(e) => setAuthForm((f) => ({ ...f, phone: e.target.value }))} />
+                  <AuthField label={tt('Imèl oswa telefòn')} icon={Mail}>
+                    <AuthInput icon autoComplete="username" autoCapitalize="none" placeholder={tt('nom@exemple.com oswa 509…')} value={loginId}
+                      onChange={(e) => setLoginId(e.target.value)} />
                   </AuthField>
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
@@ -2996,8 +3107,8 @@ export default function BlicPayApp() {
               <>
                 <p className="mt-2 text-[15px]" style={{ color: C.muted }}>{tr('forgotStep1Sub')}</p>
                 <div className="mt-7">
-                  <AuthField label={tr('phonePh')} icon={Phone}>
-                    <AuthInput icon inputMode="tel" autoComplete="tel" placeholder="509 3X XX XXXX" value={forgotPhone} onChange={(e) => setForgotPhone(e.target.value)} />
+                  <AuthField label={tt('Imèl oswa telefòn')} icon={Mail}>
+                    <AuthInput icon autoComplete="username" autoCapitalize="none" placeholder={tt('nom@exemple.com oswa 509…')} value={forgotPhone} onChange={(e) => setForgotPhone(e.target.value)} />
                   </AuthField>
                 </div>
                 {forgotError && (
@@ -3013,7 +3124,9 @@ export default function BlicPayApp() {
               </>
             ) : (
               <>
-                <p className="mt-2 text-[15px]" style={{ color: C.muted }}>{tr('forgotStep2Sub')}</p>
+                <p className="mt-2 text-[15px]" style={{ color: C.muted }}>
+                  {forgotChallenge?.email ? tt('Nou voye yon kòd 6 chif bay {0}. Antre l anba a ak nouvo modpas ou.', forgotChallenge.email) : tt('Si yon kont ak yon imèl koresponn, nou voye yon kòd 6 chif ladan l.')}
+                </p>
                 <div className="mt-7 space-y-4">
                   <AuthField label={tr('codePh')}>
                     <input value={forgotCode} onChange={(e) => setForgotCode(e.target.value.replace(/[^0-9]/g, ''))}

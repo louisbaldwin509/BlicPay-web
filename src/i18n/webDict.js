@@ -1,6 +1,23 @@
 // Diksyonè sit kliyan an: tèks kreyòl → [français, english].
 // Kle a se tèks kreyòl EGZAK ki nan kòd la (tx("...")). {0}, {1}… = valè dinamik.
 export const WEB_DICT = {
+  'Konfime@@otp': ['Confirmer', 'Confirm'],
+  "Antre imèl oswa telefòn ou ak modpas ou.": ["Entrez votre e-mail ou téléphone et votre mot de passe.", "Enter your email or phone and your password."],
+  "Antre imèl oswa telefòn ou.": ["Entrez votre e-mail ou votre téléphone.", "Enter your email or phone."],
+  "Antre 6 chif kòd la.": ["Entrez les 6 chiffres du code.", "Enter the 6-digit code."],
+  "Nouvo kòd voye.": ["Nouveau code envoyé.", "New code sent."],
+  "Imèl oswa telefòn": ["E-mail ou téléphone", "Email or phone"],
+  "nom@exemple.com oswa 509…": ["nom@exemple.com ou 509…", "name@example.com or 509…"],
+  "Nou voye yon kòd 6 chif bay {0}. Antre l anba a ak nouvo modpas ou.": ["Nous avons envoyé un code à 6 chiffres à {0}. Saisissez-le ci-dessous avec votre nouveau mot de passe.", "We sent a 6-digit code to {0}. Enter it below with your new password."],
+  "Si yon kont ak yon imèl koresponn, nou voye yon kòd 6 chif ladan l.": ["Si un compte avec un e-mail correspond, nous y avons envoyé un code à 6 chiffres.", "If a matching account with an email exists, we sent a 6-digit code to it."],
+  "Kòd sa a pa valab ankò — mande yon lòt.": ["Ce code n'est plus valide — demandez-en un autre.", "This code is no longer valid — request a new one."],
+  "Verifye imèl ou": ["Vérifiez votre e-mail", "Check your email"],
+  "Nou voye yon kòd 6 chif bay": ["Nous avons envoyé un code à 6 chiffres à", "We sent a 6-digit code to"],
+  "Antre l pou konfime se ou menm.": ["Saisissez-le pour confirmer que c'est bien vous.", "Enter it to confirm it's you."],
+  "Kòd konfimasyon": ["Code de confirmation", "Confirmation code"],
+  "Voye yon lòt kòd ({0}s)": ["Renvoyer un code ({0} s)", "Resend code ({0}s)"],
+  "Voye yon lòt kòd": ["Renvoyer un code", "Resend code"],
+  "Pa wè imèl la? Gade nan dosye Spam oswa Pwomosyon yo.": ["Vous ne voyez pas l'e-mail ? Vérifiez vos dossiers Spam ou Promotions.", "Don't see the email? Check your Spam or Promotions folders."],
   "Ayiti": ["Haïti", "Haiti"],
   "Etazini": ["États-Unis", "United States"],
   "Kanada": ["Canada", "Canada"],
