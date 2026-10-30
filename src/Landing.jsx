@@ -201,8 +201,7 @@ export default function Landing({ onStart, lang, setLang }) {
       <header className="sticky top-0 z-40 border-b" style={{ background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(12px)', borderColor: C.border }}>
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center gap-6">
           <a href="#top" className="flex items-center gap-2 shrink-0" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-            <Logo />
-            <span style={{ ...display, fontWeight: 800, fontSize: 19 }}>BLIC<span style={{ color: C.sky }}>Pay</span></span>
+            <img src="/brand/logo-full.png" alt="BLICPay" style={{ height: 42, width: 'auto' }} />
           </a>
           <nav className="hidden lg:flex items-center gap-6 text-sm font-medium" style={{ color: C.muted }}>
             {NAV.map(([id, k]) => <button key={id} onClick={() => go(id)} className="hover:text-[#0B1B33]">{t(k)}</button>)}
@@ -477,7 +476,7 @@ export default function Landing({ onStart, lang, setLang }) {
       <footer className="border-t" style={{ borderColor: C.border }}>
         <div className="max-w-6xl mx-auto px-5 py-12 grid sm:grid-cols-3 gap-8">
           <div>
-            <div className="flex items-center gap-2"><Logo size={26} /><span style={{ ...display, fontWeight: 800 }}>BLIC<span style={{ color: C.sky }}>Pay</span></span></div>
+            <img src="/brand/logo-full.png" alt="BLICPay" style={{ height: 46, width: 'auto' }} />
             <p className="mt-3 text-sm" style={{ color: C.muted }}>{t('footDesc')}</p>
           </div>
           <div>

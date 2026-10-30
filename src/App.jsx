@@ -2423,10 +2423,7 @@ export default function BlicPayApp() {
         {view !== 'auth' && view !== 'forgotpassword' && !isBizDash && (
           <div className="flex items-center justify-between px-5 pt-6 pb-2">
             <div className="flex items-center gap-2">
-              <Logo size={28} />
-              <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 18 }}>
-                {tt("BLIC")}<span style={{ color: C.sky }}>{tt("Pay")}</span>
-              </span>
+              <img src="/brand/logo-full.png" alt="BLICPay" style={{ height: 36, width: 'auto' }} />
             </div>
             <div className="flex items-center gap-2">
               <button onClick={() => setShowLangPicker((s) => !s)} aria-label={tr('langLabel')}
@@ -2502,11 +2499,7 @@ export default function BlicPayApp() {
               <span>{LANGS.find((l) => l.code === lang)?.flag}</span> {LANGS.find((l) => l.code === lang)?.label}
             </button>
             <div className="flex flex-col items-center text-center">
-              <Logo size={44} />
-              <h1 className="mt-3" style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>
-                {tt("BLIC")}<span style={{ color: C.sky }}>{tt("Pay")}</span>
-              </h1>
-              <p className="mt-1 text-xs tracking-wide" style={{ color: C.muted }}>{tt("GLOBAL · SECURE · DIGITAL")}</p>
+              <img src="/brand/logo-full.png" alt="BLICPay — Global · Secure · Digital" style={{ height: 72, width: 'auto' }} />
             </div>
 
             <div className="mt-8 flex rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
@@ -2711,7 +2704,7 @@ export default function BlicPayApp() {
         {view === 'forgotpassword' && (
           <div className="fadein px-6 pt-16 pb-10">
             <div className="flex flex-col items-center text-center">
-              <Logo size={44} />
+              <img src="/brand/logo-symbol.png" alt="BLICPay" style={{ height: 56, width: 'auto' }} />
               <h1 className="mt-3" style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{tr('forgotTitle')}</h1>
             </div>
 
