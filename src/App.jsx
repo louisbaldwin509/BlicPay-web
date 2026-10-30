@@ -23,7 +23,7 @@ import {
   Bell, Wallet, ArrowUpRight, ArrowDownLeft, Clock, Settings, Home,
   ArrowLeftRight, Plus, Check, Copy, ChevronRight, ArrowLeft, ShieldCheck,
   DollarSign, Smartphone, Banknote, X, AlertCircle, Building2, Eye, EyeOff, RefreshCw, Users, BadgeCheck, PiggyBank,
-  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode
+  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode, Landmark
 } from 'lucide-react';
 
 // Coupe l'URL réelle de ton backend ici une fois qu'il est déployé
@@ -189,6 +189,8 @@ const METHOD_CATEGORIES = [
 const methods = [
   { id: 'moncash', name: 'Mon Cash', desc: 'Bous mobil Digicel', color: '#1E9E7C', icon: DollarSign, logo: '/logos/moncash-icon.png', kind: 'mobile' },
   { id: 'natcash', name: 'NatCash', desc: 'Bous mobil Natcom', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash-icon.png', kind: 'mobile' },
+  { id: 'unibank', name: 'Unibank', desc: 'Bank ayisyen — virement', color: '#143A73', icon: Landmark, logo: null, kind: 'bank', comingSoon: true },
+  { id: 'sogebank', name: 'Sogebank', desc: 'Bank ayisyen — virement', color: '#143A73', icon: Landmark, logo: null, kind: 'bank', comingSoon: true },
   { id: 'biwo', name: 'Nan biwo', desc: 'Ale peye kach nan yonn nan biwo nou yo', color: '#946115', icon: Building2, logo: null, kind: 'office' },
 ];
 

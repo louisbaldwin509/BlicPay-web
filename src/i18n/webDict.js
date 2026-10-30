@@ -371,6 +371,7 @@ export const WEB_DICT = {
   'Transfè': ['Transfert', 'Transfer'],
   'Bous mobil Digicel': ['Portefeuille mobile Digicel', 'Digicel mobile wallet'],
   'Bous mobil Natcom': ['Portefeuille mobile Natcom', 'Natcom mobile wallet'],
+  'Bank ayisyen — virement': ['Banque haïtienne — virement', 'Haitian bank — transfer'],
   'Voye lajan': ['Envoyer de l’argent', 'Send money'],
   'Transfè gratis ant kliyan BLICPay': ['Transferts gratuits entre clients BLICPay', 'Free transfers between BLICPay users'],
   'Voye lajan bay nenpòt kliyan BLICPay ak ID li — imedyat, san frè.': ['Envoyez de l’argent à tout client BLICPay avec son ID — instantané et sans frais.', 'Send money to any BLICPay user with their ID — instant and free.'],
