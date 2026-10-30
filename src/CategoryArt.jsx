@@ -113,11 +113,6 @@ export function OtherArt({ size = 64 }) {
         <ellipse cx="47" cy="40" rx="10" ry="3.6" fill="url(#ot-coin)" />
         <ellipse cx="47" cy="40" rx="6.4" ry="2.1" fill="none" stroke="#FFF3C4" strokeWidth="1" opacity=".8" />
       </g>
-      <g filter="url(#ot-sh)">
-        <circle cx="50" cy="14" r="9" fill="url(#ot-usdt)" />
-        <path d="M45.6 10.4h8.8M50 10.4v8.2" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
-        <ellipse cx="50" cy="13.4" rx="4.6" ry="1.4" stroke="#fff" strokeWidth="1" fill="none" />
-      </g>
     </svg>
   );
 }

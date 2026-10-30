@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import BusinessApp from './business/BusinessApp.jsx';
 import ReceiveQR from './ReceiveQR.jsx';
+import Landing from './Landing.jsx';
 import { CATEGORY_ART } from './CategoryArt.jsx';
 import { WEB_DICT } from './i18n/webDict.js';
 
@@ -188,7 +189,6 @@ const METHOD_CATEGORIES = [
 const methods = [
   { id: 'moncash', name: 'Mon Cash', desc: 'Depoze kach nan pwen Digicel ou', color: '#1E9E7C', icon: DollarSign, logo: '/logos/moncash-icon.png', kind: 'mobile' },
   { id: 'natcash', name: 'NatCash', desc: 'Depoze ak bous mobil NatCash ou', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash-icon.png', kind: 'mobile' },
-  { id: 'usdt', name: 'USDT', desc: 'Depoze dola ameriken an stablecoin (Tether)', color: '#0E9E86', icon: Banknote, logo: '/logos/usdt-icon.png', kind: 'crypto', comingSoon: true },
   { id: 'zelle', name: 'Zelle', desc: 'Depoze dirèkteman soti nan kont labank ou', color: '#6D3FD1', icon: ArrowLeftRight, logo: '/logos/zelle-icon.png', kind: 'bank', comingSoon: true },
   { id: 'biwo', name: 'Nan biwo', desc: 'Ale peye kach nan yonn nan biwo nou yo', color: '#946115', icon: Building2, logo: null, kind: 'office' },
 ];
@@ -325,10 +325,10 @@ const T = {
     lp_sec3t: 'Depo Egzamine', lp_sec3d: 'Chak depo revize anvan li konte nan balans ou.',
     lp_sec4t: 'Sipèvizyon Admin', lp_sec4d: 'Yon ekip veye sou operasyon sansib yo.',
     lp_faqEyebrow: 'FAQ', lp_faqTitle: 'Kesyon moun poze, *repons klè*.',
-    lp_q1: 'Kisa BLICPay ye?', lp_a1: 'BLICPay se yon aplikasyon pou jere lajan w — depo, retrè, transfè, epay, ak sistèm sòl tradisyonèl la, tout nan yon sèl kote, sou telefòn oswa òdinatè w.',
+    lp_q1: 'Kisa BLICPay ye?', lp_a1: "BLICPay se yon kont dijital ou rechaje — ou ka voye lajan bay lòt kliyan BLICPay, peye ak resevwa pa QR, epi byento peye ak yon kat vityèl oswa fizik.",
     lp_q2: 'Kijan pou m kreye yon kont?', lp_a2: 'Klike sou "Kreye kont", antre non w, telefòn ou, ak yon modpas. Kont ou pare pou itilize imedyatman — ou ka verifye idantite w apre pou plis limit.',
-    lp_q3: 'Ki jan pou m depoze lajan?', lp_a3: 'Ou ka depoze via MonCash, NatCash, USDT, Zelle, oswa dirèkteman nan yon biwo BLICPay. Chak depo verifye anvan li konte nan balans ou.',
-    lp_q4: 'Kisa BLIC Sòl ye?', lp_a4: 'Se yon vèsyon dijital sistèm sòl tradisyonèl la — ou antre nan yon gwoup, chak moun kontribye regilyèman, epi chak moun resevwa tou li nan wotasyon an.',
+    lp_q3: 'Ki jan pou m depoze lajan?', lp_a3: "Ou ka rechaje kont ou ak MonCash, NatCash, oswa an kach nan yon biwo BLICPay. Chak depo verifye anvan li konte nan balans ou.",
+    lp_q4: "Èske transfè ant kliyan BLICPay gen frè?", lp_a4: "Non. Transfè BLICPay → BLICPay yo gratis e imedyat — ou bezwen sèlman ID kliyan moun nan (BP-xxxxxx).",
     lp_q5: 'Èske lajan m an sekirite?', lp_a5: 'Chak kont pwoteje ak modpas ak yon sistèm otantifikasyon sekirize. Nou rekòmande verifye idantite w (KYC) pou plis pwoteksyon.',
     lp_ctaTitle: 'Sote etap bank tradisyonèl la, *pou tout bon*.', lp_ctaSub: 'Kreye kont ou gratis an mwens pase 2 minit.', lp_ctaBtn: 'Kreye kont mwen',
     lp_footDesc: 'Yon aplikasyon pou jere lajan w — depo, transfè, epay, prè ak sistèm sòl tradisyonèl la, tout nan yon sèl kote.',
@@ -440,10 +440,10 @@ const T = {
     lp_sec3t: 'Dépôts examinés', lp_sec3d: 'Chaque dépôt est vérifié avant d\'être crédité.',
     lp_sec4t: 'Supervision admin', lp_sec4d: 'Une équipe surveille les opérations sensibles.',
     lp_faqEyebrow: 'FAQ', lp_faqTitle: 'Questions posées, *réponses claires*.',
-    lp_q1: 'Qu\'est-ce que BLICPay ?', lp_a1: 'BLICPay est une application pour gérer votre argent — dépôt, retrait, transfert, épargne, et le système sòl traditionnel, tout en un seul endroit, sur téléphone ou ordinateur.',
+    lp_q1: 'Qu\'est-ce que BLICPay ?', lp_a1: "BLICPay est un compte numérique rechargeable — envoyez de l’argent aux autres clients BLICPay, payez et encaissez par QR, et bientôt payez avec une carte virtuelle ou physique.",
     lp_q2: 'Comment créer un compte ?', lp_a2: 'Cliquez sur "Créer un compte", entrez votre nom, votre téléphone et un mot de passe. Votre compte est prêt immédiatement — vous pouvez vérifier votre identité ensuite pour plus de limites.',
-    lp_q3: 'Comment déposer de l\'argent ?', lp_a3: 'Vous pouvez déposer via MonCash, NatCash, USDT, Zelle, ou directement dans une agence BLICPay. Chaque dépôt est vérifié avant d\'être crédité.',
-    lp_q4: 'Qu\'est-ce que BLIC Sòl ?', lp_a4: 'C\'est une version numérique du système sòl traditionnel — vous rejoignez un groupe, chacun contribue régulièrement, et chacun reçoit sa part à tour de rôle.',
+    lp_q3: 'Comment déposer de l\'argent ?', lp_a3: "Rechargez votre compte par MonCash, NatCash, ou en espèces dans une agence BLICPay. Chaque dépôt est vérifié avant d’être ajouté à votre solde.",
+    lp_q4: "Les transferts entre clients BLICPay sont-ils payants ?", lp_a4: "Non. Les transferts BLICPay → BLICPay sont gratuits et instantanés — il suffit de l’ID client du destinataire (BP-xxxxxx).",
     lp_q5: 'Mon argent est-il en sécurité ?', lp_a5: 'Chaque compte est protégé par un mot de passe et un système d\'authentification sécurisé. Nous recommandons de vérifier votre identité (KYC) pour plus de protection.',
     lp_ctaTitle: 'Sautez l\'étape de la banque traditionnelle, *pour de bon*.', lp_ctaSub: 'Créez votre compte gratuitement en moins de 2 minutes.', lp_ctaBtn: 'Créer mon compte',
     lp_footDesc: 'Une application pour gérer votre argent — dépôt, transfert, épargne, prêt et le système sòl traditionnel, tout en un seul endroit.',
@@ -555,10 +555,10 @@ const T = {
     lp_sec3t: 'Reviewed Deposits', lp_sec3d: 'Every deposit is reviewed before it counts toward your balance.',
     lp_sec4t: 'Admin Oversight', lp_sec4d: 'A team monitors sensitive operations.',
     lp_faqEyebrow: 'FAQ', lp_faqTitle: 'Questions asked, *answers made clear*.',
-    lp_q1: 'What is BLICPay?', lp_a1: 'BLICPay is an app for managing your money — deposits, withdrawals, transfers, savings, and the traditional sòl system, all in one place, on your phone or computer.',
+    lp_q1: 'What is BLICPay?', lp_a1: "BLICPay is a rechargeable digital account — send money to other BLICPay users, pay and get paid by QR, and soon pay with a virtual or physical card.",
     lp_q2: 'How do I create an account?', lp_a2: 'Click "Sign up", enter your name, phone number, and a password. Your account is ready to use immediately — you can verify your identity afterward for higher limits.',
-    lp_q3: 'How do I deposit money?', lp_a3: 'You can deposit via MonCash, NatCash, USDT, Zelle, or directly at a BLICPay branch. Every deposit is verified before it counts toward your balance.',
-    lp_q4: 'What is BLIC Sòl?', lp_a4: 'It\'s a digital version of the traditional sòl system — you join a group, everyone contributes regularly, and each member receives their payout in turn.',
+    lp_q3: 'How do I deposit money?', lp_a3: "Top up with MonCash, NatCash, or cash at a BLICPay branch. Every deposit is checked before it is added to your balance.",
+    lp_q4: "Are transfers between BLICPay users free?", lp_a4: "No. BLICPay → BLICPay transfers are free and instant — you only need the recipient’s client ID (BP-xxxxxx).",
     lp_q5: 'Is my money safe?', lp_a5: 'Every account is protected by a password and a secure authentication system. We recommend verifying your identity (KYC) for additional protection.',
     lp_ctaTitle: 'Skip the traditional bank, *for good*.', lp_ctaSub: 'Create your account for free in less than 2 minutes.', lp_ctaBtn: 'Create my account',
     lp_footDesc: 'An app for managing your money — deposits, transfers, savings, loans, and the traditional sòl system, all in one place.',
@@ -889,824 +889,6 @@ function CountUp({ target, suffix = '' }) {
   return <span ref={ref}>{val}{suffix}</span>;
 }
 
-function LandingPage({ onStart, lang, setLang, tr }) {
-  const [openFaq, setOpenFaq] = useState(null);
-  const [footerModal, setFooterModal] = useState(null); // null | 'about' | 'support' | 'terms' | 'privacy'
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
-
-  const FEATURES = [
-    { icon: Users, title: tr('lp_f1t'), desc: tr('lp_f1d'), fillable: true, accent: C.amber, bg: '#FBF0DE' },
-    { icon: PiggyBank, title: tr('lp_f2t'), desc: tr('lp_f2d'), fillable: true, accent: C.mint, bg: '#E4F5EF' },
-    { icon: HandCoins, title: tr('lp_f3t'), desc: tr('lp_f3d'), fillable: true, accent: C.navy, bg: '#E6F0FB' },
-    { icon: ArrowLeftRight, title: tr('lp_f4t'), desc: tr('lp_f4d'), fillable: false, accent: C.sky, bg: '#E6F0FB' },
-    { icon: Wallet, title: tr('lp_f5t'), desc: tr('lp_f5d'), fillable: true, accent: '#6D3FD1', bg: '#F4EBFF' },
-    { icon: ShieldCheck, title: tr('lp_f6t'), desc: tr('lp_f6d'), fillable: true, accent: C.mint, bg: '#E4F5EF' },
-  ];
-  const [F0Icon, F1Icon, F2Icon, F3Icon, F4Icon, F5Icon] = FEATURES.map((f) => f.icon);
-
-  const DEPOSIT_METHODS = [
-    { name: 'MonCash', color: '#E4032E', logo: '/logos/moncash-wide.png' },
-    { name: 'NatCash', color: '#0072BC', logo: '/logos/natcash-wide.png' },
-    { name: 'USDT', color: '#26A17B', logo: '/logos/usdt-wide.png' },
-    { name: 'Zelle', color: '#6D1ED4', logo: '/logos/zelle-wide.png' },
-    { name: 'Depo Biwo', color: C.navy, logo: null },
-  ];
-
-  const FAQS = [
-    { q: tr('lp_q1'), a: tr('lp_a1') },
-    { q: tr('lp_q2'), a: tr('lp_a2') },
-    { q: tr('lp_q3'), a: tr('lp_a3') },
-    { q: tr('lp_q4'), a: tr('lp_a4') },
-    { q: tr('lp_q5'), a: tr('lp_a5') },
-  ];
-
-  const currentLang = LANGS.find((l) => l.code === lang) || LANGS[1];
-
-  return (
-    <div style={{ background: '#FFFFFF', color: C.ink, overflow: 'hidden' }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap');
-        html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
-        .lp-snap { scroll-snap-align: start; scroll-snap-stop: normal; }
-        .lp-btn { transition: all .18s ease; }
-        .lp-btn:hover { filter: brightness(1.05); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(12,68,124,0.22); }
-        .lp-btn:active { transform: translateY(0) scale(0.98); }
-        .lp-btn:hover .lp-arrow { transform: translateX(3px); }
-        .lp-arrow { transition: transform .18s ease; display: inline-block; }
-        .lp-card { transition: all .25s ease; }
-        .lp-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(11,27,51,0.09); border-color: transparent !important; }
-        .lp-card:hover .lp-feat-arrow { opacity: 1 !important; transform: translateX(0) !important; }
-        @keyframes lpFloat { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-14px) rotate(3deg); } }
-        @keyframes lpFloatSlow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(18px); } }
-        @keyframes lpPulse { 0%,100% { opacity: .5; transform: scale(1); } 50% { opacity: .8; transform: scale(1.08); } }
-        @keyframes lpTicker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .lp-blob1 { animation: lpFloat 7s ease-in-out infinite; }
-        .lp-blob2 { animation: lpFloatSlow 9s ease-in-out infinite; }
-        .lp-badge-pill { animation: lpPulse 3.5s ease-in-out infinite; }
-        .lp-mock { animation: lpFloatSlow 6s ease-in-out infinite; }
-        .lp-faq-body { animation: fadein .25s ease; }
-        .lp-masonry { column-count: 1; column-gap: 20px; }
-        @media (min-width: 768px) { .lp-masonry { column-count: 3; } }
-        .lp-masonry-item { break-inside: avoid; margin-bottom: 20px; display: block; }
-        .lp-crystal { position: relative; overflow: hidden; }
-        .lp-crystal::before {
-          content: ''; position: absolute; top: -60%; left: -30%; width: 60%; height: 220%;
-          background: linear-gradient(115deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.35) 45%, rgba(255,255,255,0) 60%);
-          transform: rotate(20deg); pointer-events: none;
-        }
-        .lp-crystal::after {
-          content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-          background: linear-gradient(160deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 70%, rgba(255,255,255,0.12) 100%);
-        }
-        .lp-nav-link { position: relative; }
-        .lp-nav-link::after { content: ''; position: absolute; left: 0; bottom: -3px; width: 0; height: 2px; background: ${C.sky}; transition: width .2s ease; }
-        .lp-nav-link:hover::after { width: 100%; }
-      `}</style>
-
-      {/* Nav */}
-      <div className="sticky top-0 z-30" style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(10px)', borderBottom: `1px solid ${C.border}` }}>
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Logo size={28} />
-            <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 18 }}>{tt("BLIC")}<span style={{ color: C.sky }}>{tt("Pay")}</span></span>
-          </div>
-          <div className="hidden md:flex items-center gap-7">
-            <a href="#features" className="lp-nav-link text-sm font-medium" style={{ color: C.ink }}>{tr('lp_navFeatures')}</a>
-            <a href="#sol" className="lp-nav-link text-sm font-medium" style={{ color: C.ink }}>{tr('lp_navSol')}</a>
-            <a href="#how" className="lp-nav-link text-sm font-medium" style={{ color: C.ink }}>{tr('lp_navHow')}</a>
-            <a href="#faq" className="lp-nav-link text-sm font-medium" style={{ color: C.ink }}>{tr('lp_navFaq')}</a>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <button onClick={() => setLangMenuOpen((v) => !v)}
-                className="flex items-center gap-1.5 text-sm font-semibold px-3 py-2 rounded-lg" style={{ color: C.ink }}>
-                <span>{currentLang.flag}</span>
-                <ChevronRight size={13} color={C.muted} style={{ transform: langMenuOpen ? 'rotate(90deg)' : 'rotate(90deg)', transition: 'transform .2s' }} />
-              </button>
-              {langMenuOpen && (
-                <div className="absolute right-0 mt-1 rounded-xl overflow-hidden z-40" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: '0 8px 24px rgba(11,27,51,0.12)', minWidth: 160 }}>
-                  {LANGS.map((l) => (
-                    <button key={l.code} onClick={() => { setLang(l.code); setLangMenuOpen(false); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left"
-                      style={{ background: lang === l.code ? C.bg : 'transparent', color: C.ink }}>
-                      <span>{l.flag}</span> {l.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <button onClick={onStart} className="lp-nav-link text-sm font-semibold px-4 py-2" style={{ color: C.navy }}>{tr('lp_login')}</button>
-            <button onClick={onStart} className="lp-btn text-sm font-semibold px-5 py-2.5 rounded-full text-white"
-              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-              {tr('lp_signup')}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Hero */}
-      <div className="relative max-w-6xl mx-auto px-6 pt-16 pb-10 grid md:grid-cols-2 gap-12 items-center lp-snap">
-        <div className="lp-blob1" style={{ position: 'absolute', top: -40, right: 40, width: 140, height: 140, borderRadius: '50%', background: `radial-gradient(circle, ${C.sky}22, transparent 70%)`, zIndex: 0 }} />
-        <div className="lp-blob2" style={{ position: 'absolute', bottom: -20, left: -20, width: 180, height: 180, borderRadius: '50%', background: `radial-gradient(circle, ${C.mint}18, transparent 70%)`, zIndex: 0 }} />
-
-        <Reveal className="relative">
-          <span className="lp-badge-pill inline-flex items-center gap-2.5 mb-6" style={{ color: C.navy, letterSpacing: 1.5 }}>
-            <span className="w-2 h-2 rounded-full" style={{ background: C.mint }} />
-            <span className="text-xs font-bold uppercase">{tr('lp_badge')}</span>
-          </span>
-          <h1 style={{ ...fontDisplay, fontWeight: 800, fontSize: 58, lineHeight: 1.02, letterSpacing: -1, color: C.ink }}>
-            {tr('lp_h1a')} {tr('lp_h1b')}
-          </h1>
-          <p style={{ ...fontDisplay, fontStyle: 'italic', fontWeight: 700, fontSize: 50, lineHeight: 1.05, color: C.sky, marginTop: 6 }}>
-            {tr('lp_h1italic')}
-          </p>
-          <p className="mt-6 text-base leading-relaxed" style={{ color: C.muted, maxWidth: 440 }}>
-            {tr('lp_sub')}
-          </p>
-          <div className="mt-9 flex items-center gap-3">
-            <button onClick={onStart} className="lp-btn px-7 py-4 rounded-full font-bold text-sm flex items-center gap-1.5"
-              style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, color: '#fff' }}>
-              {tr('lp_start')} <ChevronRight size={15} className="lp-arrow" />
-            </button>
-            <button onClick={onStart} className="lp-btn px-7 py-4 rounded-full font-bold text-sm" style={{ border: `1.5px solid ${C.border}`, color: C.ink, background: 'transparent' }}>
-              {tr('lp_login')}
-            </button>
-          </div>
-
-          <div className="mt-6 flex items-center gap-4 flex-wrap">
-            {[[Lock, tr('lp_trust1')], [ShieldCheck, tr('lp_trust2')], [Clock, tr('lp_trust3')]].map(([Icon, label]) => (
-              <span key={label} className="inline-flex items-center gap-1.5 text-xs" style={{ color: C.muted }}>
-                <Icon size={13} color={C.sky} /> {label}
-              </span>
-            ))}
-          </div>
-          <div className="mt-10">
-            <p className="text-[11px] font-bold uppercase mb-3" style={{ color: C.muted, letterSpacing: 0.6 }}>{tr('lp_methods')}</p>
-            <div className="flex items-center gap-2 flex-wrap">
-              {DEPOSIT_METHODS.map((m) => (
-                <span key={m.name} className="inline-flex items-center gap-2 text-xs font-semibold pl-2 pr-3.5 py-1.5 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, color: C.ink }}>
-                  {m.logo ? (
-                    <img src={m.logo} alt={m.name} className="rounded" style={{ height: 18, width: 'auto', maxWidth: 46, objectFit: 'contain' }} />
-                  ) : (
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: m.color, display: 'inline-block' }} />
-                  )}
-                  {m.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        </Reveal>
-
-        <Reveal delay={150} className="relative">
-          <img src="/hero-mockup.png" alt={tt("Aplikasyon BLICPay sou telefòn ak òdinatè")}
-            className="lp-mock w-full h-auto md:w-[135%]" style={{ display: 'block', margin: '0 auto' }} />
-        </Reveal>
-      </div>
-
-
-
-      <div className="lp-snap" style={{ background: '#FAFBFC', borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
-      <Reveal>
-        <div className="max-w-5xl mx-auto px-6 py-14">
-          <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${C.border}`, boxShadow: '0 20px 50px rgba(11,27,51,0.10)' }}>
-            {/* browser chrome */}
-            <div className="flex items-center gap-2 px-4 py-3" style={{ background: '#1A2B45' }}>
-              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F57', display: 'inline-block' }} />
-              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#FEBC2E', display: 'inline-block' }} />
-              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#28C840', display: 'inline-block' }} />
-              <div className="mx-auto px-4 py-1 rounded-md text-[10px]" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
-                {tt("blicpayht.com")}
-              </div>
-              <div style={{ width: 30 }} />
-            </div>
-            {/* app nav — dark bar (logo + notifications + avatar) then light icon nav row, matching the reference */}
-            <div className="flex items-center justify-between px-6 py-3" style={{ background: '#0F2038' }}>
-              <div className="flex items-center gap-2">
-                <Logo size={20} />
-                <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 13, color: '#fff' }}>{tt("BLIC")}<span style={{ color: C.sky }}>{tt("Pay")}</span></span>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Bell size={16} color="rgba(255,255,255,0.75)" />
-                  <span className="absolute -top-1.5 -right-1.5 text-[8px] font-bold flex items-center justify-center rounded-full" style={{ width: 13, height: 13, background: '#E4032E', color: '#fff' }}>3</span>
-                </div>
-                <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold" style={{ background: C.sky, color: '#fff' }}>BL</div>
-              </div>
-            </div>
-            <div className="flex items-center justify-around px-4 py-3" style={{ background: C.card, borderBottom: `1px solid ${C.border}` }}>
-              {[
-                { icon: Home, label: 'Akèy', active: false },
-                { icon: Users, label: 'BLIC Sòl', active: true },
-                { icon: ArrowLeftRight, label: 'Transfè', active: false },
-                { icon: HandCoins, label: 'Prè', active: false },
-                { icon: Settings, label: 'Paramèt', active: false },
-              ].map((n) => (
-                <div key={n.label} className="flex flex-col items-center gap-1.5">
-                  <div className="flex items-center justify-center rounded-full transition-all" style={{
-                    width: 34, height: 34,
-                    background: n.active ? `linear-gradient(135deg, ${C.navy}, ${C.sky})` : 'transparent',
-                  }}>
-                    <n.icon size={16} fill={n.active ? '#fff' : C.muted} strokeWidth={1.5} color={n.active ? '#fff' : C.muted} />
-                  </div>
-                  <span className="text-[9px] font-semibold" style={{ color: n.active ? C.navy : C.muted }}>{n.label}</span>
-                </div>
-              ))}
-            </div>
-            {/* dashboard body */}
-            <div className="p-5 md:p-6 grid md:grid-cols-2 gap-5" style={{ background: C.bg }}>
-              {/* wallet card */}
-              <div className="rounded-2xl p-5" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.75)' }}>{tr('lp_mockBalance')}</p>
-                <p style={{ ...fontDisplay, fontWeight: 800, fontSize: 26, color: '#fff', marginTop: 4 }}>{tt("45,200 HTG")}</p>
-                <div className="mt-4 flex gap-2">
-                  <span className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>{tr('tileDeposit')}</span>
-                  <span className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>{tr('tileWithdraw')}</span>
-                </div>
-              </div>
-              {/* quick links */}
-              <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <p className="text-xs font-bold" style={{ color: C.muted }}>{tr('lp_mockQuickAccess')}</p>
-                <div className="mt-3 grid grid-cols-4 gap-3">
-                  {[
-                    { icon: ArrowLeftRight, label: tr('tileTransfer'), fillable: false },
-                    { icon: Users, label: 'Sòl', fillable: true },
-                    { icon: PiggyBank, label: tr('lp_mockGoalShort'), fillable: true },
-                    { icon: HandCoins, label: tr('tileLoan'), fillable: true },
-                  ].map((a) => (
-                    <div key={a.label} className="flex flex-col items-center gap-1.5">
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E6F0FB' }}>
-                        <a.icon size={15} color={C.navy} fill={a.fillable ? C.navy : 'none'} strokeWidth={a.fillable ? 1.4 : 2} />
-                      </div>
-                      <span className="text-[10px] font-medium" style={{ color: C.muted }}>{a.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* recent activity */}
-              <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <p className="text-xs font-bold" style={{ color: C.muted }}>{tr('lp_mockRecentActivity')}</p>
-                <div className="mt-3 space-y-2">
-                  {[{ n: tr('lp_mockDepositMoncash'), a: '+2,500 HTG', pos: true }, { n: tr('lp_mockSolContribution'), a: '−1,000 HTG', pos: false }].map((t) => (
-                    <div key={t.n} className="flex items-center justify-between px-3 py-2.5 rounded-lg" style={{ background: C.bg }}>
-                      <span className="text-xs font-medium">{t.n}</span>
-                      <span className="text-xs font-semibold" style={{ color: t.pos ? C.mint : C.ink }}>{t.a}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* BLIC Sòl panel — showcasing the real 90-group structure */}
-              <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-bold" style={{ color: C.muted }}>{tt("BLIC SÒL")}</p>
-                  <span className="text-[10px] font-semibold" style={{ color: C.sky }}>{tr('lp_stat1')}: 90</span>
-                </div>
-                <div className="mt-3 p-3 rounded-xl" style={{ background: C.bg }}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold">{tt("Sòl Basic #3")}</span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#E4F5EF', color: C.mint }}>7/10</span>
-                  </div>
-                  <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: C.border }}>
-                    <div style={{ width: '70%', height: '100%', background: `linear-gradient(90deg, ${C.navy}, ${C.sky})` }} />
-                  </div>
-                  <p className="mt-2 text-[10px]" style={{ color: C.muted }}>{tr('lp_mockWeeklyDesc')}</p>
-                </div>
-              </div>
-              {/* Upcoming card feature — closely matches the reference layout, Mastercard-style mark blurred */}
-              <div className="rounded-2xl p-5 md:col-span-2" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="grid md:grid-cols-2 gap-6 items-center">
-                  <div>
-                    <span className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full mb-2" style={{ background: '#FBF0DE', color: '#946115', letterSpacing: 0.5 }}>
-                      {tr('lp_cardBadge')}
-                    </span>
-                    <p className="text-sm font-bold">{tr('lp_cardTitle')}</p>
-                    <p className="mt-1.5 text-xs leading-relaxed" style={{ color: C.muted }}>{tr('lp_cardSub')}</p>
-                  </div>
-
-                  <div className="relative mx-auto" style={{
-                    maxWidth: 320, aspectRatio: '1.586', borderRadius: 16, padding: 22,
-                    background: `linear-gradient(135deg, ${C.navy} 0%, ${C.sky} 100%)`,
-                    boxShadow: '0 16px 32px rgba(11,27,51,0.28)', overflow: 'hidden',
-                  }}>
-                    <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.12)' }} />
-
-                    {/* top row: logo icon (with chip stacked below it) + wordmark/tagline, matching the reference layout */}
-                    <div className="flex items-start gap-2.5 relative">
-                      <div>
-                        <svg width="30" height="30" viewBox="0 0 48 48">
-                          <path d="M24 3 L42 10 V22 C42 33 34.5 41.5 24 45 C13.5 41.5 6 33 6 22 V10 Z" fill="rgba(255,255,255,0.25)" />
-                          <path d="M13 30 L33 15" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
-                          <path d="M27 15 H33 V21" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                        </svg>
-                        {/* EMV chip, stacked under the logo like the reference */}
-                        <div className="mt-2" style={{ width: 28, height: 21, borderRadius: 4, background: 'linear-gradient(135deg, #E9D28C, #C9A857)' }}>
-                          <div style={{ margin: 2.5, border: '1px solid rgba(0,0,0,0.25)', borderRadius: 2, height: 16 }} />
-                        </div>
-                      </div>
-                      <div className="pt-0.5">
-                        <p style={{ ...fontDisplay, fontWeight: 800, fontSize: 17, color: '#fff', lineHeight: 1 }}>{tt("BLIC")}<span style={{ fontStyle: 'italic' }}>{tt("Pay")}</span></p>
-                        <p className="mt-1" style={{ fontSize: 7, color: 'rgba(255,255,255,0.8)', letterSpacing: 0.8 }}>{tr('lp_cardTagline')}</p>
-                      </div>
-                    </div>
-
-                    {/* card number, spaced like a real card */}
-                    <p className="mt-6 relative" style={{ color: '#fff', letterSpacing: 2, fontFamily: 'monospace', fontSize: 16, fontWeight: 500 }}>
-                      1234 5678 9012 3456
-                    </p>
-
-                    <div className="mt-4 flex items-end justify-between relative">
-                      <div>
-                        <p className="flex items-baseline gap-1.5">
-                          <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.75)' }}>{tt("EXRID")}</span>
-                          <span style={{ fontSize: 11, color: '#fff', fontFamily: 'monospace' }}>12/99</span>
-                        </p>
-                        <p className="mt-1" style={{ fontSize: 10, color: '#fff', letterSpacing: 0.5 }}>{tr('lp_cardHolder')}</p>
-                      </div>
-                      {/* Mastercard-style dual-circle mark, deliberately blurred to avoid reproducing the trademark clearly */}
-                      <div className="text-right">
-                        <div style={{ filter: 'blur(3.5px)', opacity: 0.85, position: 'relative', width: 34, height: 20, marginLeft: 'auto' }}>
-                          <div style={{ position: 'absolute', left: 0, width: 20, height: 20, borderRadius: '50%', background: '#EB5757' }} />
-                          <div style={{ position: 'absolute', left: 12, width: 20, height: 20, borderRadius: '50%', background: '#F2A93B' }} />
-                        </div>
-                        <p className="mt-1" style={{ fontSize: 7, color: 'rgba(255,255,255,0.7)', letterSpacing: 0.5 }}>{tt("DEBIT")}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Reveal>
-      </div>
-
-      <div id="features" className="max-w-6xl mx-auto px-6 py-20">
-        <Reveal className="text-center max-w-xl mx-auto">
-          <span className="text-xs font-bold tracking-wide" style={{ color: C.sky }}>{tr('lp_featEyebrow')}</span>
-          <h2 className="mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 30 }}><EmphTitle text={tr('lp_featTitle')} style={{ color: C.sky }} /></h2>
-          <p className="mt-3 text-sm" style={{ color: C.muted }}>{tr('lp_featSub')}</p>
-        </Reveal>
-        <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-5" style={{ gridAutoRows: 'minmax(90px, auto)' }}>
-          {/* Large featured card — BLIC Sòl */}
-          <Reveal delay={0} className="col-span-2 md:col-span-2 row-span-2">
-            <div className="lp-card p-7 rounded-3xl h-full relative flex flex-col justify-between" style={{ background: `linear-gradient(160deg, ${C.navy}, ${C.sky})`, boxShadow: '0 8px 24px rgba(12,68,124,0.18)', minHeight: 260 }}>
-              <div>
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'rgba(255,255,255,0.15)' }}>
-                  <Users size={22} color="#fff" fill="#fff" strokeWidth={1.4} />
-                </div>
-                <h3 className="font-bold" style={{ ...fontDisplay, fontSize: 26, lineHeight: 1.15, color: '#fff' }}><EmphTitle text={FEATURES[0].title} style={{ color: C.sky }} /></h3>
-                <p className="mt-2 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.8)', maxWidth: 320 }}>{FEATURES[0].desc}</p>
-              </div>
-              <div className="mt-6 flex items-center gap-2">
-                {['Basic', 'Standard', 'Premium'].map((t) => (
-                  <span key={t} className="text-[11px] font-semibold px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>{t}</span>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-
-          {/* Depo Objektif — wide */}
-          <Reveal delay={80} className="col-span-2 md:col-span-2">
-            <div className="lp-card p-6 rounded-3xl h-full relative" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: '0 4px 16px rgba(11,27,51,0.05)', minHeight: 90 }}>
-              <div className="flex items-center gap-4">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: FEATURES[1].bg }}>
-                  <F1Icon size={20} color={FEATURES[1].accent} fill={FEATURES[1].accent} strokeWidth={1.4} />
-                </div>
-                <div>
-                  <h3 className="font-bold" style={{ fontSize: 18, lineHeight: 1.2 }}><EmphTitle text={FEATURES[1].title} style={{ color: FEATURES[1].accent }} /></h3>
-                  <p className="mt-1 text-xs leading-relaxed" style={{ color: C.muted }}>{FEATURES[1].desc}</p>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-
-          {/* Prè */}
-          <Reveal delay={120} className="col-span-1 md:col-span-1">
-            <div className="lp-card p-5 rounded-3xl h-full relative" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: '0 4px 16px rgba(11,27,51,0.05)', minHeight: 150 }}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: FEATURES[2].bg }}>
-                <F2Icon size={20} color={FEATURES[2].accent} fill={FEATURES[2].accent} strokeWidth={1.4} />
-              </div>
-              <h3 className="font-bold" style={{ fontSize: 18, lineHeight: 1.2 }}><EmphTitle text={FEATURES[2].title} style={{ color: FEATURES[2].accent }} /></h3>
-              <p className="mt-1.5 text-xs leading-relaxed" style={{ color: C.muted }}>{FEATURES[2].desc}</p>
-            </div>
-          </Reveal>
-
-          {/* Transfè */}
-          <Reveal delay={160} className="col-span-1 md:col-span-1">
-            <div className="lp-card p-5 rounded-3xl h-full relative" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: '0 4px 16px rgba(11,27,51,0.05)', minHeight: 150 }}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: FEATURES[3].bg }}>
-                <F3Icon size={20} color={FEATURES[3].accent} strokeWidth={2} />
-              </div>
-              <h3 className="font-bold" style={{ fontSize: 18, lineHeight: 1.2 }}><EmphTitle text={FEATURES[3].title} style={{ color: FEATURES[3].accent }} /></h3>
-              <p className="mt-1.5 text-xs leading-relaxed" style={{ color: C.muted }}>{FEATURES[3].desc}</p>
-            </div>
-          </Reveal>
-
-          {/* BLIC Depo */}
-          <Reveal delay={200} className="col-span-1 md:col-span-2">
-            <div className="lp-card p-6 rounded-3xl h-full relative" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: '0 4px 16px rgba(11,27,51,0.05)', minHeight: 130 }}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: FEATURES[4].bg }}>
-                <F4Icon size={20} color={FEATURES[4].accent} fill={FEATURES[4].accent} strokeWidth={1.4} />
-              </div>
-              <h3 className="font-bold" style={{ fontSize: 18, lineHeight: 1.2 }}><EmphTitle text={FEATURES[4].title} style={{ color: FEATURES[4].accent }} /></h3>
-              <p className="mt-1.5 text-xs leading-relaxed" style={{ color: C.muted }}>{FEATURES[4].desc}</p>
-            </div>
-          </Reveal>
-
-          {/* Verifikasyon KYC */}
-          <Reveal delay={240} className="col-span-1 md:col-span-2">
-            <div className="lp-card p-6 rounded-3xl h-full relative" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: '0 4px 16px rgba(11,27,51,0.05)', minHeight: 130 }}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: FEATURES[5].bg }}>
-                <F5Icon size={20} color={FEATURES[5].accent} fill={FEATURES[5].accent} strokeWidth={1.4} />
-              </div>
-              <h3 className="font-bold" style={{ fontSize: 18, lineHeight: 1.2 }}><EmphTitle text={FEATURES[5].title} style={{ color: FEATURES[5].accent }} /></h3>
-              <p className="mt-1.5 text-xs leading-relaxed" style={{ color: C.muted }}>{FEATURES[5].desc}</p>
-            </div>
-          </Reveal>
-        </div>
-
-        {/* Two-column phone showcase — real features, not the coming-soon card */}
-        <div className="mt-8 grid md:grid-cols-2 gap-5">
-          <Reveal delay={100}>
-            <div className="rounded-3xl p-8 overflow-hidden relative" style={{ background: '#EEF3FB', minHeight: 420 }}>
-              <h3 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22, maxWidth: 260 }}><EmphTitle text={tr('lp_show1Title')} style={{ color: C.sky }} /></h3>
-              <p className="mt-2 text-sm" style={{ color: C.muted, maxWidth: 260 }}>{tr('lp_show1Sub')}</p>
-              <div className="mx-auto mt-6" style={{
-                width: 220, borderRadius: 26, border: '8px solid #0B1B33', background: '#fff',
-                boxShadow: '0 20px 40px rgba(11,27,51,0.18)', overflow: 'hidden',
-              }}>
-                <div className="px-4 pt-3 pb-2 flex items-center justify-between text-[10px] font-semibold" style={{ color: C.ink }}>
-                  <span>9:41</span><span style={{ width: 60, height: 16, borderRadius: 10, background: '#0B1B33' }} /><span>••••</span>
-                </div>
-                <div className="px-4 pb-5">
-                  <div className="rounded-2xl p-4" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">{tt("Sòl Standard #5")}</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>6/10</span>
-                    </div>
-                    <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.25)' }}>
-                      <div style={{ width: '60%', height: '100%', background: '#fff' }} />
-                    </div>
-                    <p className="mt-2 text-[10px]" style={{ color: 'rgba(255,255,255,0.8)' }}>{tr('lp_mockBiweeklyDesc')}</p>
-                  </div>
-                  <button className="mt-3 w-full py-2.5 rounded-xl text-xs font-bold text-white" style={{ background: C.mint }}>{tr('lp_mockRequestJoin')}</button>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={150}>
-            <div className="rounded-3xl p-8 overflow-hidden relative" style={{ background: `linear-gradient(160deg, ${C.navy}, ${C.sky})`, minHeight: 420 }}>
-              <h3 style={{ ...fontDisplay, fontWeight: 800, fontSize: 22, maxWidth: 260, color: '#fff' }}><EmphTitle text={tr('lp_show2Title')} style={{ color: '#fff', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.5)' }} /></h3>
-              <p className="mt-2 text-sm" style={{ color: 'rgba(255,255,255,0.75)', maxWidth: 260 }}>{tr('lp_show2Sub')}</p>
-              <div className="mx-auto mt-6" style={{
-                width: 220, borderRadius: 26, border: '8px solid #0B1B33', background: `linear-gradient(180deg, #1a3a5c, #0c447c)`,
-                boxShadow: '0 20px 40px rgba(0,0,0,0.3)', overflow: 'hidden', padding: '14px 12px',
-              }}>
-                <p className="text-center text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>9:41</p>
-                {[
-                  { t: 'Depo resevwa', d: 'Ou resevwa 2,500 HTG pa MonCash.', time: '2mn' },
-                  { t: 'Kotizasyon Sòl', d: 'Peman 2,500 HTG konfime pou Sòl #5.', time: '1j' },
-                ].map((n) => (
-                  <div key={n.t} className="mt-2 rounded-xl p-2.5 flex items-start gap-2" style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(6px)' }}>
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: '#fff' }}>
-                      <Bell size={11} color={C.navy} />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-bold text-white">{n.t}</span>
-                        <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.6)' }}>{n.time}</span>
-                      </div>
-                      <p className="text-[9px] leading-snug" style={{ color: 'rgba(255,255,255,0.75)' }}>{n.d}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </div>
-
-      {/* Scrolling partner strip — real authorized partner logos in white chips for contrast */}
-      <div className="overflow-hidden py-4 lp-snap" style={{ background: '#0F2038' }}>
-        <div className="flex items-center gap-6" style={{ width: 'max-content', animation: 'lpTicker 24s linear infinite' }}>
-          {[...Array(2)].flatMap((_, dup) =>
-            [
-              { name: 'MonCash', logo: '/logos/moncash-wide.png' },
-              { name: 'NatCash', logo: '/logos/natcash-wide.png' },
-              { name: 'USDT', logo: '/logos/usdt-wide.png' },
-              { name: 'Zelle', logo: '/logos/zelle-wide.png' },
-              { name: 'BLICPay', logo: null },
-            ].map((p, i) => (
-              <span key={dup + '-' + i} className="inline-flex items-center gap-2.5 px-3">
-                {p.logo ? (
-                  <span className="rounded-md flex items-center justify-center px-2 py-1.5" style={{ background: '#fff' }}>
-                    <img src={p.logo} alt={p.name} style={{ height: 16, width: 'auto', maxWidth: 52, objectFit: 'contain', display: 'block' }} />
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5">
-                    <Logo size={16} />
-                    <span className="text-xs font-bold" style={{ color: '#fff' }}>{tt("BLICPay")}</span>
-                  </span>
-                )}
-              </span>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* How it works */}
-      <div className="lp-snap" style={{ background: '#FAFBFC', borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
-      <div id="how" className="max-w-6xl mx-auto px-6 py-20">
-        <Reveal className="text-center max-w-xl mx-auto">
-          <span className="text-xs font-bold tracking-wide" style={{ color: C.sky }}>{tr('lp_howEyebrow')}</span>
-          <h2 className="mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 30 }}><EmphTitle text={tr('lp_howTitle')} style={{ color: C.sky }} /></h2>
-          <p className="mt-3 text-sm" style={{ color: C.muted }}>{tr('lp_howSub')}</p>
-        </Reveal>
-        <div className="mt-14 relative grid md:grid-cols-3 gap-6">
-          {/* connecting line behind the step badges, desktop only */}
-          <div className="hidden md:block absolute" style={{ top: 28, left: '16.5%', right: '16.5%', height: 2, background: `linear-gradient(90deg, ${C.border}, ${C.sky}, ${C.border})` }} />
-          {[
-            { n: '01', title: tr('lp_s1t'), desc: tr('lp_s1d'), icon: User },
-            { n: '02', title: tr('lp_s2t'), desc: tr('lp_s2d'), icon: Wallet },
-            { n: '03', title: tr('lp_s3t'), desc: tr('lp_s3d'), icon: TrendingUp },
-          ].map((s, i) => (
-            <Reveal key={s.n} delay={i * 100} className="relative">
-              <div className="relative p-6 pt-0 rounded-2xl h-full" style={{ background: 'transparent' }}>
-                <div className="relative mx-auto md:mx-0 mb-5 flex items-center justify-center rounded-full"
-                  style={{ width: 56, height: 56, background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, boxShadow: '0 8px 20px rgba(12,68,124,0.25)' }}>
-                  <s.icon size={22} color="#fff" />
-                  <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center rounded-full text-[10px] font-bold"
-                    style={{ width: 22, height: 22, background: '#fff', color: C.navy, border: `2px solid ${C.sky}` }}>{s.n}</span>
-                </div>
-                <div className="text-center md:text-left rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                  <h3 className="font-bold text-sm">{s.title}</h3>
-                  <p className="mt-2 text-xs leading-relaxed" style={{ color: C.muted }}>{s.desc}</p>
-                </div>
-              </div>
-              {i < 2 && (
-                <div className="hidden md:flex absolute items-center justify-center" style={{ top: 18, right: -30, width: 24, height: 24 }}>
-                  <ChevronRight size={20} color={C.sky} />
-                </div>
-              )}
-            </Reveal>
-          ))}
-        </div>
-      </div>
-      </div>
-
-      {/* Sòl tier comparison table */}
-      <div id="sol" className="max-w-4xl mx-auto px-6 py-20 lp-snap">
-        <Reveal className="text-center max-w-xl mx-auto">
-          <span className="text-xs font-bold tracking-wide" style={{ color: C.sky }}>{tr('lp_solEyebrow')}</span>
-          <h2 className="mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 30 }}><EmphTitle text={tr('lp_solTitle')} style={{ color: C.sky }} /></h2>
-          <p className="mt-3 text-sm" style={{ color: C.muted }}>{tr('lp_solSub')}</p>
-        </Reveal>
-        <Reveal delay={100}>
-          <div className="mt-10 rounded-2xl overflow-hidden" style={{ border: `1px solid ${C.border}`, background: C.card }}>
-            <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ background: C.bg }}>
-                  <th className="text-left text-xs font-bold px-5 py-3.5" style={{ color: C.muted }}>{tr('lp_solNivo')}</th>
-                  <th className="text-center text-xs font-bold px-5 py-3.5" style={{ color: C.muted }}>{tr('lp_solSemenn')}</th>
-                  <th className="text-center text-xs font-bold px-5 py-3.5" style={{ color: C.muted }}>{tr('lp_solKenzenn')}</th>
-                  <th className="text-center text-xs font-bold px-5 py-3.5" style={{ color: C.muted }}>{tr('lp_solMwa')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { tier: 'Basic', semenn: '1,000', kenzenn: '4,000', mwa: '10,000' },
-                  { tier: 'Standard', semenn: '2,500', kenzenn: '8,000', mwa: '15,000' },
-                  { tier: 'Premium', semenn: '5,000', kenzenn: '10,000', mwa: '20,000' },
-                ].map((row) => (
-                  <tr key={row.tier} style={{ borderTop: `1px solid ${C.border}` }}>
-                    <td className="px-5 py-3.5 text-sm font-semibold">{row.tier}</td>
-                    <td className="px-5 py-3.5 text-sm text-center" style={{ color: C.muted }}>{row.semenn} HTG</td>
-                    <td className="px-5 py-3.5 text-sm text-center" style={{ color: C.muted }}>{row.kenzenn} HTG</td>
-                    <td className="px-5 py-3.5 text-sm text-center" style={{ color: C.muted }}>{row.mwa} HTG</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Reveal>
-      </div>
-
-      <div className="lp-snap" style={{ background: '#FAFBFC', borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        <Reveal className="text-center max-w-xl mx-auto">
-          <span className="text-xs font-bold tracking-wide" style={{ color: C.sky }}>{tr('lp_testiEyebrow')}</span>
-          <h2 className="mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 30 }}><EmphTitle text={tr('lp_testiTitle')} style={{ color: C.sky }} /></h2>
-        </Reveal>
-        <div className="mt-10 lp-masonry">
-          {[
-            { n: 1, tint: '#FBF0F2' }, { n: 2, tint: '#EFF7F0' }, { n: 3, tint: '#F4F6FA' },
-            { n: 4, tint: '#FBF3EA' }, { n: 5, tint: '#F4F6FA' }, { n: 6, tint: '#EFF0FB' },
-          ].map((s, i) => {
-            const name = tr(`lp_testi${s.n}Name`);
-            const initials = name.slice(0, 2).toUpperCase();
-            return (
-              <Reveal key={i} delay={(i % 3) * 100} className="lp-masonry-item">
-                <div className="p-6 rounded-2xl flex flex-col" style={{ background: s.tint }}>
-                  <div className="flex items-center gap-2.5 mb-3">
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(255,255,255,0.7)', color: C.navy }}>{initials}</div>
-                    <span className="text-sm font-bold" style={{ color: C.muted }}>{name}</span>
-                  </div>
-                  <p className="text-sm leading-relaxed flex-1" style={{ color: C.ink }}>"{tr(`lp_testi${s.n}Quote`)}"</p>
-                  <div className="mt-5 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold">{name}</p>
-                      <p className="text-[11px]" style={{ color: C.muted }}>{tr(`lp_testi${s.n}Role`)}</p>
-                    </div>
-                    <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: '#fff' }}>
-                      <Star size={11} color={C.amber} fill={C.amber} /> 5.0
-                    </span>
-                  </div>
-                </div>
-              </Reveal>
-            );
-          })}
-        </div>
-      </div>
-      </div>
-
-      {/* Security / trust — honest claims only */}
-      <div className="max-w-6xl mx-auto px-6 py-16 lp-snap">
-        <Reveal>
-          <div className="rounded-3xl p-10 md:p-12 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky} 55%, #6D3FD1)` }}>
-            {/* colorful blurred shapes behind the glass cards */}
-            <div style={{ position: 'absolute', top: -60, right: -40, width: 220, height: 220, borderRadius: '50%', background: 'rgba(255,255,255,0.18)', filter: 'blur(10px)' }} />
-            <div style={{ position: 'absolute', bottom: -80, left: -60, width: 240, height: 240, borderRadius: '50%', background: `${C.mint}55`, filter: 'blur(20px)' }} />
-            <div className="grid md:grid-cols-2 gap-12 items-center relative">
-              <div>
-                <span className="text-xs font-bold tracking-wide" style={{ color: '#fff', letterSpacing: 0.6, opacity: 0.85 }}>{tr('lp_secEyebrow')}</span>
-                <h2 className="mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 28, letterSpacing: -0.3, color: '#fff' }}><EmphTitle text={tr('lp_secTitle')} style={{ textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.5)' }} /></h2>
-                <p className="mt-4 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.8)', maxWidth: 380 }}>
-                  {tr('lp_secSub')}
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { icon: Lock, t: tr('lp_sec1t'), d: tr('lp_sec1d') },
-                  { icon: ShieldCheck, t: tr('lp_sec2t'), d: tr('lp_sec2d') },
-                  { icon: BadgeCheck, t: tr('lp_sec3t'), d: tr('lp_sec3d') },
-                  { icon: Users, t: tr('lp_sec4t'), d: tr('lp_sec4d') },
-                ].map((s) => (
-                  <div key={s.t} className="lp-crystal p-4 rounded-xl" style={{
-                    background: 'linear-gradient(160deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06))',
-                    backdropFilter: 'blur(16px) saturate(140%)', WebkitBackdropFilter: 'blur(16px) saturate(140%)',
-                    border: '1.5px solid rgba(255,255,255,0.4)',
-                    boxShadow: '0 10px 30px rgba(11,27,51,0.2), inset 0 1px 1px rgba(255,255,255,0.5)',
-                  }}>
-                    <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: 'rgba(255,255,255,0.25)' }}>
-                      <s.icon size={16} color="#fff" fill="#fff" strokeWidth={1.4} />
-                    </div>
-                    <p className="text-xs font-bold" style={{ color: '#fff' }}>{s.t}</p>
-                    <p className="mt-1 text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>{s.d}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Reveal>
-      </div>
-
-      <div id="faq" className="max-w-3xl mx-auto px-6 py-20 lp-snap">
-        <Reveal>
-          <span className="block text-center text-xs font-bold tracking-wide" style={{ color: C.sky }}>{tr('lp_faqEyebrow')}</span>
-          <h2 className="text-center mt-2" style={{ ...fontDisplay, fontWeight: 800, fontSize: 30 }}><EmphTitle text={tr('lp_faqTitle')} style={{ color: C.sky }} /></h2>
-        </Reveal>
-        <div className="mt-8 space-y-3">
-          {FAQS.map((f, i) => (
-            <Reveal key={i} delay={i * 60}>
-              <div className="rounded-xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between px-5 py-4 text-left">
-                  <span className="text-sm font-semibold">{f.q}</span>
-                  <ChevronRight size={16} color={C.muted} style={{ transform: openFaq === i ? 'rotate(90deg)' : 'none', transition: 'transform .25s ease' }} />
-                </button>
-                {openFaq === i && (
-                  <p className="lp-faq-body px-5 pb-4 text-sm" style={{ color: C.muted }}>{f.a}</p>
-                )}
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-
-      <Reveal>
-        <div className="max-w-6xl mx-auto px-6 pb-16 lp-snap">
-          <div className="rounded-3xl p-10 text-center relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-            <div className="lp-blob1" style={{ position: 'absolute', top: -30, left: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
-            <div className="lp-blob2" style={{ position: 'absolute', bottom: -40, right: -20, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
-            <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 26, color: '#fff', position: 'relative' }}><EmphTitle text={tr('lp_ctaTitle')} style={{ color: '#fff', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.5)' }} /></h2>
-            <p className="mt-2 text-sm" style={{ color: 'rgba(255,255,255,0.85)', position: 'relative' }}>{tr('lp_ctaSub')}</p>
-            <button onClick={onStart} className="lp-btn mt-6 px-7 py-3.5 rounded-xl font-semibold text-sm flex items-center gap-1.5 mx-auto" style={{ background: '#fff', color: C.navy, position: 'relative' }}>
-              {tr('lp_ctaBtn')} <ChevronRight size={15} className="lp-arrow" />
-            </button>
-          </div>
-        </div>
-      </Reveal>
-
-      <div style={{ borderTop: `1px solid ${C.border}`, background: C.card }}>
-        <div className="max-w-6xl mx-auto px-6 py-14 grid md:grid-cols-5 gap-10">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2">
-              <Logo size={26} />
-              <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 16 }}>{tt("BLIC")}<span style={{ color: C.sky }}>{tt("Pay")}</span></span>
-            </div>
-            <p className="mt-3 text-xs leading-relaxed" style={{ color: C.muted, maxWidth: 260 }}>
-              {tr('lp_footDesc')}
-            </p>
-            <p className="mt-4 text-xs font-semibold" style={{ color: C.navy }}>{tr('lp_footMadeIn')}</p>
-          </div>
-          <div>
-            <p className="text-[11px] font-bold uppercase" style={{ color: C.muted, letterSpacing: 0.6 }}>{tr('lp_footProduits')}</p>
-            <div className="mt-3.5 flex flex-col gap-2.5">
-              {['BLIC Sòl', tr('tileGoal'), tr('tileLoan'), tr('navTransfer'), tr('tileDepo')].map((l) => (
-                <button key={l} onClick={onStart} className="text-xs text-left" style={{ color: C.ink, background: 'none', border: 'none', cursor: 'pointer' }}>{l}</button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <p className="text-[11px] font-bold uppercase" style={{ color: C.muted, letterSpacing: 0.6 }}>{tr('lp_footCompany')}</p>
-            <div className="mt-3.5 flex flex-col gap-2.5">
-              <button onClick={() => setFooterModal('about')} className="text-xs text-left" style={{ color: C.ink, background: 'none', border: 'none', cursor: 'pointer' }}>{tr('lp_footAbout')}</button>
-              <button onClick={() => setFooterModal('support')} className="text-xs text-left" style={{ color: C.ink, background: 'none', border: 'none', cursor: 'pointer' }}>{tr('lp_footSupport')}</button>
-            </div>
-          </div>
-          <div>
-            <p className="text-[11px] font-bold uppercase" style={{ color: C.muted, letterSpacing: 0.6 }}>{tr('lp_footLegal')}</p>
-            <div className="mt-3.5 flex flex-col gap-2.5">
-              <button onClick={() => setFooterModal('terms')} className="text-xs text-left" style={{ color: C.ink, background: 'none', border: 'none', cursor: 'pointer' }}>{tr('lp_footTerms')}</button>
-              <button onClick={() => setFooterModal('privacy')} className="text-xs text-left" style={{ color: C.ink, background: 'none', border: 'none', cursor: 'pointer' }}>{tr('lp_footPrivacy')}</button>
-            </div>
-          </div>
-        </div>
-        <div style={{ borderTop: `1px solid ${C.border}` }}>
-          <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-            <p className="text-xs" style={{ color: C.muted }}>© {new Date().getFullYear()} {tt("BLICPay.")} {tr('lp_footRights')}</p>
-          </div>
-          <div className="max-w-6xl mx-auto px-6 pb-6">
-            <p className="text-[11px] leading-relaxed" style={{ color: C.muted, maxWidth: 640 }}>
-              {tr('lp_footDisclaimer')}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {footerModal && (
-        <>
-          <div onClick={() => setFooterModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,27,51,0.55)', zIndex: 60 }} />
-          <div className="fadein" style={{
-            position: 'fixed', top: '4%', bottom: '4%', left: '50%', transform: 'translateX(-50%)',
-            width: '90%', maxWidth: 560, background: C.card, borderRadius: 20, zIndex: 61,
-            overflowY: 'auto', padding: '28px 26px',
-          }}>
-            <div className="flex items-center justify-between" style={{ marginBottom: 18 }}>
-              <h3 style={{ ...fontDisplay, fontWeight: 800, fontSize: 19 }}>
-                {footerModal === 'about' && tr('lp_footAbout')}
-                {footerModal === 'support' && tr('lp_footSupport')}
-                {footerModal === 'terms' && tr('lp_footTerms')}
-                {footerModal === 'privacy' && tr('lp_footPrivacy')}
-              </h3>
-              <button onClick={() => setFooterModal(null)} className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: C.bg }}>
-                <X size={15} color={C.muted} />
-              </button>
-            </div>
-
-            {footerModal === 'about' && (
-              <p className="text-sm leading-relaxed" style={{ color: C.ink }}>{tr('lp_aboutBody')}</p>
-            )}
-
-            {footerModal === 'support' && (
-              <div className="flex flex-col" style={{ gap: 10 }}>
-                <p className="text-sm" style={{ color: C.muted, marginBottom: 4 }}>{tr('lp_supportBody')}</p>
-                <a href="tel:+13073460474" className="flex items-center gap-3 rounded-xl" style={{ padding: '13px 16px', background: C.bg, border: `1px solid ${C.border}` }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#E6F0FB' }}><Phone size={16} color={C.navy} /></div>
-                  <div><p className="text-sm font-semibold">{tr('callUs')}</p><p className="text-xs" style={{ color: C.muted }}>+1 307 346 0474</p></div>
-                </a>
-                <a href="https://wa.me/13073460474" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl" style={{ padding: '13px 16px', background: C.bg, border: `1px solid ${C.border}` }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#E4F5EF' }}><Smartphone size={16} color={C.mint} /></div>
-                  <div><p className="text-sm font-semibold">{tr('chatWhatsapp')}</p><p className="text-xs" style={{ color: C.muted }}>+1 307 346 0474</p></div>
-                </a>
-              </div>
-            )}
-
-            {(footerModal === 'terms' || footerModal === 'privacy') && (
-              <>
-                <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: C.ink }}>
-                  {footerModal === 'terms' ? tr('lp_termsBody') : tr('lp_privacyBody')}
-                </p>
-              </>
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-
-
 export default function BlicPayApp() {
   const [view, setView] = useState('landing');
   const [lang, setLangState] = useState(() => {
@@ -1788,19 +970,14 @@ export default function BlicPayApp() {
       action: () => flash(tt("Fonksyon envitasyon ap vini.")), cta: tt("Wè plis"),
     },
     {
-      icon: Users, title: '90 gwoup BLIC Sòl louvri',
-      desc: tt("Antre nan yon gwoup Sòl nan nivo Basic, Standard oswa Premium jodi a."),
-      action: () => openSolSection(), cta: tt("Gade gwoup yo"),
+      icon: ArrowLeftRight, title: tt("Transfè gratis ant kliyan BLICPay"),
+      desc: tt("Voye lajan bay nenpòt kliyan BLICPay ak ID li — imedyat, san frè."),
+      action: () => setView('transfer'), cta: tt("Voye lajan"),
     },
     {
       icon: Lock, title: tt("Kat BLICPay ap vini"),
       desc: tt("N ap travay sou yon patenarya pou ofri kat vityèl ak fizik pou peye nenpòt kote."),
       action: () => flash(tt("Detay kat la ap vini talè.")), cta: tt("Aprann plis"),
-    },
-    {
-      icon: PiggyBank, title: tt("Fikse yon objektif epay"),
-      desc: tt("Kreye yon objektif e swiv pwogrè w chak fwa ou mete lajan."),
-      action: () => setView('termdepo'), cta: tt("Kòmanse"),
     },
   ];
   React.useEffect(() => {
@@ -1903,7 +1080,7 @@ export default function BlicPayApp() {
   const [transferId, setTransferId] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
   const [transferProcessing, setTransferProcessing] = useState(false);
-  const [pockets, setPockets] = useState(initialPockets);
+  const [pockets, setPockets] = useState([]);
   const [activePocketId, setActivePocketId] = useState(null);
   const [pocketMode, setPocketMode] = useState(null); // null | 'deposit' | 'transfer' | 'spend'
   const [pocketAmount, setPocketAmount] = useState('');
@@ -1916,7 +1093,7 @@ export default function BlicPayApp() {
   const [addMoneyProcessing, setAddMoneyProcessing] = useState(false);
   const [newPocketName, setNewPocketName] = useState('');
   const [newPocketTarget, setNewPocketTarget] = useState('');
-  const [goalDeposits, setGoalDeposits] = useState(initialGoalDeposits);
+  const [goalDeposits, setGoalDeposits] = useState([]);
   const [newGoalName, setNewGoalName] = useState('');
   const [newGoalTarget, setNewGoalTarget] = useState('');
   const [goalProcessing, setGoalProcessing] = useState(false);
@@ -3221,7 +2398,7 @@ export default function BlicPayApp() {
 
       <div className={view === 'landing' || isBizDash ? 'w-full min-h-full' : 'max-w-md mx-auto min-h-full'} style={{ background: C.bg }}>
         {view === 'landing' ? (
-          <LandingPage onStart={() => setView('auth')} lang={lang} setLang={setLang} tr={tr} />
+          <Landing onStart={() => setView('auth')} lang={lang} setLang={setLang} />
         ) : (
         <>
 
@@ -3673,7 +2850,7 @@ export default function BlicPayApp() {
             </div>
 
             {/* quick actions */}
-            <div className="mt-4 grid grid-cols-3 gap-2.5">
+            <div className="mt-4 grid grid-cols-4 gap-2.5">
               <button onClick={startDeposit} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
                 style={{ background: C.card, border: `1px solid ${C.border}` }}>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E4F5EF' }}>
@@ -3704,36 +2881,25 @@ export default function BlicPayApp() {
                   <span className="text-xs font-semibold">{tr('tileReceive')}</span>
                 </button>
               )}
-              <button onClick={openSolSection} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
-                style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#FBF0DE' }}>
-                  <Users size={16} color={C.amber} fill={C.amber} strokeWidth={1.4} />
-                </div>
-                <span className="text-xs font-semibold">{tr('tileSol')}</span>
-              </button>
-              <button onClick={() => setView('blicdepo')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
-                style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E4F5EF' }}>
-                  <PiggyBank size={16} color={C.mint} fill={C.mint} strokeWidth={1.4} />
-                </div>
-                <span className="text-xs font-semibold">{tr('tileDepo')}</span>
-              </button>
-              <button onClick={() => setView('termdepo')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
-                style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#F4EBFF' }}>
-                  <Lock size={16} color="#6D3FD1" fill="#6D3FD1" strokeWidth={1.4} />
-                </div>
-                <span className="text-xs font-semibold">{tr('tileGoal')}</span>
-              </button>
-              <button onClick={() => setView('loan')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center relative"
-                style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold" style={{ background: C.amber, color: '#fff' }}>{tt("Talè")}</span>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E6F0FB' }}>
-                  <HandCoins size={16} color={C.navy} fill={C.navy} strokeWidth={1.4} />
-                </div>
-                <span className="text-xs font-semibold">{tr('tileLoan')}</span>
-              </button>
             </div>
+
+            {/* Epay ki deja egziste (BLIC Depo / objektif) — sèvis sa yo pa nan BLICPay ankò,
+                men kliyan ki gen lajan ladan yo ka toujou rekipere l. */}
+            {(() => {
+              const pocketTotal = pockets.reduce((sum, p) => sum + (p.balance || 0), 0);
+              const goalTotal = goalDeposits.filter((g) => g.status !== 'fini').reduce((sum, g) => sum + (g.current || 0), 0);
+              if (pocketTotal + goalTotal <= 0) return null;
+              return (
+                <button onClick={() => setView(goalTotal > 0 ? 'termdepo' : 'blicdepo')} className="bp-btn mt-4 w-full p-4 rounded-xl flex items-center gap-3 text-left" style={{ background: '#EEF4FF', border: '1px solid #D6E2F7' }}>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#D6E2F7' }}><PiggyBank size={17} color={C.navy} /></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">{tt("Ou gen {0} nan epay ou", money(pocketTotal + goalTotal))}</p>
+                    <p className="text-xs" style={{ color: C.muted }}>{tt("Sèvis epay la fèmen sou BLICPay — transfere lajan an nan kont prensipal ou.")}</p>
+                  </div>
+                  <ChevronRight size={16} color={C.muted} />
+                </button>
+              );
+            })()}
 
             {/* kyc banner — baze sou accountVerified (pa kycStatus) pou l pa parèt
                 ankò pou yon kliyan deja verifye ki ta relanse yon nouvo demand */}
@@ -5615,7 +4781,7 @@ export default function BlicPayApp() {
                             {c.available === 0 ? (
                               <span className="mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#FDF3E3', color: C.amber }}>{tr('cat_soon')}</span>
                             ) : (
-                              <span className="mt-1 text-[10px] font-medium leading-snug" style={{ color: C.muted }}>{c.list.map((m) => m.name).join(' · ')}</span>
+                              <span className="mt-1 text-[10px] font-medium leading-snug" style={{ color: C.muted }}>{c.list.map((m) => tt(m.name)).join(' · ')}</span>
                             )}
                           </div>
                           {on && (

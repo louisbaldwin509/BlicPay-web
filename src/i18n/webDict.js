@@ -369,4 +369,9 @@ export const WEB_DICT = {
   'Refè verifikasyon idantite': ['Refaire la vérification d’identité', 'Redo identity verification'],
   'Lòt dokiman': ['Autre document', 'Other document'],
   'Transfè': ['Transfert', 'Transfer'],
+  'Voye lajan': ['Envoyer de l’argent', 'Send money'],
+  'Transfè gratis ant kliyan BLICPay': ['Transferts gratuits entre clients BLICPay', 'Free transfers between BLICPay users'],
+  'Voye lajan bay nenpòt kliyan BLICPay ak ID li — imedyat, san frè.': ['Envoyez de l’argent à tout client BLICPay avec son ID — instantané et sans frais.', 'Send money to any BLICPay user with their ID — instant and free.'],
+  'Ou gen {0} nan epay ou': ['Vous avez {0} en épargne', 'You have {0} in savings'],
+  'Sèvis epay la fèmen sou BLICPay — transfere lajan an nan kont prensipal ou.': ['L’épargne n’est plus proposée sur BLICPay — transférez cet argent vers votre compte principal.', 'Savings are no longer offered on BLICPay — move this money to your main account.'],
 };
