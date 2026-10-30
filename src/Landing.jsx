@@ -377,9 +377,6 @@ export default function Landing({ onStart, lang, setLang }) {
                   <span key={name} className="h-11 px-4 rounded-xl bg-white border flex items-center" style={{ borderColor: C.border }}><img src={src} alt={name} className="h-6 w-auto" /></span>
                 ))}
                 <span className="h-11 px-4 rounded-xl bg-white border flex items-center gap-2 text-sm font-semibold" style={{ borderColor: C.border }}><Building2 size={18} color={C.amber} />{t('branch')}</span>
-                <span className="h-11 px-4 rounded-xl bg-white border flex items-center gap-2 text-sm" style={{ borderColor: C.border, color: C.muted }}>
-                  <img src="/logos/zelle-wide.png" alt="Zelle" className="h-5 w-auto opacity-60" />{t('soon')}
-                </span>
               </div>
             </div>
           </Reveal>

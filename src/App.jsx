@@ -187,9 +187,8 @@ const METHOD_CATEGORIES = [
 ];
 
 const methods = [
-  { id: 'moncash', name: 'Mon Cash', desc: 'Depoze kach nan pwen Digicel ou', color: '#1E9E7C', icon: DollarSign, logo: '/logos/moncash-icon.png', kind: 'mobile' },
-  { id: 'natcash', name: 'NatCash', desc: 'Depoze ak bous mobil NatCash ou', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash-icon.png', kind: 'mobile' },
-  { id: 'zelle', name: 'Zelle', desc: 'Depoze dirèkteman soti nan kont labank ou', color: '#6D3FD1', icon: ArrowLeftRight, logo: '/logos/zelle-icon.png', kind: 'bank', comingSoon: true },
+  { id: 'moncash', name: 'Mon Cash', desc: 'Bous mobil Digicel', color: '#1E9E7C', icon: DollarSign, logo: '/logos/moncash-icon.png', kind: 'mobile' },
+  { id: 'natcash', name: 'NatCash', desc: 'Bous mobil Natcom', color: '#1C6FBF', icon: Smartphone, logo: '/logos/natcash-icon.png', kind: 'mobile' },
   { id: 'biwo', name: 'Nan biwo', desc: 'Ale peye kach nan yonn nan biwo nou yo', color: '#946115', icon: Building2, logo: null, kind: 'office' },
 ];
 
@@ -4761,7 +4760,7 @@ export default function BlicPayApp() {
               return (
                 <>
                   <h3 className="mt-7 font-semibold text-sm uppercase" style={{ color: C.muted }}>{flowKind === 'withdraw' ? tr('chooseCatWithdraw') : tr('chooseCatDeposit')}</h3>
-                  <div className="mt-3 grid grid-cols-3 gap-2.5">
+                  <div className="mt-3 grid gap-2.5" style={{ gridTemplateColumns: `repeat(${cats.length}, minmax(0, 1fr))` }}>
                     {cats.map((c) => {
                       const on = c.id === active.id;
                       const Art = CATEGORY_ART[c.id];
