@@ -141,7 +141,9 @@ async function apiFetch(path, { method = 'GET', body, token } = {}) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.error || 'Yon bagay pa mache. Eseye ankò.');
+    const e = new Error(data.error || 'Yon bagay pa mache. Eseye ankò.');
+    e.code = data.code;
+    throw e;
   }
   return data;
 }
@@ -161,6 +163,126 @@ const C = {
 
 const fontDisplay = { fontFamily: "'Manrope', sans-serif" };
 const fontMono = { fontFamily: "'IBM Plex Mono', monospace" };
+
+// ---------- Ekran koneksyon / kreye kont (vèsyon pwofesyonèl) ----------
+function AuthField({ label, icon: Icon, hint, children }) {
+  return (
+    <label className="block">
+      <span className="block text-[13px] font-semibold mb-1.5" style={{ color: C.ink }}>{label}</span>
+      <div className="auth-field relative flex items-center rounded-xl" style={{ background: '#fff', border: `1px solid ${C.border}` }}>
+        {Icon && <Icon size={17} color="#94A0B2" className="absolute left-3.5 pointer-events-none" />}
+        {children}
+      </div>
+      {hint && <span className="block text-[11.5px] mt-1.5" style={{ color: C.muted }}>{hint}</span>}
+    </label>
+  );
+}
+
+const authInputCls = 'w-full bg-transparent outline-none text-[15px] py-3.5 pr-4';
+
+function AuthInput({ icon, ...props }) {
+  return <input {...props} className={authInputCls} style={{ paddingLeft: icon ? 42 : 16, color: C.ink }} />;
+}
+
+function PasswordInput({ value, onChange, placeholder, autoComplete }) {
+  const [show, setShow] = useState(false);
+  return (
+    <>
+      <input type={show ? 'text' : 'password'} value={value} onChange={onChange} placeholder={placeholder} autoComplete={autoComplete}
+        className={authInputCls} style={{ paddingLeft: 42, paddingRight: 46, color: C.ink }} />
+      <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? tt('Kache@@pw') : tt('Montre@@pw')}
+        className="absolute right-2 w-9 h-9 rounded-lg flex items-center justify-center" style={{ color: '#94A0B2' }}>
+        {show ? <EyeOff size={17} /> : <Eye size={17} />}
+      </button>
+    </>
+  );
+}
+
+function passwordStrength(pw) {
+  if (!pw) return 0;
+  let n = 0;
+  if (pw.length >= 6) n++;
+  if (pw.length >= 10) n++;
+  if (/[0-9]/.test(pw) && /[a-zA-Z]/.test(pw)) n++;
+  if (/[^a-zA-Z0-9]/.test(pw)) n++;
+  return Math.max(1, Math.min(3, n));
+}
+
+function StrengthMeter({ value }) {
+  const lvl = passwordStrength(value);
+  if (!value) return null;
+  const col = lvl === 1 ? C.danger : lvl === 2 ? C.amber : C.mint;
+  const label = lvl === 1 ? tt('Fèb@@pw') : lvl === 2 ? tt('Mwayen@@pw') : tt('Solid@@pw');
+  return (
+    <div className="flex items-center gap-2 mt-2">
+      <div className="flex-1 grid grid-cols-3 gap-1">
+        {[1, 2, 3].map((i) => <div key={i} className="h-1 rounded-full" style={{ background: i <= lvl ? col : C.border }} />)}
+      </div>
+      <span className="text-[11.5px] font-semibold" style={{ color: col }}>{label}</span>
+    </div>
+  );
+}
+
+function AuthShell({ lang, onLang, onHome, children }) {
+  const cur = LANGS.find((l) => l.code === lang);
+  return (
+    <div className="min-h-screen w-full flex" style={{ background: '#fff' }}>
+      <style>{`
+        .auth-field:focus-within { border-color: ${C.navy} !important; box-shadow: 0 0 0 4px rgba(20,58,115,.10); }
+        .auth-field select { -webkit-appearance: none; appearance: none; }
+      `}</style>
+      {/* Panno mak la (gwo ekran sèlman) */}
+      <aside className="hidden lg:flex flex-col justify-between relative overflow-hidden" style={{ width: '44%', maxWidth: 620, padding: '40px 48px', background: 'linear-gradient(160deg, #0B1F45 0%, #143A73 55%, #1C6FA8 100%)', color: '#fff' }}>
+        <div style={{ position: 'absolute', right: -160, top: -160, width: 460, height: 460, borderRadius: '50%', background: 'radial-gradient(circle, rgba(41,182,232,.35), transparent 65%)' }} />
+        <div style={{ position: 'absolute', left: -120, bottom: -180, width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(41,182,232,.18), transparent 65%)' }} />
+        <button onClick={onHome} className="relative flex items-center gap-3 self-start">
+          <span className="rounded-xl flex items-center justify-center" style={{ width: 44, height: 44, background: '#fff', padding: 5 }}>
+            <img src="/brand/logo-symbol.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          </span>
+          <span style={{ ...fontDisplay, fontWeight: 800, fontSize: 22, letterSpacing: -0.3 }}>BLIC<span style={{ color: '#5CCBF2', fontStyle: 'italic' }}>Pay</span></span>
+        </button>
+        <div className="relative">
+          <div className="relative" style={{ height: 230, marginBottom: 36 }}>
+            <img src="/cards/card-world.jpg" alt="" style={{ position: 'absolute', left: 0, top: 18, width: 300, borderRadius: 18, transform: 'rotate(-8deg)', boxShadow: '0 30px 60px -20px rgba(0,0,0,.55)', opacity: .9 }} />
+            <img src="/cards/card-shield.jpg" alt="" style={{ position: 'absolute', left: 120, top: 40, width: 310, borderRadius: 18, transform: 'rotate(4deg)', boxShadow: '0 30px 60px -20px rgba(0,0,0,.6)' }} />
+          </div>
+          <h2 style={{ ...fontDisplay, fontWeight: 800, fontSize: 34, lineHeight: 1.12, letterSpacing: -0.8 }}>{tt('Lajan ou, an sekirite, toupatou.')}</h2>
+          <p className="mt-3 text-[15px]" style={{ color: 'rgba(255,255,255,.75)', maxWidth: 420 }}>{tt('Rechaje kont ou, voye lajan bay lòt kliyan BLICPay, epi peye ak kat ou.')}</p>
+          <div className="mt-7 space-y-3">
+            {[[BadgeCheck, tt('Idantite chak kliyan verifye (KYC)')], [Lock, tt('Kòd PIN pou chak operasyon')], [ShieldCheck, tt('Done ou chifre')]].map(([I, txt]) => (
+              <div key={txt} className="flex items-center gap-3 text-sm" style={{ color: 'rgba(255,255,255,.88)' }}>
+                <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,.10)', border: '1px solid rgba(255,255,255,.14)' }}><I size={15} color="#5CCBF2" /></span>
+                {txt}
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="relative text-xs" style={{ color: 'rgba(255,255,255,.5)' }}>© {new Date().getFullYear()} BLICPay LLC</p>
+      </aside>
+
+      {/* Fòm nan */}
+      <main className="flex-1 flex flex-col min-h-screen" style={{ background: '#fff' }}>
+        <div className="flex items-center justify-between px-5 sm:px-10 h-16">
+          <button onClick={onHome} className="flex items-center gap-1.5 text-sm font-semibold" style={{ color: C.muted }}>
+            <ArrowLeft size={16} /> <span className="hidden sm:inline">{tt('Retounen nan akèy')}</span>
+          </button>
+          <button onClick={onLang} className="flex items-center gap-1.5 text-xs font-semibold px-3 h-9 rounded-full" style={{ border: `1px solid ${C.border}`, color: C.ink }}>
+            <Globe size={14} color={C.muted} /> {cur?.label}
+          </button>
+        </div>
+        <div className="flex-1 flex justify-center px-5 sm:px-10 pb-10">
+          <div className="w-full fadein" style={{ maxWidth: 440, paddingTop: 'min(6vh, 48px)' }}>
+            <img src="/brand/logo-full.png" alt="BLICPay" className="lg:hidden mb-8" style={{ height: 52, width: 'auto' }} />
+            {children}
+          </div>
+        </div>
+        <div className="px-5 sm:px-10 pb-6 flex items-center justify-center gap-1.5 text-[12px]" style={{ color: '#94A0B2' }}>
+          <Lock size={12} /> {tt('Koneksyon an sekirize ak chifreman.')}
+        </div>
+      </main>
+    </div>
+  );
+}
 
 // Etikèt lizib pou chak tip demand admin ka kreye nan VerificationRequest.
 const VR_TYPE_LABELS = {
@@ -908,6 +1030,7 @@ export default function BlicPayApp() {
     { q: tr('lp_q5'), a: tr('lp_a5') },
   ];
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
+  const [betaNotice, setBetaNotice] = useState(''); // mod tès prive: mesaj apre enskripsyon
   const [authForm, setAuthForm] = useState({
     lastName: '', firstName: '', phone: '', email: '',
     country: '', address: '', city: '', department: '', password: '',
@@ -1188,7 +1311,7 @@ export default function BlicPayApp() {
       await loadVerificationRequests(newToken);
       await loadNotifications(newToken);
     } catch (err) {
-      setAuthError(err.message);
+      if (err.code === 'PRIVATE_BETA') setBetaNotice(err.message); else setAuthError(err.message);
     } finally {
       setAuthLoading(false);
     }
@@ -1235,7 +1358,7 @@ export default function BlicPayApp() {
       } catch { /* localStorage endispoinib — kontinye san sove sesyon an */ }
       await loadWallet(newToken);
     } catch (err) {
-      setAuthError(err.message);
+      if (err.code === 'PRIVATE_BETA') setBetaNotice(err.message); else setAuthError(err.message);
     } finally {
       setAuthLoading(false);
     }
@@ -2397,9 +2520,9 @@ export default function BlicPayApp() {
         </div>
       )}
 
-      <div className={view === 'landing' || isBizDash ? 'w-full min-h-full' : 'max-w-md mx-auto min-h-full'} style={{ background: C.bg }}>
+      <div className={view === 'landing' || isBizDash || view === 'auth' || view === 'forgotpassword' ? 'w-full min-h-full' : 'max-w-md mx-auto min-h-full'} style={{ background: C.bg }}>
         {view === 'landing' ? (
-          <Landing onStart={() => setView('auth')} lang={lang} setLang={setLang} />
+          <Landing onStart={(m) => { setAuthMode(m === 'register' ? 'register' : 'login'); setRegisterStep(1); setAuthError(''); setBetaNotice(''); setView('auth'); }} lang={lang} setLang={setLang} />
         ) : (
         <>
 
@@ -2492,284 +2615,271 @@ export default function BlicPayApp() {
         )}
 
         {view === 'auth' && (
-          <div className="fadein px-6 pt-16 pb-10 relative">
-            <button onClick={() => setShowLangPicker((s) => !s)}
-              className="absolute right-5 top-6 flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg"
-              style={{ background: C.card, border: `1px solid ${C.border}`, color: C.muted }}>
-              <span>{LANGS.find((l) => l.code === lang)?.flag}</span> {LANGS.find((l) => l.code === lang)?.label}
-            </button>
-            <div className="flex flex-col items-center text-center">
-              <img src="/brand/logo-full.png" alt="BLICPay — Global · Secure · Digital" style={{ height: 72, width: 'auto' }} />
-            </div>
+          <AuthShell lang={lang} onLang={() => setShowLangPicker((v) => !v)} onHome={() => setView('landing')}>
+            {betaNotice ? (
+              <div className="fadein">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: '#E6F4FB' }}><ShieldCheck size={26} color={C.navy} /></div>
+                <h1 className="mt-6" style={{ ...fontDisplay, fontWeight: 800, fontSize: 28, letterSpacing: -0.6, color: C.ink }}>{tt('Kont ou anrejistre')}</h1>
+                <p className="mt-3 text-[15px] leading-relaxed" style={{ color: C.muted }}>{betaNotice}</p>
+                <button onClick={() => { setBetaNotice(''); setAuthMode('login'); setRegisterStep(1); }}
+                  className="bp-btn mt-8 w-full h-12 rounded-xl font-semibold text-white" style={{ background: C.navy }}>
+                  {tt('Retounen nan koneksyon')}
+                </button>
+              </div>
+            ) : (
+            <>
+            <h1 style={{ ...fontDisplay, fontWeight: 800, fontSize: 30, letterSpacing: -0.7, color: C.ink, lineHeight: 1.15 }}>
+              {authMode === 'login' ? tt('Byenveni ankò') : tt('Kreye kont BLICPay ou')}
+            </h1>
+            <p className="mt-2 text-[15px]" style={{ color: C.muted }}>
+              {authMode === 'login' ? tt('Konekte nan kont BLICPay ou.') : tt('Gratis, an kèk minit. Ou pral bezwen yon pyès idantite pou verifye kont ou apre.')}
+            </p>
 
-            <div className="mt-8 flex rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
-              <button onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                className="flex-1 py-2.5 text-sm font-semibold"
-                style={{ background: authMode === 'login' ? C.navy : C.card, color: authMode === 'login' ? '#fff' : C.muted }}>
-                {tr('loginTab')}
-              </button>
-              <button onClick={() => { setAuthMode('register'); setAuthError(''); setRegisterStep(1); }}
-                className="flex-1 py-2.5 text-sm font-semibold"
-                style={{ background: authMode === 'register' ? C.navy : C.card, color: authMode === 'register' ? '#fff' : C.muted }}>
-                {tr('registerTab')}
-              </button>
+            <div className="mt-7 grid grid-cols-2 p-1 rounded-xl" style={{ background: '#F1F4F9' }}>
+              {[['login', tr('loginTab')], ['register', tr('registerTab')]].map(([m, label]) => (
+                <button key={m} onClick={() => { setAuthMode(m); setAuthError(''); setRegisterStep(1); }}
+                  className="h-10 rounded-lg text-sm font-semibold transition-all"
+                  style={{ background: authMode === m ? '#fff' : 'transparent', color: authMode === m ? C.ink : C.muted, boxShadow: authMode === m ? '0 1px 3px rgba(11,27,51,.12)' : 'none' }}>
+                  {label}
+                </button>
+              ))}
             </div>
 
             {authMode === 'login' ? (
-              <>
-                <div className="mt-5 space-y-3">
-                  <input placeholder={tr('phonePh')} value={authForm.phone}
-                    onChange={(e) => setAuthForm((f) => ({ ...f, phone: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
-                  <input placeholder={tr('passwordPh')} type="password" value={authForm.password}
-                    onChange={(e) => setAuthForm((f) => ({ ...f, password: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
+              <form className="mt-7" onSubmit={(e) => { e.preventDefault(); handleAuthSubmit(); }}>
+                <div className="space-y-4">
+                  <AuthField label={tr('phonePh')} icon={Phone}>
+                    <AuthInput icon inputMode="tel" autoComplete="tel" placeholder="509 3X XX XXXX" value={authForm.phone}
+                      onChange={(e) => setAuthForm((f) => ({ ...f, phone: e.target.value }))} />
+                  </AuthField>
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[13px] font-semibold" style={{ color: C.ink }}>{tr('passwordPh')}</span>
+                      <button type="button" onClick={() => {
+                        setForgotStep(1); setForgotPhone(''); setForgotCode('');
+                        setForgotNewPassword(''); setForgotConfirmPassword(''); setForgotError(''); setForgotDone(false);
+                        setView('forgotpassword');
+                      }} className="text-[13px] font-semibold" style={{ color: C.navy }}>{tr('forgotPasswordLink')}</button>
+                    </div>
+                    <div className="auth-field relative flex items-center rounded-xl" style={{ background: '#fff', border: `1px solid ${C.border}` }}>
+                      <Lock size={17} color="#94A0B2" className="absolute left-3.5 pointer-events-none" />
+                      <PasswordInput autoComplete="current-password" placeholder="••••••••" value={authForm.password}
+                        onChange={(e) => setAuthForm((f) => ({ ...f, password: e.target.value }))} />
+                    </div>
+                  </div>
                 </div>
 
                 {authError && (
-                  <p className="mt-3 text-xs flex items-center gap-1.5" style={{ color: C.danger }}>
-                    <AlertCircle size={13} /> {authError}
-                  </p>
+                  <div className="mt-4 px-3.5 py-3 rounded-xl text-[13px] flex items-start gap-2" style={{ background: '#FDF1F1', border: '1px solid #F5CFCF', color: '#9B2C2C' }}>
+                    <AlertCircle size={15} className="shrink-0 mt-px" /> <span>{authError}</span>
+                  </div>
                 )}
 
-                <button onClick={handleAuthSubmit} disabled={authLoading}
-                  className="bp-btn mt-5 w-full py-3.5 rounded-xl font-semibold text-white"
-                  style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: authLoading ? 0.7 : 1 }}>
-                  {authLoading ? tr('waitBtn') : tr('loginBtn')}
+                <button type="submit" disabled={authLoading}
+                  className="bp-btn mt-6 w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2"
+                  style={{ background: C.navy, opacity: authLoading ? 0.7 : 1, boxShadow: '0 10px 24px -12px rgba(20,58,115,.7)' }}>
+                  {authLoading ? tr('waitBtn') : <>{tr('loginBtn')} <ChevronRight size={17} /></>}
                 </button>
-                <button onClick={() => {
-                  setForgotStep(1); setForgotPhone(''); setForgotCode('');
-                  setForgotNewPassword(''); setForgotConfirmPassword(''); setForgotError(''); setForgotDone(false);
-                  setView('forgotpassword');
-                }}
-                  className="mt-3 w-full text-center text-xs font-semibold" style={{ color: C.navy }}>
-                  {tr('forgotPasswordLink')}
-                </button>
-              </>
+                <p className="mt-6 text-center text-sm" style={{ color: C.muted }}>
+                  {tt('Ou poko gen kont?')}{' '}
+                  <button type="button" onClick={() => { setAuthMode('register'); setAuthError(''); setRegisterStep(1); }} className="font-semibold" style={{ color: C.navy }}>{tr('registerTab')}</button>
+                </p>
+              </form>
             ) : (
-              <>
-                {/* step indicator */}
-                <div className="flex items-center justify-center gap-2 mt-6">
-                  {[1, 2, 3].map((s) => (
-                    <React.Fragment key={s}>
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={{
-                          background: s <= registerStep ? C.navy : C.card,
-                          color: s <= registerStep ? '#fff' : C.muted,
-                          border: `1px solid ${s <= registerStep ? C.navy : C.border}`,
-                        }}>
-                        {s < registerStep ? <Check size={12} /> : s}
-                      </div>
-                      {s < 3 && <div className="w-6 h-0.5" style={{ background: s < registerStep ? C.navy : C.border }} />}
-                    </React.Fragment>
+              <div className="mt-7">
+                {/* Endikatè etap */}
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3].map((st) => (
+                    <div key={st} className="flex-1 h-1.5 rounded-full" style={{ background: st <= registerStep ? C.navy : C.border }} />
                   ))}
                 </div>
-                <p className="text-center text-xs font-semibold mt-2" style={{ color: C.muted }}>
-                  {registerStep === 1 ? tr('stepInfo') : registerStep === 2 ? tr('stepPassword') : tr('stepTerms')}
-                </p>
+                <div className="mt-2.5 flex items-center justify-between text-[12.5px]">
+                  <span className="font-semibold" style={{ color: C.ink }}>{registerStep === 1 ? tr('stepInfo') : registerStep === 2 ? tr('stepPassword') : tr('stepTerms')}</span>
+                  <span style={{ color: C.muted }}>{tt('Etap {0} sou 3', registerStep)}</span>
+                </div>
 
                 {registerStep === 1 && (
-                  <div className="mt-5 space-y-3">
+                  <div className="mt-6 space-y-4">
                     <div className="grid grid-cols-2 gap-3">
-                      <input placeholder={tr('lastNamePh')} value={authForm.lastName}
-                        onChange={(e) => setAuthForm((f) => ({ ...f, lastName: e.target.value }))}
-                        className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
-                      <input placeholder={tr('firstNamePh')} value={authForm.firstName}
-                        onChange={(e) => setAuthForm((f) => ({ ...f, firstName: e.target.value }))}
-                        className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
+                      <AuthField label={tr('firstNamePh')}>
+                        <AuthInput autoComplete="given-name" value={authForm.firstName} onChange={(e) => setAuthForm((f) => ({ ...f, firstName: e.target.value }))} />
+                      </AuthField>
+                      <AuthField label={tr('lastNamePh')}>
+                        <AuthInput autoComplete="family-name" value={authForm.lastName} onChange={(e) => setAuthForm((f) => ({ ...f, lastName: e.target.value }))} />
+                      </AuthField>
                     </div>
-                    <input placeholder={tr('phonePh')} value={authForm.phone}
-                      onChange={(e) => setAuthForm((f) => ({ ...f, phone: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
-                    <input placeholder={tr('emailPh')} type="email" value={authForm.email}
-                      onChange={(e) => setAuthForm((f) => ({ ...f, email: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
-                    <input placeholder={tr('addressPh')} value={authForm.address}
-                      onChange={(e) => setAuthForm((f) => ({ ...f, address: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
+                    <AuthField label={tr('phonePh')} icon={Phone}>
+                      <AuthInput icon inputMode="tel" autoComplete="tel" placeholder="509 3X XX XXXX" value={authForm.phone} onChange={(e) => setAuthForm((f) => ({ ...f, phone: e.target.value }))} />
+                    </AuthField>
+                    <AuthField label={tr('emailPh')} icon={Mail}>
+                      <AuthInput icon type="email" autoComplete="email" placeholder="nom@exemple.com" value={authForm.email} onChange={(e) => setAuthForm((f) => ({ ...f, email: e.target.value }))} />
+                    </AuthField>
+                    <AuthField label={tr('addressPh')}>
+                      <AuthInput autoComplete="street-address" value={authForm.address} onChange={(e) => setAuthForm((f) => ({ ...f, address: e.target.value }))} />
+                    </AuthField>
                     <div className="grid grid-cols-2 gap-3">
-                      <input placeholder={tr('cityPh')} value={authForm.city}
-                        onChange={(e) => setAuthForm((f) => ({ ...f, city: e.target.value }))}
-                        className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
-                      <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm pointer-events-none">🇭🇹</span>
-                        <select value={authForm.country}
-                          onChange={(e) => setAuthForm((f) => ({ ...f, country: e.target.value }))}
-                          className="w-full pl-9 pr-3 py-3 rounded-lg text-sm appearance-none"
-                          style={{ background: C.card, border: `1px solid ${C.border}`, color: authForm.country ? C.ink : C.muted }}>
-                          <option value="" disabled>{tr('countryPh')}</option>
+                      <AuthField label={tr('cityPh')}>
+                        <AuthInput autoComplete="address-level2" value={authForm.city} onChange={(e) => setAuthForm((f) => ({ ...f, city: e.target.value }))} />
+                      </AuthField>
+                      <AuthField label={tr('countryPh')}>
+                        <select value={authForm.country} onChange={(e) => setAuthForm((f) => ({ ...f, country: e.target.value }))}
+                          className={authInputCls} style={{ paddingLeft: 16, color: authForm.country ? C.ink : '#94A0B2' }}>
+                          <option value="" disabled>—</option>
                           {tr('countries').map((c) => <option key={c} value={c}>{c}</option>)}
                         </select>
-                      </div>
+                        <ChevronRight size={15} color="#94A0B2" className="absolute right-3.5 pointer-events-none" style={{ transform: 'rotate(90deg)' }} />
+                      </AuthField>
                     </div>
-                    <input placeholder={tr('departmentPh')} value={authForm.department}
-                      onChange={(e) => setAuthForm((f) => ({ ...f, department: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
+                    <AuthField label={tr('departmentPh')}>
+                      <AuthInput autoComplete="address-level1" value={authForm.department} onChange={(e) => setAuthForm((f) => ({ ...f, department: e.target.value }))} />
+                    </AuthField>
                   </div>
                 )}
 
                 {registerStep === 2 && (
-                  <div className="mt-5 space-y-3">
-                    <input placeholder={tr('passwordPh')} type="password" value={authForm.password}
-                      onChange={(e) => setAuthForm((f) => ({ ...f, password: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
-                    <input placeholder={tr('confirmPasswordPh')} type="password" value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
+                  <div className="mt-6 space-y-4">
+                    <div>
+                      <AuthField label={tr('passwordPh')} icon={Lock} hint={tt('Omwen 6 karaktè. Pi bon: lèt, chif ak senbòl.')}>
+                        <PasswordInput autoComplete="new-password" value={authForm.password} onChange={(e) => setAuthForm((f) => ({ ...f, password: e.target.value }))} />
+                      </AuthField>
+                      <StrengthMeter value={authForm.password} />
+                    </div>
+                    <AuthField label={tr('confirmPasswordPh')} icon={Lock}>
+                      <PasswordInput autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                    </AuthField>
                   </div>
                 )}
 
                 {registerStep === 3 && (
-                  <div className="mt-5">
-                    <p className="text-xs font-semibold mb-2" style={{ color: C.muted }}>{tr('reviewInfo')}</p>
-                    <div className="rounded-xl p-4 space-y-2 text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                      <div className="flex items-center justify-between">
-                        <span style={{ color: C.muted }}>{tr('fullNamePh')}</span>
-                        <span className="font-medium">{authForm.firstName} {authForm.lastName}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span style={{ color: C.muted }}>{tr('phonePh')}</span>
-                        <span className="font-medium">{authForm.phone}</span>
-                      </div>
-                      {authForm.email && (
-                        <div className="flex items-center justify-between">
-                          <span style={{ color: C.muted }}>{tr('emailPh')}</span>
-                          <span className="font-medium">{authForm.email}</span>
+                  <div className="mt-6">
+                    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+                      <div className="px-4 py-3 text-[12px] font-semibold uppercase tracking-wider" style={{ background: '#F7F9FC', color: C.muted, borderBottom: `1px solid ${C.border}` }}>{tr('reviewInfo')}</div>
+                      {[
+                        [tr('fullNamePh'), `${authForm.firstName} ${authForm.lastName}`.trim()],
+                        [tr('phonePh'), authForm.phone],
+                        [tr('emailPh'), authForm.email],
+                        [tr('addressPh'), authForm.address],
+                        [`${tr('cityPh')} / ${tr('countryPh')}`, [authForm.city, authForm.country].filter(Boolean).join(' · ')],
+                        [tr('departmentPh'), authForm.department],
+                      ].filter(([, v]) => v).map(([k, v], i) => (
+                        <div key={k} className="flex items-center justify-between gap-4 px-4 py-3 text-sm" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
+                          <span style={{ color: C.muted }}>{k}</span>
+                          <span className="font-semibold text-right" style={{ color: C.ink }}>{v}</span>
                         </div>
-                      )}
-                      {authForm.address && (
-                        <div className="flex items-center justify-between">
-                          <span style={{ color: C.muted }}>{tr('addressPh')}</span>
-                          <span className="font-medium">{authForm.address}</span>
-                        </div>
-                      )}
-                      {(authForm.city || authForm.country) && (
-                        <div className="flex items-center justify-between">
-                          <span style={{ color: C.muted }}>{tr('cityPh')} / {tr('countryPh')}</span>
-                          <span className="font-medium">
-                            {[authForm.city, authForm.country && `🇭🇹 ${authForm.country}`].filter(Boolean).join(' · ')}
-                          </span>
-                        </div>
-                      )}
-                      {authForm.department && (
-                        <div className="flex items-center justify-between">
-                          <span style={{ color: C.muted }}>{tr('departmentPh')}</span>
-                          <span className="font-medium">{authForm.department}</span>
-                        </div>
-                      )}
+                      ))}
                     </div>
-                    <label className="mt-4 flex items-start gap-2.5 cursor-pointer">
-                      <input type="checkbox" checked={acceptedTerms}
-                        onChange={(e) => setAcceptedTerms(e.target.checked)}
-                        className="mt-0.5" style={{ width: 16, height: 16, accentColor: C.navy }} />
-                      <span className="text-xs" style={{ color: C.muted }}>{tr('termsText')}</span>
+                    <label className="mt-5 flex items-start gap-3 cursor-pointer p-3.5 rounded-xl" style={{ background: '#F7F9FC', border: `1px solid ${C.border}` }}>
+                      <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)}
+                        className="mt-0.5 shrink-0" style={{ width: 17, height: 17, accentColor: C.navy }} />
+                      <span className="text-[13px] leading-relaxed" style={{ color: C.ink }}>{tr('termsText')}</span>
                     </label>
                   </div>
                 )}
 
                 {authError && (
-                  <p className="mt-3 text-xs flex items-center gap-1.5" style={{ color: C.danger }}>
-                    <AlertCircle size={13} /> {authError}
-                  </p>
+                  <div className="mt-4 px-3.5 py-3 rounded-xl text-[13px] flex items-start gap-2" style={{ background: '#FDF1F1', border: '1px solid #F5CFCF', color: '#9B2C2C' }}>
+                    <AlertCircle size={15} className="shrink-0 mt-px" /> <span>{authError}</span>
+                  </div>
                 )}
 
-                <div className="flex gap-2.5 mt-5">
+                <div className="flex gap-3 mt-6">
                   {registerStep > 1 && (
                     <button onClick={() => goRegisterStep(registerStep - 1)}
-                      className="bp-btn py-3.5 px-5 rounded-xl font-semibold text-sm"
-                      style={{ border: `1px solid ${C.border}`, color: C.muted }}>
-                      {tr('back')}
+                      className="bp-btn h-12 px-5 rounded-xl font-semibold text-sm flex items-center gap-1.5"
+                      style={{ border: `1px solid ${C.border}`, color: C.ink, background: '#fff' }}>
+                      <ArrowLeft size={16} /> {tr('back')}
                     </button>
                   )}
                   {registerStep < 3 ? (
                     <button onClick={() => goRegisterStep(registerStep + 1)}
-                      className="bp-btn flex-1 py-3.5 rounded-xl font-semibold text-white"
-                      style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-                      {tr('next')}
+                      className="bp-btn flex-1 h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2"
+                      style={{ background: C.navy, boxShadow: '0 10px 24px -12px rgba(20,58,115,.7)' }}>
+                      {tr('next')} <ChevronRight size={17} />
                     </button>
                   ) : (
                     <button onClick={submitRegistration} disabled={authLoading}
-                      className="bp-btn flex-1 py-3.5 rounded-xl font-semibold text-white"
-                      style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: authLoading ? 0.7 : 1 }}>
+                      className="bp-btn flex-1 h-12 rounded-xl font-semibold text-white"
+                      style={{ background: C.navy, opacity: authLoading ? 0.7 : 1, boxShadow: '0 10px 24px -12px rgba(20,58,115,.7)' }}>
                       {authLoading ? tr('waitBtn') : tr('createAccountBtn')}
                     </button>
                   )}
                 </div>
-              </>
+                <p className="mt-6 text-center text-sm" style={{ color: C.muted }}>
+                  {tt('Ou deja gen yon kont?')}{' '}
+                  <button type="button" onClick={() => { setAuthMode('login'); setAuthError(''); }} className="font-semibold" style={{ color: C.navy }}>{tr('loginTab')}</button>
+                </p>
+              </div>
             )}
-
-          </div>
+            </>
+            )}
+          </AuthShell>
         )}
 
         {view === 'forgotpassword' && (
-          <div className="fadein px-6 pt-16 pb-10">
-            <div className="flex flex-col items-center text-center">
-              <img src="/brand/logo-symbol.png" alt="BLICPay" style={{ height: 56, width: 'auto' }} />
-              <h1 className="mt-3" style={{ ...fontDisplay, fontWeight: 800, fontSize: 22 }}>{tr('forgotTitle')}</h1>
-            </div>
+          <AuthShell lang={lang} onLang={() => setShowLangPicker((v) => !v)} onHome={() => setView('landing')}>
+          <div className="fadein">
+            <button onClick={closeForgotPassword} className="flex items-center gap-1.5 text-sm font-semibold mb-6" style={{ color: C.navy }}>
+              <ArrowLeft size={16} /> {tr('loginTab')}
+            </button>
+            <h1 style={{ ...fontDisplay, fontWeight: 800, fontSize: 30, letterSpacing: -0.7, color: C.ink, lineHeight: 1.15 }}>{tr('forgotTitle')}</h1>
 
             {forgotDone ? (
-              <div className="mt-8 p-5 rounded-xl text-center" style={{ background: '#E4F5EF' }}>
-                <Check size={24} color={C.mint} className="mx-auto" />
-                <p className="mt-2 text-sm font-semibold" style={{ color: C.mint }}>{tr('resetSuccessMsg')}</p>
+              <div className="mt-7 p-5 rounded-xl" style={{ background: '#EAF7F2', border: '1px solid #BFE7D8' }}>
+                <div className="flex items-center gap-2.5"><Check size={20} color={C.mint} /><p className="text-sm font-semibold" style={{ color: '#1F6B53' }}>{tr('resetSuccessMsg')}</p></div>
                 <button onClick={closeForgotPassword}
-                  className="bp-btn mt-4 w-full py-3 rounded-xl font-semibold text-sm text-white"
-                  style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+                  className="bp-btn mt-5 w-full h-12 rounded-xl font-semibold text-white" style={{ background: C.navy }}>
                   {tr('loginTab')}
                 </button>
               </div>
             ) : forgotStep === 1 ? (
               <>
-                <p className="mt-6 text-sm text-center" style={{ color: C.muted }}>{tr('forgotStep1Sub')}</p>
-                <input placeholder={tr('phonePh')} value={forgotPhone}
-                  onChange={(e) => setForgotPhone(e.target.value)}
-                  className="w-full mt-5 px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
+                <p className="mt-2 text-[15px]" style={{ color: C.muted }}>{tr('forgotStep1Sub')}</p>
+                <div className="mt-7">
+                  <AuthField label={tr('phonePh')} icon={Phone}>
+                    <AuthInput icon inputMode="tel" autoComplete="tel" placeholder="509 3X XX XXXX" value={forgotPhone} onChange={(e) => setForgotPhone(e.target.value)} />
+                  </AuthField>
+                </div>
                 {forgotError && (
-                  <p className="mt-3 text-xs flex items-center gap-1.5" style={{ color: C.danger }}>
-                    <AlertCircle size={13} /> {forgotError}
-                  </p>
+                  <div className="mt-4 px-3.5 py-3 rounded-xl text-[13px] flex items-start gap-2" style={{ background: '#FDF1F1', border: '1px solid #F5CFCF', color: '#9B2C2C' }}>
+                    <AlertCircle size={15} className="shrink-0 mt-px" /> <span>{forgotError}</span>
+                  </div>
                 )}
                 <button onClick={sendResetCode} disabled={forgotSending}
-                  className="bp-btn mt-5 w-full py-3.5 rounded-xl font-semibold text-white"
-                  style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: forgotSending ? 0.7 : 1 }}>
+                  className="bp-btn mt-6 w-full h-12 rounded-xl font-semibold text-white"
+                  style={{ background: C.navy, opacity: forgotSending ? 0.7 : 1, boxShadow: '0 10px 24px -12px rgba(20,58,115,.7)' }}>
                   {forgotSending ? tr('waitBtn') : tr('sendCodeBtn')}
                 </button>
               </>
             ) : (
               <>
-                <p className="mt-6 text-sm text-center" style={{ color: C.muted }}>{tr('forgotStep2Sub')}</p>
-                <div className="mt-5 space-y-3">
-                  <input placeholder={tr('codePh')} value={forgotCode}
-                    onChange={(e) => setForgotCode(e.target.value.replace(/[^0-9]/g, ''))}
-                    inputMode="numeric" maxLength={6}
-                    className="w-full px-4 py-3 rounded-lg text-sm text-center tracking-widest" style={{ ...fontMono, background: C.card, border: `1px solid ${C.border}` }} />
-                  <input placeholder={tr('newPasswordPh')} type="password" value={forgotNewPassword}
-                    onChange={(e) => setForgotNewPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
-                  <input placeholder={tr('confirmNewPasswordPh')} type="password" value={forgotConfirmPassword}
-                    onChange={(e) => setForgotConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg text-sm" style={{ background: C.card, border: `1px solid ${C.border}` }} />
+                <p className="mt-2 text-[15px]" style={{ color: C.muted }}>{tr('forgotStep2Sub')}</p>
+                <div className="mt-7 space-y-4">
+                  <AuthField label={tr('codePh')}>
+                    <input value={forgotCode} onChange={(e) => setForgotCode(e.target.value.replace(/[^0-9]/g, ''))}
+                      inputMode="numeric" maxLength={6} autoComplete="one-time-code" placeholder="••••••"
+                      className={authInputCls} style={{ ...fontMono, paddingLeft: 16, letterSpacing: 8, fontSize: 18, color: C.ink }} />
+                  </AuthField>
+                  <AuthField label={tr('newPasswordPh')} icon={Lock}>
+                    <PasswordInput autoComplete="new-password" value={forgotNewPassword} onChange={(e) => setForgotNewPassword(e.target.value)} />
+                  </AuthField>
+                  <AuthField label={tr('confirmNewPasswordPh')} icon={Lock}>
+                    <PasswordInput autoComplete="new-password" value={forgotConfirmPassword} onChange={(e) => setForgotConfirmPassword(e.target.value)} />
+                  </AuthField>
                 </div>
                 {forgotError && (
-                  <p className="mt-3 text-xs flex items-center gap-1.5" style={{ color: C.danger }}>
-                    <AlertCircle size={13} /> {forgotError}
-                  </p>
+                  <div className="mt-4 px-3.5 py-3 rounded-xl text-[13px] flex items-start gap-2" style={{ background: '#FDF1F1', border: '1px solid #F5CFCF', color: '#9B2C2C' }}>
+                    <AlertCircle size={15} className="shrink-0 mt-px" /> <span>{forgotError}</span>
+                  </div>
                 )}
                 <button onClick={resetPassword} disabled={forgotSending}
-                  className="bp-btn mt-5 w-full py-3.5 rounded-xl font-semibold text-white"
-                  style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, opacity: forgotSending ? 0.7 : 1 }}>
+                  className="bp-btn mt-6 w-full h-12 rounded-xl font-semibold text-white"
+                  style={{ background: C.navy, opacity: forgotSending ? 0.7 : 1, boxShadow: '0 10px 24px -12px rgba(20,58,115,.7)' }}>
                   {forgotSending ? tr('waitBtn') : tr('resetPasswordBtn')}
                 </button>
               </>
             )}
-
-            {!forgotDone && (
-              <button onClick={closeForgotPassword}
-                className="mt-4 w-full text-center text-xs font-semibold" style={{ color: C.muted }}>
-                {tr('back')}
-              </button>
-            )}
           </div>
+          </AuthShell>
         )}
 
         {view === 'dashboard' && !isBizDash && (

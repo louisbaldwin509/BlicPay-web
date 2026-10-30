@@ -221,8 +221,8 @@ export default function Landing({ onStart, lang, setLang }) {
                 </div>
               )}
             </div>
-            <button onClick={onStart} className="hidden sm:block h-10 px-4 rounded-full text-sm font-semibold" style={{ color: C.navy }}>{t('login')}</button>
-            <button onClick={onStart} className="lp2-btn h-10 px-5 rounded-full text-sm font-bold text-white" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>{t('signup')}</button>
+            <button onClick={() => onStart('login')} className="hidden sm:block h-10 px-4 rounded-full text-sm font-semibold" style={{ color: C.navy }}>{t('login')}</button>
+            <button onClick={() => onStart('register')} className="lp2-btn h-10 px-5 rounded-full text-sm font-bold text-white" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>{t('signup')}</button>
             <button onClick={() => setMenu((v) => !v)} className="lg:hidden w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: C.border }} aria-label="Menu">
               {menu ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -255,10 +255,10 @@ export default function Landing({ onStart, lang, setLang }) {
             <Reveal delay={160}><p className="mt-5 text-lg leading-relaxed max-w-xl" style={{ color: C.muted }}>{t('sub')}</p></Reveal>
             <Reveal delay={240}>
               <div className="mt-8 flex flex-wrap gap-3">
-                <button onClick={onStart} className="lp2-btn h-12 px-6 rounded-full font-bold text-white flex items-center gap-2" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, boxShadow: '0 12px 30px -10px rgba(20,58,115,.6)' }}>
+                <button onClick={() => onStart('register')} className="lp2-btn h-12 px-6 rounded-full font-bold text-white flex items-center gap-2" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, boxShadow: '0 12px 30px -10px rgba(20,58,115,.6)' }}>
                   {t('start')}<ArrowRight size={18} />
                 </button>
-                <button onClick={onStart} className="lp2-btn h-12 px-6 rounded-full font-semibold border" style={{ borderColor: C.border }}>{t('login')}</button>
+                <button onClick={() => onStart('login')} className="lp2-btn h-12 px-6 rounded-full font-semibold border" style={{ borderColor: C.border }}>{t('login')}</button>
               </div>
             </Reveal>
             <Reveal delay={320}>
@@ -421,7 +421,7 @@ export default function Landing({ onStart, lang, setLang }) {
                 <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.amber }}>{t('bizEyebrow')}</p>
                 <h2 className="mt-3 text-3xl sm:text-4xl leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('bizTitle')}</h2>
                 <p className="mt-4 leading-relaxed" style={{ color: C.muted }}>{t('bizSub')}</p>
-                <button onClick={onStart} className="lp2-btn mt-7 h-12 px-6 rounded-full font-bold text-white inline-flex items-center gap-2" style={{ background: C.navy }}>
+                <button onClick={() => onStart('register')} className="lp2-btn mt-7 h-12 px-6 rounded-full font-bold text-white inline-flex items-center gap-2" style={{ background: C.navy }}>
                   {t('bizCta')}<ArrowRight size={18} />
                 </button>
               </div>
@@ -464,7 +464,7 @@ export default function Landing({ onStart, lang, setLang }) {
               <div className="absolute inset-0 opacity-20 lp2-grid" />
               <h2 className="relative text-3xl sm:text-4xl tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('ctaTitle')}</h2>
               <p className="relative mt-3 opacity-85">{t('ctaSub')}</p>
-              <button onClick={onStart} className="lp2-btn relative mt-8 h-12 px-7 rounded-full font-bold inline-flex items-center gap-2" style={{ background: '#fff', color: C.navy }}>
+              <button onClick={() => onStart('register')} className="lp2-btn relative mt-8 h-12 px-7 rounded-full font-bold inline-flex items-center gap-2" style={{ background: '#fff', color: C.navy }}>
                 {t('signup')}<ArrowRight size={18} />
               </button>
             </div>
