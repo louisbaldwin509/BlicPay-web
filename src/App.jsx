@@ -2722,15 +2722,6 @@ export default function BlicPayApp() {
               {authMode === 'login' ? tt('Konekte nan kont BLICPay ou.') : tt('Gratis, an kèk minit. Ou pral bezwen yon pyès idantite pou verifye kont ou apre.')}
             </p>
 
-            <div className="mt-7 grid grid-cols-2 p-1 rounded-xl" style={{ background: '#F1F4F9' }}>
-              {[['login', tr('loginTab')], ['register', tr('registerTab')]].map(([m, label]) => (
-                <button key={m} onClick={() => { setAuthMode(m); setAuthError(''); setRegisterStep(1); }}
-                  className="h-10 rounded-lg text-sm font-semibold transition-all"
-                  style={{ background: authMode === m ? '#fff' : 'transparent', color: authMode === m ? C.ink : C.muted, boxShadow: authMode === m ? '0 1px 3px rgba(11,27,51,.12)' : 'none' }}>
-                  {label}
-                </button>
-              ))}
-            </div>
 
             {authMode === 'login' ? (
               <form className="mt-7" onSubmit={(e) => { e.preventDefault(); handleAuthSubmit(); }}>
