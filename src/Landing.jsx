@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   ArrowRight, ArrowLeftRight, BadgeCheck, Building2, Check, ChevronDown, CreditCard, Globe, Lock, Menu,
-  Phone, QrCode, ShieldCheck, Smartphone, Sparkles, Wallet, X, Fingerprint, Zap, ScanLine, Store, Landmark,
+  Phone, QrCode, ShieldCheck, Smartphone, Sparkles, Wallet, X, Fingerprint, Zap, ScanLine, Store,
 } from 'lucide-react';
 
 const C = {
@@ -377,9 +377,9 @@ export default function Landing({ onStart, lang, setLang }) {
                   <span key={name} className="h-11 px-4 rounded-xl bg-white border flex items-center" style={{ borderColor: C.border }}><img src={src} alt={name} className="h-6 w-auto" /></span>
                 ))}
                 <span className="h-11 px-4 rounded-xl bg-white border flex items-center gap-2 text-sm font-semibold" style={{ borderColor: C.border }}><Building2 size={18} color={C.amber} />{t('branch')}</span>
-                {['Unibank', 'Sogebank'].map((bank) => (
-                  <span key={bank} className="h-11 px-4 rounded-xl bg-white border flex items-center gap-2 text-sm" style={{ borderColor: C.border }}>
-                    <Landmark size={17} color={C.navy} /><span className="font-semibold">{bank}</span>
+                {[['Unibank', '/logos/unibank-icon.png'], ['Sogebank', '/logos/sogebank-icon.png']].map(([bank, logo]) => (
+                  <span key={bank} className="h-11 pl-1.5 pr-3 rounded-xl bg-white border flex items-center gap-2 text-sm" style={{ borderColor: C.border }}>
+                    <img src={logo} alt={bank} className="h-8 w-8 rounded-lg" /><span className="font-semibold">{bank}</span>
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#FDF3E3', color: C.amber }}>{t('soon')}</span>
                   </span>
                 ))}
