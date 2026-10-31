@@ -438,7 +438,7 @@ function DashboardPage({ ctx }) {
             </div>
             <p className="text-sm mt-3" style={{ color: K.ink }}>
               {approved
-                ? t('plan_active', { d: fmt(types?.caps?.business?.daily ?? 500000), m: fmt(types?.caps?.business?.monthly ?? 5000000) })
+                ? t('plan_active', { d: fmt(types?.caps?.[profile?.legalForm === 'pro' ? 'pro' : 'business']?.daily ?? 500000), m: fmt(types?.caps?.[profile?.legalForm === 'pro' ? 'pro' : 'business']?.monthly ?? 5000000) })
                 : bizStatus === 'submitted' ? t('plan_review') : t('plan_todo')}
             </p>
             <button onClick={() => setPage('account')} className="mt-4 h-10 px-4 rounded-xl text-sm font-bold flex items-center gap-1.5 text-white" style={{ background: approved ? K.mint : K.navy }}>
@@ -637,7 +637,9 @@ function ActivityPage({ ctx }) {
 
 function CardPage({ ctx }) {
   const { t, lang, user, token, apiFetch, flash, balance, ops, months, stats, recentPeople, types, biz, profile, bizStatus, approved, bizName, loading, load, search, setSearch, setPage, setShowReceive, describe, dateFmt, timeFmt, hello, firstName, isIn, isOut, pageHeader, onDeposit, onWithdraw, onTransfer, onKyc, onSettings, onSupport, onChangePassword, onLogout } = ctx;
-  const caps = types?.caps || { personal: { daily: 80000, weekly: 300000, monthly: 500000 }, business: { daily: 500000, weekly: 2000000, monthly: 5000000 } };
+  const allCaps = types?.caps || { personal: { daily: 80000, weekly: 300000, monthly: 500000 }, pro: { daily: 200000, weekly: 800000, monthly: 1500000 }, business: { daily: 500000, weekly: 2000000, monthly: 5000000 } };
+  const isPro = profile?.legalForm === 'pro';
+  const caps = { personal: allCaps.personal, business: (isPro ? allCaps.pro : allCaps.business) || allCaps.business };
   return (
     <>
       {pageHeader(t('card_title'), t('card_sub'))}
@@ -657,7 +659,7 @@ function CardPage({ ctx }) {
         <div className="grid grid-cols-3 gap-3 text-sm">
           <div />
           <p className="text-xs font-semibold" style={{ color: K.muted }}>{t('personal_limits')}</p>
-          <p className="text-xs font-semibold" style={{ color: K.navy }}>{t('business_limits')}</p>
+          <p className="text-xs font-semibold" style={{ color: K.navy }}>{isPro ? t('pro_limits') : t('business_limits')}</p>
           {[['daily', t('per_day')], ['weekly', t('per_week')], ['monthly', t('per_month')]].map(([k, label]) => (
             <React.Fragment key={k}>
               <p className="font-medium py-2 border-t" style={{ borderColor: K.border }}>{label}</p>
