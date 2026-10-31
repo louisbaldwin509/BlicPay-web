@@ -130,6 +130,7 @@ const D = {
   kyb_desc: ['Nou verifye antrepriz ou otomatikman nan rejis ofisyèl la, ansanm ak dirijan ak aksyonè li yo. Sa nesesè pou aktive tout fonksyon kont antrepriz la.', 'Nous vérifions automatiquement votre entreprise dans le registre officiel, ainsi que ses dirigeants et actionnaires. C’est nécessaire pour activer toutes les fonctions du compte entreprise.', 'We automatically verify your business in the official registry, along with its officers and shareholders. This is required to unlock all business account features.'],
   kyb_fee: ['Frè ouvèti kont antrepriz', 'Frais d’ouverture du compte entreprise', 'Business account opening fee'],
   kyb_fee_note: ['Yon sèl fwa, peye an goud selon tal BRH jodi a. Si verifikasyon an bezwen refè, ou p ap peye ankò.', 'Paiement unique, réglé en gourdes au taux BRH du jour. Si la vérification doit être refaite, vous ne payez pas à nouveau.', 'One-time payment, settled in gourdes at today’s BRH rate. If the verification needs to be redone, you won’t pay again.'],
+  kyb_need_file: ['Ranpli tout enfòmasyon yo, voye dokiman obligatwa yo epi soumèt dosye a. Apre sa, w ap ka peye frè ouvèti a epi lanse verifikasyon an.', 'Complétez toutes les informations, envoyez les documents obligatoires et soumettez le dossier. Vous pourrez ensuite payer les frais d’ouverture et lancer la vérification.', 'Complete all the information, upload the required documents and submit the file. You can then pay the opening fee and start the verification.'],
   kyb_pay_with: ['Peye ak', 'Payer avec', 'Pay with'],
   kyb_pay_balance: ['Balans BLICPay', 'Solde BLICPay', 'BLICPay balance'],
   kyb_balance: ['Balans', 'Solde', 'Balance'],
@@ -173,6 +174,12 @@ const D = {
   field_website: ['Sit entènèt', 'Site web', 'Website'],
   field_turnoverRange: ['Chif dafè', 'Chiffre d’affaires', 'Turnover'],
   field_repTitle: ['Pozisyon reprezantan', 'Fonction du représentant', 'Representative role'],
+  field_incorporationDate: ['Dat kreyasyon', 'Date de création', 'Creation date'],
+  field_activityDescription: ['Aktivite', 'Activité', 'Activity'],
+  field_employeesRange: ['Anplwaye', 'Employés', 'Employees'],
+  field_expectedMonthlyVolume: ['Volim pa mwa prevwa', 'Volume mensuel prévu', 'Expected monthly volume'],
+  field_sourceOfFunds: ['Sous lajan', 'Origine des fonds', 'Source of funds'],
+  field_accountPurpose: ['Itilizasyon kont lan', 'Usage du compte', 'Account purpose'],
 };
 
 const IDX = { ht: 0, fr: 1, en: 2 };

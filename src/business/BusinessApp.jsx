@@ -685,12 +685,13 @@ function AccountPage({ ctx }) {
   const req = biz?.requirements || { required: [], optional: [] };
   const missing = biz?.missing || [];
 
-  const FIELDS = ['legalName', 'tradeName', 'legalForm', 'nif', 'patenteNumber', 'sector', 'address', 'city', 'businessPhone', 'businessEmail', 'website', 'turnoverRange', 'repTitle'];
+  const FIELDS = ['legalName', 'tradeName', 'legalForm', 'nif', 'patenteNumber', 'incorporationDate', 'sector', 'activityDescription', 'employeesRange', 'turnoverRange', 'expectedMonthlyVolume', 'sourceOfFunds', 'accountPurpose', 'address', 'city', 'businessPhone', 'businessEmail', 'website', 'repTitle'];
+  const SELECTS = { legalForm: [types?.legalForms, true], turnoverRange: [types?.turnoverRanges], employeesRange: [types?.employeeRanges], expectedMonthlyVolume: [types?.monthlyVolumes], sourceOfFunds: [types?.fundSources], accountPurpose: [types?.accountPurposes] };
 
   function valueLabel(k, v) {
     if (!v) return '—';
-    if (k === 'legalForm') return loc(types?.legalForms?.[v]?.label, lang) || v;
-    if (k === 'turnoverRange') return loc(types?.turnoverRanges?.[v], lang) || v;
+    if (k === 'incorporationDate') return new Date(v).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR', { timeZone: 'UTC' });
+    if (SELECTS[k]) { const [map, isForm] = SELECTS[k]; const o = map?.[v]; return (isForm ? loc(o?.label, lang) : loc(o, lang)) || v; }
     return v;
   }
 
@@ -818,13 +819,17 @@ function AccountPage({ ctx }) {
                 <div key={k}>
                   <p className="text-xs font-medium mb-1" style={{ color: K.muted }}>{t(`field_${k}`)}</p>
                   {editing ? (
-                    k === 'legalForm' || k === 'turnoverRange' ? (
+                    SELECTS[k] ? (
                       <select value={form[k] || ''} onChange={(e) => setForm({ ...form, [k]: e.target.value })} className="w-full h-10 px-3 rounded-xl border text-sm bg-white" style={{ borderColor: K.border }}>
                         <option value="">—</option>
-                        {Object.entries(k === 'legalForm' ? types?.legalForms || {} : types?.turnoverRanges || {}).map(([id, v]) => (
-                          <option key={id} value={id}>{loc(k === 'legalForm' ? v.label : v, lang)}</option>
+                        {Object.entries(SELECTS[k][0] || {}).map(([id, v]) => (
+                          <option key={id} value={id}>{loc(SELECTS[k][1] ? v.label : v, lang)}</option>
                         ))}
                       </select>
+                    ) : k === 'incorporationDate' ? (
+                      <input type="date" value={(form[k] || '').slice(0, 10)} onChange={(e) => setForm({ ...form, [k]: e.target.value })} className="w-full h-10 px-3 rounded-xl border text-sm" style={{ borderColor: K.border }} />
+                    ) : k === 'activityDescription' ? (
+                      <textarea rows={2} value={form[k] || ''} onChange={(e) => setForm({ ...form, [k]: e.target.value })} className="w-full px-3 py-2 rounded-xl border text-sm" style={{ borderColor: K.border }} />
                     ) : (
                       <input value={form[k] || ''} onChange={(e) => setForm({ ...form, [k]: e.target.value })} className="w-full h-10 px-3 rounded-xl border text-sm outline-none focus:ring-2" style={{ borderColor: K.border }} />
                     )
@@ -908,6 +913,12 @@ function AccountPage({ ctx }) {
               <button onClick={onKyc} className="mt-4 w-full h-10 rounded-xl text-sm font-bold text-white" style={{ background: K.navy }}>{t('rep_verify')}</button>
             )}
           </Card>
+          {biz?.kyb?.enabled && bizStatus === 'draft' && (
+            <Card className="p-5">
+              <div className="flex items-center gap-2 mb-2"><ShieldCheck size={18} style={{ color: K.navy }} /><h2 className="text-base font-bold">{t('kyb_title')}</h2></div>
+              <p className="text-sm" style={{ color: K.muted }}>{t('kyb_need_file')}</p>
+            </Card>
+          )}
           {biz?.kyb?.enabled && bizStatus !== 'draft' && (
             <Card className="p-5">
               <div className="flex items-center gap-2 mb-2"><ShieldCheck size={18} style={{ color: K.navy }} /><h2 className="text-base font-bold">{t('kyb_title')}</h2></div>

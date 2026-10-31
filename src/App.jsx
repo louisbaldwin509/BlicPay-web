@@ -206,6 +206,9 @@ const REG_OCCUPATIONS = [['employed', 'Anplwaye'], ['self_employed', 'Travayè e
 const REG_FUNDS = [['salary', 'Salè'], ['business', 'Revni biznis'], ['remittances', 'Transfè fanmi (dyaspora)'], ['savings', 'Epay@@funds'], ['pension', 'Pansyon'], ['other', 'Lòt@@occ']];
 const REG_VOLUMES = [['lt25k', 'Mwens pase 25 000 HTG'], ['25k_100k', '25 000 – 100 000 HTG'], ['100k_500k', '100 000 – 500 000 HTG'], ['gt500k', 'Plis pase 500 000 HTG']];
 const REG_STEPS = ['Idantite', 'Kowòdone', 'Pyès idantite', 'Pwofil finansye', 'Sekirite@@step', 'Verifikasyon@@step'];
+// Kont antrepriz: 3 etap sou antrepriz la AVAN etap reprezantan legal la.
+const BIZ_STEPS = ['Antrepriz la', 'Aktivite', 'Kowòdone antrepriz'];
+const locL = (o, lang) => (o ? o[lang] || o.fr || o.ht || '' : '');
 const optLabel = (list, v) => { const f = list.find(([k]) => k === v); return f ? tt(f[1]) : ''; };
 
 function AuthSelect({ value, onChange, options, placeholder = '—' }) {
@@ -1118,6 +1121,16 @@ export default function BlicPayApp() {
     occupation: '', employer: '', sourceOfFunds: '', expectedMonthlyVolume: '', isPep: null,
   });
   const [certifiedAccurate, setCertifiedAccurate] = useState(false);
+  const [regKind, setRegKind] = useState('personal'); // 'personal' | 'business'
+  const [bizTypes, setBizTypes] = useState(null);
+  const [bizForm, setBizForm] = useState({
+    legalName: '', tradeName: '', legalForm: '', nif: '', patenteNumber: '', incorporationDate: '', sector: '',
+    activityDescription: '', employeesRange: '', turnoverRange: '', expectedMonthlyVolume: '', sourceOfFunds: '', accountPurpose: '', foreignActivity: null,
+    address: '', city: '', businessPhone: '', businessEmail: '', website: '', repTitle: '',
+  });
+  React.useEffect(() => {
+    if (regKind === 'business' && !bizTypes) apiFetch('/business/types').then(setBizTypes).catch(() => {});
+  }, [regKind, bizTypes]);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [registerStep, setRegisterStep] = useState(1);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -1434,8 +1447,27 @@ export default function BlicPayApp() {
   function goRegisterStep(step) {
     setAuthError('');
     const f = authForm;
+    const off = regKind === 'business' ? BIZ_STEPS.length : 0;
+    const ps = registerStep - off; // etap pèsonèl (reprezantan an)
+    const b = bizForm;
     if (step > registerStep) {
-      if (registerStep === 1) {
+      if (off && registerStep === 1) {
+        if (!b.legalName.trim() || !b.legalForm) { setAuthError(tt('Non antrepriz la ak fòm legal la obligatwa.')); return; }
+        if (!b.nif.trim()) { setAuthError(tt('NIF antrepriz la obligatwa.')); return; }
+        if (!b.incorporationDate) { setAuthError(tt('Dat kreyasyon antrepriz la obligatwa.')); return; }
+        if (!b.sector.trim()) { setAuthError(tt('Sektè aktivite a obligatwa.')); return; }
+      }
+      if (off && registerStep === 2) {
+        if (b.activityDescription.trim().length < 10) { setAuthError(tt('Dekri aktivite antrepriz la an kèk mo.')); return; }
+        if (!b.employeesRange || !b.turnoverRange || !b.expectedMonthlyVolume || !b.sourceOfFunds || !b.accountPurpose) { setAuthError(tt('Reponn tout kesyon sou aktivite a.')); return; }
+        if (b.foreignActivity === null) { setAuthError(tt('Reponn tout kesyon sou aktivite a.')); return; }
+      }
+      if (off && registerStep === 3) {
+        if (!b.address.trim() || !b.city.trim()) { setAuthError(tt('Adrès ak vil antrepriz la obligatwa.')); return; }
+        if (!b.businessPhone.trim()) { setAuthError(tt('Telefòn antrepriz la obligatwa.')); return; }
+        if (!b.repTitle.trim()) { setAuthError(tt('Pozisyon ou nan antrepriz la obligatwa.')); return; }
+      }
+      if (ps === 1) {
         if (!f.firstName.trim() || !f.lastName.trim()) { setAuthError(tt('Non ak siyati obligatwa.')); return; }
         if (!f.dateOfBirth) { setAuthError(tt('Dat nesans lan obligatwa.')); return; }
         const age = (Date.now() - new Date(f.dateOfBirth).getTime()) / (365.25 * 86400000);
@@ -1444,24 +1476,24 @@ export default function BlicPayApp() {
         if (!f.nationality) { setAuthError(tt('Chwazi nasyonalite ou.')); return; }
         if (!f.birthPlace.trim()) { setAuthError(tt('Kote ou fèt obligatwa.')); return; }
       }
-      if (registerStep === 2) {
+      if (ps === 2) {
         if (!f.phone.trim()) { setAuthError(tr('errPhone')); return; }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim())) { setAuthError(tt('Imèl la pa valab.')); return; }
         if (!f.address.trim() || !f.city.trim()) { setAuthError(tt('Adrès ak vil obligatwa.')); return; }
         if (!f.country) { setAuthError(tt('Chwazi peyi kote ou rete a.')); return; }
         if (f.country === 'HT' && !f.department) { setAuthError(tt('Chwazi depatman ou.')); return; }
       }
-      if (registerStep === 3) {
+      if (ps === 3) {
         if (!f.idType || f.idNumber.trim().length < 5) { setAuthError(tt('Tip ak nimewo pyès idantite a obligatwa.')); return; }
         if (f.idExpiry && new Date(f.idExpiry).getTime() < Date.now()) { setAuthError(tt('Pyès idantite a ekspire.')); return; }
       }
-      if (registerStep === 4) {
+      if (ps === 4) {
         if (!f.occupation) { setAuthError(tt('Chwazi okipasyon ou.')); return; }
         if (!f.sourceOfFunds) { setAuthError(tt('Chwazi sous lajan ou.')); return; }
         if (!f.expectedMonthlyVolume) { setAuthError(tt('Chwazi konbyen lajan ou panse fè pa mwa.')); return; }
         if (f.isPep === null) { setAuthError(tt('Reponn kesyon sou moun ki ekspoze politikman an.')); return; }
       }
-      if (registerStep === 5) {
+      if (ps === 5) {
         if (f.password.length < 6) { setAuthError(tr('errPasswordShort')); return; }
         if (f.password !== confirmPassword) { setAuthError(tr('errPasswordMatch')); return; }
       }
@@ -1479,9 +1511,10 @@ export default function BlicPayApp() {
     setAuthLoading(true);
     try {
       const f = authForm;
-      const reg = await apiFetch('/auth/register', {
+      const reg = await apiFetch(regKind === 'business' ? '/business/register' : '/auth/register', {
         method: 'POST',
         body: {
+          ...(regKind === 'business' ? { company: { ...bizForm, foreignActivity: !!bizForm.foreignActivity } } : {}),
           firstName: f.firstName, lastName: f.lastName, phone: f.phone.trim(), password: f.password,
           dateOfBirth: f.dateOfBirth, gender: f.gender, nationality: f.nationality, birthPlace: f.birthPlace,
           email: f.email.trim(), addressLine: f.address, city: f.city, country: f.country, department: f.country === 'HT' ? f.department : '',
@@ -2783,7 +2816,7 @@ export default function BlicPayApp() {
           </div>
         )}
 
-        {view === 'auth' && (
+        {view === 'auth' && (() => { const off = regKind === 'business' ? BIZ_STEPS.length : 0; const ps = registerStep - off; const allSteps = off ? [...BIZ_STEPS, ...REG_STEPS] : REG_STEPS; return (
           <AuthShell lang={lang} onLang={() => setShowLangPicker((v) => !v)} onHome={() => setView('landing')}>
             {otp && !betaNotice ? (
               <div className="fadein">
@@ -2879,18 +2912,79 @@ export default function BlicPayApp() {
               </form>
             ) : (
               <div className="mt-7">
+                {(() => null)()}
+                {registerStep === 1 && (
+                  <div className="grid grid-cols-2 gap-2 mb-6">
+                    {[['personal', User, tt('Kont pèsonèl')], ['business', Building2, tt('Kont antrepriz')]].map(([k, Icon, label]) => (
+                      <button key={k} type="button" onClick={() => { setRegKind(k); setAuthError(''); }} className="h-14 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold"
+                        style={{ border: `1.5px solid ${regKind === k ? C.navy : C.border}`, background: regKind === k ? '#EEF3FB' : '#fff', color: regKind === k ? C.navy : C.ink }}>
+                        <Icon size={18} /> {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 {/* Endikatè etap */}
                 <div className="flex items-center gap-1.5">
-                  {REG_STEPS.map((_, i) => (
+                  {allSteps.map((_, i) => (
                     <div key={i} className="flex-1 h-1.5 rounded-full" style={{ background: i + 1 <= registerStep ? C.navy : C.border }} />
                   ))}
                 </div>
                 <div className="mt-2.5 flex items-center justify-between text-[12.5px]">
-                  <span className="font-semibold" style={{ color: C.ink }}>{tt(REG_STEPS[registerStep - 1])}</span>
-                  <span style={{ color: C.muted }}>{tt('Etap {0} sou {1}', registerStep, REG_STEPS.length)}</span>
+                  <span className="font-semibold" style={{ color: C.ink }}>{off && registerStep <= off ? tt(allSteps[registerStep - 1]) : tt(allSteps[registerStep - 1])}{off && registerStep > off ? ` — ${tt('Reprezantan legal')}` : ''}</span>
+                  <span style={{ color: C.muted }}>{tt('Etap {0} sou {1}', registerStep, allSteps.length)}</span>
                 </div>
 
-                {registerStep === 1 && (
+
+                {off > 0 && registerStep === 1 && (
+                  <div className="mt-6 space-y-4">
+                    <AuthField label={tt('Non legal antrepriz la (rezon sosyal)')}><AuthInput value={bizForm.legalName} onChange={(e) => setBizForm((x) => ({ ...x, legalName: e.target.value }))} placeholder="Ex. Boulangerie Saint-Marc S.A." /></AuthField>
+                    <AuthField label={tt('Non komèsyal (opsyonèl)')}><AuthInput value={bizForm.tradeName} onChange={(e) => setBizForm((x) => ({ ...x, tradeName: e.target.value }))} /></AuthField>
+                    <AuthField label={tt('Fòm legal')}><AuthSelect value={bizForm.legalForm} onChange={(e) => setBizForm((x) => ({ ...x, legalForm: e.target.value }))} options={Object.entries(bizTypes?.legalForms || {}).map(([k, v]) => [k, locL(v.label, lang)])} /></AuthField>
+                    <div className="grid grid-cols-2 gap-3">
+                      <AuthField label="NIF"><AuthInput value={bizForm.nif} onChange={(e) => setBizForm((x) => ({ ...x, nif: e.target.value }))} placeholder="000-000-000-0" /></AuthField>
+                      <AuthField label={tt('Nimewo patant (opsyonèl)')}><AuthInput value={bizForm.patenteNumber} onChange={(e) => setBizForm((x) => ({ ...x, patenteNumber: e.target.value }))} /></AuthField>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <AuthField label={tt('Dat kreyasyon')} icon={Calendar}><AuthInput icon type="date" max={new Date().toISOString().slice(0, 10)} value={bizForm.incorporationDate} onChange={(e) => setBizForm((x) => ({ ...x, incorporationDate: e.target.value }))} /></AuthField>
+                      <AuthField label={tt('Sektè aktivite')}><AuthInput value={bizForm.sector} onChange={(e) => setBizForm((x) => ({ ...x, sector: e.target.value }))} placeholder={tt('Egz. Restoran, Komès...')} /></AuthField>
+                    </div>
+                    <RegNote icon={Building2}>{tt('Nou mande menm enfòmasyon ak yon bank pou louvri yon kont antrepriz. Dokiman legal yo ap mande apre, nan espas antrepriz la.')}</RegNote>
+                  </div>
+                )}
+                {off > 0 && registerStep === 2 && (
+                  <div className="mt-6 space-y-5">
+                    <label className="block">
+                      <span className="block text-[13px] font-semibold mb-1.5" style={{ color: C.ink }}>{tt('Kisa antrepriz la fè?')}</span>
+                      <textarea rows={3} value={bizForm.activityDescription} onChange={(e) => setBizForm((x) => ({ ...x, activityDescription: e.target.value }))} placeholder={tt('Pwodwi oswa sèvis ou vann, kliyan ou yo...')}
+                        className="w-full rounded-xl text-[15px] px-4 py-3" style={{ border: `1px solid ${C.border}`, color: C.ink, resize: 'vertical' }} />
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <AuthField label={tt('Kantite anplwaye')}><AuthSelect value={bizForm.employeesRange} onChange={(e) => setBizForm((x) => ({ ...x, employeesRange: e.target.value }))} options={Object.entries(bizTypes?.employeeRanges || {}).map(([k, v]) => [k, locL(v, lang)])} /></AuthField>
+                      <AuthField label={tt('Chif dafè pa ane')}><AuthSelect value={bizForm.turnoverRange} onChange={(e) => setBizForm((x) => ({ ...x, turnoverRange: e.target.value }))} options={Object.entries(bizTypes?.turnoverRanges || {}).map(([k, v]) => [k, locL(v, lang)])} /></AuthField>
+                    </div>
+                    <AuthField label={tt('Volim pa mwa sou BLICPay')}><AuthSelect value={bizForm.expectedMonthlyVolume} onChange={(e) => setBizForm((x) => ({ ...x, expectedMonthlyVolume: e.target.value }))} options={Object.entries(bizTypes?.monthlyVolumes || {}).map(([k, v]) => [k, locL(v, lang)])} /></AuthField>
+                    <AuthField label={tt('Sous lajan antrepriz la')}><AuthSelect value={bizForm.sourceOfFunds} onChange={(e) => setBizForm((x) => ({ ...x, sourceOfFunds: e.target.value }))} options={Object.entries(bizTypes?.fundSources || {}).map(([k, v]) => [k, locL(v, lang)])} /></AuthField>
+                    <AuthField label={tt('Pou kisa w ap itilize kont lan?')}><AuthSelect value={bizForm.accountPurpose} onChange={(e) => setBizForm((x) => ({ ...x, accountPurpose: e.target.value }))} options={Object.entries(bizTypes?.accountPurposes || {}).map(([k, v]) => [k, locL(v, lang)])} /></AuthField>
+                    <div>
+                      <span className="block text-[13px] font-semibold mb-1.5" style={{ color: C.ink }}>{tt('Antrepriz la fè biznis andeyò Ayiti?')}</span>
+                      <ChoiceGroup value={bizForm.foreignActivity} onChange={(v) => setBizForm((x) => ({ ...x, foreignActivity: v }))} options={[[false, 'Non@@no'], [true, 'Wi']]} />
+                    </div>
+                  </div>
+                )}
+                {off > 0 && registerStep === 3 && (
+                  <div className="mt-6 space-y-4">
+                    <AuthField label={tt('Adrès antrepriz la')}><AuthInput value={bizForm.address} onChange={(e) => setBizForm((x) => ({ ...x, address: e.target.value }))} /></AuthField>
+                    <AuthField label={tt('Vil / komin')}><AuthInput value={bizForm.city} onChange={(e) => setBizForm((x) => ({ ...x, city: e.target.value }))} /></AuthField>
+                    <div className="grid grid-cols-2 gap-3">
+                      <AuthField label={tt('Telefòn antrepriz')} icon={Phone}><AuthInput icon inputMode="tel" value={bizForm.businessPhone} onChange={(e) => setBizForm((x) => ({ ...x, businessPhone: e.target.value }))} /></AuthField>
+                      <AuthField label={tt('Imèl antrepriz (opsyonèl)')} icon={Mail}><AuthInput icon type="email" value={bizForm.businessEmail} onChange={(e) => setBizForm((x) => ({ ...x, businessEmail: e.target.value }))} /></AuthField>
+                    </div>
+                    <AuthField label={tt('Sit web (opsyonèl)')}><AuthInput value={bizForm.website} onChange={(e) => setBizForm((x) => ({ ...x, website: e.target.value }))} placeholder="https://" /></AuthField>
+                    <AuthField label={tt('Pozisyon ou nan antrepriz la')}><AuthInput value={bizForm.repTitle} onChange={(e) => setBizForm((x) => ({ ...x, repTitle: e.target.value }))} placeholder={tt('Egz. Direktè jeneral, Pwopriyetè')} /></AuthField>
+                    <RegNote>{tt('Etap kap vini yo se pou ou menm, kòm reprezantan legal antrepriz la: idantite w, kowòdone w ak pyès idantite w.')}</RegNote>
+                  </div>
+                )}
+                {ps === 1 && (
                   <div className="mt-6 space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       <AuthField label={tr('firstNamePh')}>
@@ -2919,7 +3013,7 @@ export default function BlicPayApp() {
                   </div>
                 )}
 
-                {registerStep === 2 && (
+                {ps === 2 && (
                   <div className="mt-6 space-y-4">
                     <AuthField label={tr('phonePh')} icon={Phone}>
                       <AuthInput icon inputMode="tel" autoComplete="tel" placeholder="509 3X XX XXXX" value={authForm.phone} onChange={(e) => setAuthForm((f) => ({ ...f, phone: e.target.value }))} />
@@ -2946,7 +3040,7 @@ export default function BlicPayApp() {
                   </div>
                 )}
 
-                {registerStep === 3 && (
+                {ps === 3 && (
                   <div className="mt-6 space-y-4">
                     <div>
                       <span className="block text-[13px] font-semibold mb-1.5" style={{ color: C.ink }}>{tt('Tip pyès idantite')}</span>
@@ -2962,7 +3056,7 @@ export default function BlicPayApp() {
                   </div>
                 )}
 
-                {registerStep === 4 && (
+                {ps === 4 && (
                   <div className="mt-6 space-y-5">
                     <AuthField label={tt('Okipasyon')}>
                       <AuthSelect value={authForm.occupation} onChange={(e) => setAuthForm((f) => ({ ...f, occupation: e.target.value }))} options={REG_OCCUPATIONS} />
@@ -2985,7 +3079,7 @@ export default function BlicPayApp() {
                   </div>
                 )}
 
-                {registerStep === 5 && (
+                {ps === 5 && (
                   <div className="mt-6 space-y-4">
                     <div>
                       <AuthField label={tr('passwordPh')} icon={Lock} hint={tt('Omwen 6 karaktè. Pi bon: lèt, chif ak senbòl.')}>
@@ -2999,8 +3093,21 @@ export default function BlicPayApp() {
                   </div>
                 )}
 
-                {registerStep === 6 && (
+                {ps === 6 && (
                   <div className="mt-6 space-y-3">
+                    {regKind === 'business' && (
+                      <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+                        <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: '#F7F9FC', borderBottom: `1px solid ${C.border}` }}>
+                          <span className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: C.muted }}>{tt('Antrepriz la')}</span>
+                          <button type="button" onClick={() => setRegisterStep(1)} className="text-[12.5px] font-semibold" style={{ color: C.navy }}>{tt('Modifye@@review')}</button>
+                        </div>
+                        {[[tt('Non legal'), bizForm.legalName], [tt('Fòm legal'), locL(bizTypes?.legalForms?.[bizForm.legalForm]?.label, lang)], ['NIF', bizForm.nif], [tt('Sektè aktivite'), bizForm.sector], [tt('Adrès antrepriz la'), [bizForm.address, bizForm.city].filter(Boolean).join(', ')], [tt('Pozisyon ou nan antrepriz la'), bizForm.repTitle]].filter(([, v]) => v).map(([k, v], i) => (
+                          <div key={k} className="flex items-start justify-between gap-4 px-4 py-2.5 text-[13.5px]" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
+                            <span style={{ color: C.muted }}>{k}</span><span className="font-semibold text-right" style={{ color: C.ink }}>{v}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     {[
                       [tt('Idantite'), 1, [
                         [tr('fullNamePh'), `${authForm.firstName} ${authForm.lastName}`.trim()],
@@ -3028,7 +3135,7 @@ export default function BlicPayApp() {
                       <div key={title} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
                         <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: '#F7F9FC', borderBottom: `1px solid ${C.border}` }}>
                           <span className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: C.muted }}>{title}</span>
-                          <button type="button" onClick={() => setRegisterStep(step)} className="text-[12.5px] font-semibold" style={{ color: C.navy }}>{tt('Modifye@@review')}</button>
+                          <button type="button" onClick={() => setRegisterStep(step + off)} className="text-[12.5px] font-semibold" style={{ color: C.navy }}>{tt('Modifye@@review')}</button>
                         </div>
                         {rows.filter(([, v]) => v).map(([k, v], i) => (
                           <div key={k + i} className="flex items-start justify-between gap-4 px-4 py-2.5 text-[13.5px]" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
@@ -3065,7 +3172,7 @@ export default function BlicPayApp() {
                       <ArrowLeft size={16} /> {tr('back')}
                     </button>
                   )}
-                  {registerStep < REG_STEPS.length ? (
+                  {registerStep < allSteps.length ? (
                     <button onClick={() => goRegisterStep(registerStep + 1)}
                       className="bp-btn flex-1 h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2"
                       style={{ background: C.navy, boxShadow: '0 10px 24px -12px rgba(20,58,115,.7)' }}>
@@ -3088,7 +3195,7 @@ export default function BlicPayApp() {
             </>
             )}
           </AuthShell>
-        )}
+        ); })()}
 
         {view === 'forgotpassword' && (
           <AuthShell lang={lang} onLang={() => setShowLangPicker((v) => !v)} onHome={() => setView('landing')}>
