@@ -2724,7 +2724,7 @@ export default function BlicPayApp() {
 
       <div className={view === 'landing' || isBizDash || view === 'auth' || view === 'forgotpassword' ? 'w-full min-h-full' : 'max-w-md mx-auto min-h-full'} style={{ background: C.bg }}>
         {view === 'landing' ? (
-          <Landing onStart={(m) => { setAuthMode(m === 'register' ? 'register' : 'login'); setRegisterStep(1); setAuthError(''); setBetaNotice(''); setView('auth'); }} lang={lang} setLang={setLang} />
+          <Landing onStart={(m) => { setRegKind(m === 'register-business' ? 'business' : 'personal'); setAuthMode(m === 'register' || m === 'register-business' ? 'register' : 'login'); setRegisterStep(1); setAuthError(''); setBetaNotice(''); setView('auth'); }} lang={lang} setLang={setLang} />
         ) : (
         <>
 

@@ -19,6 +19,55 @@ const D = {
   navHow: ['Kijan l mache', 'Comment ça marche', 'How it works'],
   navBusiness: ['Antrepriz', 'Entreprises', 'Business'],
   navFaq: ['FAQ', 'FAQ', 'FAQ'],
+  navPlans: ['Kont yo', 'Comptes', 'Accounts'],
+  plEyebrow: ['Kont BLICPay', 'Comptes BLICPay', 'BLICPay accounts'],
+  plTitle: ['Yon kont pou chak bezwen.', 'Un compte pour chaque besoin.', 'An account for every need.'],
+  plSub: ['Pou lavi chak jou oswa pou antrepriz ou — pri klè, san sipriz.', 'Pour le quotidien ou pour votre entreprise — des tarifs clairs, sans surprise.', 'For everyday life or for your business — clear pricing, no surprises.'],
+  plPersonal: ['Pèsonèl', 'Personnel', 'Personal'],
+  plPersonalFor: ['Pou depans ak transfè chak jou.', 'Pour vos dépenses et transferts du quotidien.', 'For everyday spending and transfers.'],
+  plFree: ['Gratis', 'Gratuit', 'Free'],
+  plFreeSub: ['Pa gen frè ouvèti, pa gen abònman', 'Ni frais d’ouverture, ni abonnement', 'No opening fee, no subscription'],
+  plBusiness: ['Antrepriz', 'Entreprise', 'Business'],
+  plBusinessFor: ['Pou komès, PME ak gwo antrepriz.', 'Pour les commerces, PME et grandes entreprises.', 'For shops, SMEs and larger companies.'],
+  plBizPrice: ['100 $ US', '100 $ US', 'US$100'],
+  plBizPriceSub: ['Frè ouvèti yon sèl fwa — pa gen abònman', 'Frais d’ouverture unique — sans abonnement', 'One-time opening fee — no subscription'],
+  plPopular: ['Pou pwofesyonèl', 'Pour les pros', 'For professionals'],
+  plOpenPersonal: ['Louvri yon kont pèsonèl', 'Ouvrir un compte personnel', 'Open a personal account'],
+  plOpenBusiness: ['Louvri yon kont antrepriz', 'Ouvrir un compte entreprise', 'Open a business account'],
+  p1: ['Transfè gratis e enstantane ant kliyan BLICPay', 'Transferts gratuits et instantanés entre clients BLICPay', 'Free, instant transfers between BLICPay clients'],
+  p2: ['Depo pa MonCash, NatCash oswa nan ajans — depi 100 HTG', 'Dépôts par MonCash, NatCash ou en agence — dès 100 HTG', 'Deposits via MonCash, NatCash or at a branch — from 100 HTG'],
+  p3: ['Retrè jiska 80 000 HTG pa jou', 'Retraits jusqu’à 80 000 HTG par jour', 'Withdrawals up to 80,000 HTG per day'],
+  p4: ['Kòd QR pèsonèl pou resevwa lajan', 'QR code personnel pour recevoir de l’argent', 'Personal QR code to receive money'],
+  p5: ['PIN, Face ID ak kòd pa imèl pou pwoteje kont ou', 'PIN, Face ID et code par e-mail pour protéger votre compte', 'PIN, Face ID and email codes to protect your account'],
+  p6: ['Kat vityèl ak fizik — byento', 'Cartes virtuelle et physique — bientôt', 'Virtual and physical cards — coming soon'],
+  b1: ['Tout avantaj kont pèsonèl la', 'Tous les avantages du compte personnel', 'Everything in Personal'],
+  b2: ['Retrè jiska 500 000 HTG pa jou ak 5 milyon pa mwa', 'Retraits jusqu’à 500 000 HTG par jour et 5 millions par mois', 'Withdrawals up to 500,000 HTG per day and 5 million per month'],
+  b3: ['Resevwa peman kliyan ou yo pa QR, sou non antrepriz la', 'Encaissement par QR code au nom de votre entreprise', 'Collect customer payments by QR, in your business name'],
+  b4: ['Badj « antrepriz verifye » kliyan ou yo wè', 'Badge « entreprise vérifiée » visible par vos clients', '“Verified business” badge your customers see'],
+  b5: ['Tablo bò pwofesyonèl: vant, analiz, istorik', 'Tableau de bord pro : encaissements, analyses, historique', 'Pro dashboard: payments, analytics, history'],
+  b6: ['Verifikasyon ofisyèl antrepriz la (rejis, benefisyè)', 'Vérification officielle de l’entreprise (registre, bénéficiaires)', 'Official business verification (registry, owners)'],
+  b7: ['Kat antrepriz — byento', 'Cartes entreprise — bientôt', 'Business cards — coming soon'],
+  cmpTitle: ['Konpare kont yo', 'Comparer les comptes', 'Compare accounts'],
+  cmpFeature: ['', '', ''],
+  r1: ['Frè ouvèti', 'Frais d’ouverture', 'Opening fee'],
+  r2: ['Abònman pa mwa', 'Abonnement mensuel', 'Monthly fee'],
+  r3: ['Transfè ant kliyan BLICPay', 'Transferts entre clients BLICPay', 'Transfers between BLICPay clients'],
+  r4: ['Depo minimòm', 'Dépôt minimum', 'Minimum deposit'],
+  r5: ['Plafon retrè pa jou', 'Plafond de retrait par jour', 'Daily withdrawal limit'],
+  r6: ['Plafon retrè pa semèn', 'Plafond de retrait par semaine', 'Weekly withdrawal limit'],
+  r7: ['Plafon retrè pa mwa', 'Plafond de retrait par mois', 'Monthly withdrawal limit'],
+  r8: ['Frè retrè', 'Frais de retrait', 'Withdrawal fee'],
+  r9: ['Resevwa peman pa QR', 'Encaissement par QR code', 'QR payments'],
+  r10: ['Tablo bò antrepriz', 'Tableau de bord entreprise', 'Business dashboard'],
+  r11: ['Verifikasyon', 'Vérification', 'Verification'],
+  vNone: ['0 HTG', '0 HTG', '0 HTG'],
+  vFreeInstant: ['Gratis • enstantane', 'Gratuits • instantanés', 'Free • instant'],
+  vFee: ['1,25 % sou lajan MonCash / NatCash', '1,25 % sur l’argent MonCash / NatCash', '1.25% on MonCash / NatCash funds'],
+  vPersonalQr: ['QR pèsonèl', 'QR personnel', 'Personal QR'],
+  vBizQr: ['QR antrepriz', 'QR entreprise', 'Business QR'],
+  vKyc: ['Pyès idantite + selfi', 'Pièce d’identité + selfie', 'ID + selfie'],
+  vKyb: ['Dokiman legal + rejis + benefisyè', 'Documents légaux + registre + bénéficiaires', 'Legal docs + registry + owners'],
+  plNote: ['Frè retrè 1,25 % la aplike sèlman sou lajan ki te depoze pa MonCash oswa NatCash. Frè ouvèti antrepriz la peye an goud selon tal BRH jou a.', 'Les frais de retrait de 1,25 % s’appliquent uniquement à l’argent déposé par MonCash ou NatCash. Les frais d’ouverture entreprise sont réglés en gourdes au taux BRH du jour.', 'The 1.25% withdrawal fee only applies to money deposited via MonCash or NatCash. The business opening fee is paid in gourdes at the daily BRH rate.'],
   login: ['Konekte', 'Se connecter', 'Sign in'],
   signup: ['Kreye kont', 'Créer un compte', 'Create account'],
   badge: ['Kont dijital • Kat • Transfè', 'Compte numérique • Carte • Transferts', 'Digital account • Card • Transfers'],
@@ -180,7 +229,7 @@ export default function Landing({ onStart, lang, setLang }) {
     [CreditCard, 'f5', '#F1F2F4', '#111827', true],
     [Store, 'f6', '#FDF3E3', C.amber],
   ];
-  const NAV = [['services', 'navFeatures'], ['card', 'navCard'], ['how', 'navHow'], ['business', 'navBusiness'], ['faq', 'navFaq']];
+  const NAV = [['services', 'navFeatures'], ['card', 'navCard'], ['plans', 'navPlans'], ['business', 'navBusiness'], ['faq', 'navFaq']];
   const go = (id) => { setMenu(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); };
 
   return (
@@ -412,6 +461,84 @@ export default function Landing({ onStart, lang, setLang }) {
         </div>
       </section>
 
+      {/* KONT YO — PÈSONÈL / ANTREPRIZ */}
+      <section id="plans" className="py-20 lg:py-28" style={{ background: C.bg }}>
+        <div className="max-w-6xl mx-auto px-5">
+          <Reveal className="text-center max-w-2xl mx-auto">
+            <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t('plEyebrow')}</p>
+            <h2 className="mt-3 text-3xl sm:text-5xl leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('plTitle')}</h2>
+            <p className="mt-4 text-lg" style={{ color: C.muted }}>{t('plSub')}</p>
+          </Reveal>
+
+          <div className="mt-14 grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            {[
+              { k: 'personal', name: 'plPersonal', who: 'plPersonalFor', price: 'plFree', priceSub: 'plFreeSub', items: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'], cta: 'plOpenPersonal', action: 'register', icon: Wallet, dark: false },
+              { k: 'business', name: 'plBusiness', who: 'plBusinessFor', price: 'plBizPrice', priceSub: 'plBizPriceSub', items: ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7'], cta: 'plOpenBusiness', action: 'register-business', icon: Building2, dark: true },
+            ].map((pl, n) => (
+              <Reveal key={pl.k} delay={n * 120}>
+                <div className="lp2-card relative h-full rounded-[28px] p-8 flex flex-col" style={pl.dark
+                  ? { background: `linear-gradient(160deg, ${C.navyDeep} 0%, #0E2E66 60%, #154C9C 100%)`, color: '#fff', boxShadow: '0 30px 60px -30px rgba(10,31,69,.6)' }
+                  : { background: '#fff', border: `1px solid ${C.border}` }}>
+                  {pl.dark && <span className="absolute top-6 right-6 text-xs font-bold rounded-full px-3 py-1" style={{ background: 'rgba(41,182,232,.18)', color: '#8FDDF7' }}>{t('plPopular')}</span>}
+                  <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: pl.dark ? 'rgba(255,255,255,.1)' : '#E6F6FD' }}><pl.icon size={22} color={pl.dark ? '#8FDDF7' : C.navy} /></span>
+                  <h3 className="mt-5 text-2xl" style={{ ...display, fontWeight: 800 }}>{t(pl.name)}</h3>
+                  <p className="mt-1 text-sm" style={{ color: pl.dark ? 'rgba(255,255,255,.72)' : C.muted }}>{t(pl.who)}</p>
+                  <div className="mt-6 pb-6" style={{ borderBottom: `1px solid ${pl.dark ? 'rgba(255,255,255,.12)' : C.border}` }}>
+                    <p className="text-4xl tracking-tight" style={{ ...display, fontWeight: 800 }}>{t(pl.price)}</p>
+                    <p className="mt-1 text-sm" style={{ color: pl.dark ? 'rgba(255,255,255,.65)' : C.muted }}>{t(pl.priceSub)}</p>
+                  </div>
+                  <ul className="mt-6 space-y-3 flex-1">
+                    {pl.items.map((it) => (
+                      <li key={it} className="flex items-start gap-3 text-[15px]">
+                        <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: pl.dark ? 'rgba(41,182,232,.2)' : '#E4F5EF' }}><Check size={13} color={pl.dark ? '#8FDDF7' : C.mint} strokeWidth={3} /></span>
+                        <span style={{ color: pl.dark ? 'rgba(255,255,255,.9)' : C.ink }}>{t(it)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button onClick={() => onStart(pl.action)} className="lp2-btn mt-8 h-12 rounded-full font-bold inline-flex items-center justify-center gap-2"
+                    style={pl.dark ? { background: '#fff', color: C.navy } : { background: C.navy, color: '#fff' }}>
+                    {t(pl.cta)}<ArrowRight size={18} />
+                  </button>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal>
+            <div className="mt-16 max-w-5xl mx-auto rounded-[24px] bg-white border overflow-hidden" style={{ borderColor: C.border }}>
+              <div className="grid grid-cols-[1.15fr_1fr_1fr] text-[12.5px] sm:text-sm font-bold" style={{ background: '#F9FBFD', borderBottom: `1px solid ${C.border}` }}>
+                <div className="px-3 sm:px-5 py-4" style={{ ...display }}>{t('cmpTitle')}</div>
+                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><Wallet size={16} color={C.navy} className="hidden sm:block" />{t('plPersonal')}</div>
+                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><Building2 size={16} color={C.navy} className="hidden sm:block" />{t('plBusiness')}</div>
+              </div>
+              {[
+                ['r1', t('plFree'), t('plBizPrice')],
+                ['r2', t('vNone'), t('vNone')],
+                ['r3', t('vFreeInstant'), t('vFreeInstant')],
+                ['r4', '100 HTG', '100 HTG'],
+                ['r5', '80 000 HTG', '500 000 HTG'],
+                ['r6', '300 000 HTG', '2 000 000 HTG'],
+                ['r7', '500 000 HTG', '5 000 000 HTG'],
+                ['r8', t('vFee'), t('vFee')],
+                ['r9', t('vPersonalQr'), t('vBizQr')],
+                ['r10', null, true],
+                ['r11', t('vKyc'), t('vKyb')],
+              ].map(([k, a, b], i) => (
+                <div key={k} className="grid grid-cols-[1.15fr_1fr_1fr] text-[12.5px] sm:text-[14.5px]" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
+                  <div className="px-3 sm:px-5 py-3.5 font-medium" style={{ color: C.muted }}>{t(k)}</div>
+                  {[a, b].map((v, j) => (
+                    <div key={j} className="px-3 sm:px-5 py-3.5 font-semibold" style={{ color: C.ink }}>
+                      {v === true ? <Check size={18} color={C.mint} strokeWidth={3} /> : v === null ? <span style={{ color: '#B8C1CF' }}>—</span> : v}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 max-w-5xl mx-auto text-xs leading-relaxed" style={{ color: C.muted }}>{t('plNote')}</p>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ANTREPRIZ */}
       <section id="business" className="py-20 lg:py-28">
         <div className="max-w-6xl mx-auto px-5">
@@ -421,7 +548,7 @@ export default function Landing({ onStart, lang, setLang }) {
                 <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.amber }}>{t('bizEyebrow')}</p>
                 <h2 className="mt-3 text-3xl sm:text-4xl leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('bizTitle')}</h2>
                 <p className="mt-4 leading-relaxed" style={{ color: C.muted }}>{t('bizSub')}</p>
-                <button onClick={() => onStart('register')} className="lp2-btn mt-7 h-12 px-6 rounded-full font-bold text-white inline-flex items-center gap-2" style={{ background: C.navy }}>
+                <button onClick={() => onStart('register-business')} className="lp2-btn mt-7 h-12 px-6 rounded-full font-bold text-white inline-flex items-center gap-2" style={{ background: C.navy }}>
                   {t('bizCta')}<ArrowRight size={18} />
                 </button>
               </div>
