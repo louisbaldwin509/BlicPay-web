@@ -45,7 +45,7 @@ const D = {
   plFreeSub: ['Pa gen frè ouvèti, pa gen abònman', 'Ni frais d’ouverture, ni abonnement', 'No opening fee, no subscription'],
   plBusiness: ['Antrepriz', 'Entreprise', 'Business'],
   plBusinessFor: ['Pou komès, PME ak gwo antrepriz.', 'Pour les commerces, PME et grandes entreprises.', 'For shops, SMEs and larger companies.'],
-  plBizPrice: ['200 $ US', '200 $ US', 'US$200'],
+  plBizPrice: ['500 $ US', '500 $ US', 'US$500'],
   plBizPriceSub: ['Frè ouvèti yon sèl fwa — pa gen abònman', 'Frais d’ouverture unique — sans abonnement', 'One-time opening fee — no subscription'],
   plPopular: ['Pi popilè', 'Le plus choisi', 'Most popular'],
   plOpenPersonal: ['Louvri yon kont pèsonèl', 'Ouvrir un compte personnel', 'Open a personal account'],
