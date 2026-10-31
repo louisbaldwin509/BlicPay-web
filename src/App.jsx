@@ -23,7 +23,7 @@ import {
   Bell, Wallet, ArrowUpRight, ArrowDownLeft, Clock, Settings, Home,
   ArrowLeftRight, Plus, Check, Copy, ChevronRight, ArrowLeft, ShieldCheck,
   DollarSign, Smartphone, Banknote, X, AlertCircle, Building2, Eye, EyeOff, RefreshCw, Users, BadgeCheck, PiggyBank,
-  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode, Landmark, Store, Wrench, Truck, Briefcase, Sprout
+  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode, Landmark, Briefcase
 } from 'lucide-react';
 
 // Coupe l'URL réelle de ton backend ici une fois qu'il est déployé
@@ -2837,7 +2837,7 @@ export default function BlicPayApp() {
           </div>
         )}
 
-        {view === 'auth' && (() => { const off = stepsOff(regKind); const ps = registerStep - off; const allSteps = regKind === 'business' ? [...BIZ_STEPS, ...REG_STEPS] : regKind === 'pro' ? [...PRO_STEPS, ...REG_STEPS] : REG_STEPS; const PRO_ICONS = { shop: Store, online: Globe, services: Wrench, transport: Truck, liberal: Briefcase, agri: Sprout }; return (
+        {view === 'auth' && (() => { const off = stepsOff(regKind); const ps = registerStep - off; const allSteps = regKind === 'business' ? [...BIZ_STEPS, ...REG_STEPS] : regKind === 'pro' ? [...PRO_STEPS, ...REG_STEPS] : REG_STEPS; return (
           <AuthShell lang={lang} onLang={() => setShowLangPicker((v) => !v)} onHome={() => setView('landing')}>
             {otp && !betaNotice ? (
               <div className="fadein">
@@ -2960,19 +2960,21 @@ export default function BlicPayApp() {
                 {regKind === 'pro' && registerStep === 1 && (
                   <div className="mt-6 space-y-5">
                     <div>
-                      <span className="block text-[13px] font-semibold mb-2" style={{ color: C.ink }}>{tt('Ki kalite aktivite ou fè?')}</span>
-                      <div className="grid grid-cols-2 gap-2">
-                        {Object.entries(bizTypes?.proCategories || {}).map(([k, v]) => { const Icon = PRO_ICONS[k] || Briefcase; const on = bizForm.proCategory === k; return (
-                          <button key={k} type="button" onClick={() => setBizForm((x) => ({ ...x, proCategory: k, proMode: k === 'online' ? 'online' : x.proMode }))} className="text-left rounded-xl px-3 py-2.5"
-                            style={{ border: `1.5px solid ${on ? C.navy : C.border}`, background: on ? '#EEF3FB' : '#fff' }}>
-                            <div className="flex items-center gap-2 text-[13.5px] font-semibold" style={{ color: on ? C.navy : C.ink }}><Icon size={16} /> {locL(v.label, lang)}</div>
-                            <div className="text-[11.5px] mt-0.5 leading-snug" style={{ color: C.muted }}>{locL(v.hint, lang)}</div>
-                          </button>
-                        ); })}
-                      </div>
+                      <AuthField label={tt('Ki kalite aktivite ou fè?')}>
+                        <select value={bizForm.proCategory} onChange={(e) => { const k = e.target.value; setBizForm((x) => ({ ...x, proCategory: k, proMode: bizTypes?.proCategories?.[k]?.group === 'online' ? 'online' : x.proMode })); }}
+                          className={authInputCls} style={{ paddingLeft: 16, paddingRight: 38, color: bizForm.proCategory ? C.ink : '#94A0B2' }}>
+                          <option value="" disabled>{tt('Chwazi aktivite ou')}</option>
+                          {Object.entries(bizTypes?.proGroups || {}).map(([g, gv]) => (
+                            <optgroup key={g} label={locL(gv.label, lang)}>
+                              {Object.entries(bizTypes?.proCategories || {}).filter(([, v]) => v.group === g).map(([k, v]) => <option key={k} value={k}>{locL(v.label, lang)}</option>)}
+                            </optgroup>
+                          ))}
+                        </select>
+                        <ChevronRight size={15} color="#94A0B2" className="absolute right-3.5 pointer-events-none" style={{ transform: 'rotate(90deg)' }} />
+                      </AuthField>
                       {bizTypes?.proRefused && (
                         <details className="mt-2.5 rounded-xl px-3.5 py-2.5 text-[12.5px]" style={{ background: '#FFF7ED', border: '1px solid #FED7AA', color: '#9A3412' }}>
-                          <summary className="cursor-pointer font-semibold">{tt('Aktivite BLICPay pa aksepte')}</summary>
+                          <summary className="cursor-pointer font-semibold">{tt('Wè aktivite BLICPay pa aksepte')}</summary>
                           <ul className="mt-1.5 list-disc pl-5 space-y-0.5">{bizTypes.proRefused.map((x, i) => <li key={i}>{locL(x, lang)}</li>)}</ul>
                         </details>
                       )}

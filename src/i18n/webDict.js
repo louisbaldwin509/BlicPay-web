@@ -569,4 +569,6 @@ export const WEB_DICT = {
   "Paj": ["Page", "Page"],
   "Adrès": ["Adresse", "Address"],
   "Enskripsyon an pran kèk minit. Dokiman yo ak frè ouvèti a ap mande apre, nan espas kliyan ou.": ["L’inscription prend quelques minutes. Les documents et les frais d’ouverture vous seront demandés ensuite, dans votre espace client.", "Sign-up takes a few minutes. Documents and the opening fee will be requested afterwards in your client area."],
+  "Chwazi aktivite ou": ["Choisissez votre activité", "Choose your activity"],
+  "Wè aktivite BLICPay pa aksepte": ["Voir les activités non acceptées par BLICPay", "See activities BLICPay does not accept"],
 };
