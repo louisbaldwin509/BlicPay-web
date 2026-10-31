@@ -4,7 +4,19 @@ import React, { useEffect, useState } from 'react';
 import {
   ArrowRight, ArrowLeftRight, BadgeCheck, Building2, Check, ChevronDown, CreditCard, Globe, Lock, Menu,
   Phone, QrCode, ShieldCheck, Smartphone, Sparkles, Wallet, X, Fingerprint, Zap, ScanLine, Store,
-  Briefcase } from 'lucide-react';
+  Briefcase, UserRound } from 'lucide-react';
+// Ikòn plan yo (Personnel / Pro / Entreprise)
+const PLAN_ICON = { personal: UserRound, pro: Store, business: Building2 };
+const PLAN_GRAD = {
+  personal: 'linear-gradient(135deg, #3CC4F0 0%, #1B78D6 100%)',
+  pro: 'linear-gradient(135deg, #FFC85A 0%, #E8901C 100%)',
+  business: 'linear-gradient(135deg, #2557A8 0%, #0A1F45 100%)',
+};
+const PLAN_SHADOW = {
+  personal: '0 10px 22px -10px rgba(27,120,214,.7)',
+  pro: '0 10px 22px -10px rgba(232,144,28,.8)',
+  business: '0 10px 22px -10px rgba(10,31,69,.7)',
+};
 
 const C = {
   ink: '#0B1B33', muted: '#5D6B7E', border: '#E6EAF1', bg: '#F5F8FC',
@@ -494,16 +506,16 @@ export default function Landing({ onStart, lang, setLang }) {
 
           <div className="mt-14 grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {[
-              { k: 'personal', name: 'plPersonal', who: 'plPersonalFor', price: 'plFree', priceSub: 'plFreeSub', ideal: 'plIdealP', items: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'], cta: 'plOpenPersonal', action: 'register', icon: Wallet, dark: false },
-              { k: 'pro', name: 'plPro', who: 'plProFor', price: 'plProPrice', priceSub: 'plBizPriceSub', ideal: 'plIdealPro', items: ['pr1', 'pr2', 'pr3', 'pr4', 'pr5', 'pr6'], cta: 'plOpenPro', action: 'register-pro', icon: Briefcase, dark: true },
-              { k: 'business', name: 'plBusiness', who: 'plBusinessFor', price: 'plBizPrice', priceSub: 'plBizPriceSub', ideal: 'plIdealB', items: ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7'], cta: 'plOpenBusiness', action: 'register-business', icon: Building2, dark: false },
+              { k: 'personal', name: 'plPersonal', who: 'plPersonalFor', price: 'plFree', priceSub: 'plFreeSub', ideal: 'plIdealP', items: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'], cta: 'plOpenPersonal', action: 'register', icon: PLAN_ICON.personal, dark: false },
+              { k: 'pro', name: 'plPro', who: 'plProFor', price: 'plProPrice', priceSub: 'plBizPriceSub', ideal: 'plIdealPro', items: ['pr1', 'pr2', 'pr3', 'pr4', 'pr5', 'pr6'], cta: 'plOpenPro', action: 'register-pro', icon: PLAN_ICON.pro, dark: true },
+              { k: 'business', name: 'plBusiness', who: 'plBusinessFor', price: 'plBizPrice', priceSub: 'plBizPriceSub', ideal: 'plIdealB', items: ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7'], cta: 'plOpenBusiness', action: 'register-business', icon: PLAN_ICON.business, dark: false },
             ].map((pl, n) => (
               <Reveal key={pl.k} delay={n * 120}>
                 <div className="lp2-card relative h-full rounded-[28px] p-8 flex flex-col" style={pl.dark
                   ? { background: `linear-gradient(160deg, ${C.navyDeep} 0%, #0E2E66 60%, #154C9C 100%)`, color: '#fff', boxShadow: '0 30px 60px -30px rgba(10,31,69,.6)' }
                   : { background: '#fff', border: `1px solid ${C.border}` }}>
                   {pl.dark && <span className="absolute top-6 right-6 text-xs font-bold rounded-full px-3 py-1" style={{ background: 'rgba(41,182,232,.18)', color: '#8FDDF7' }}>{t('plPopular')}</span>}
-                  <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: pl.dark ? 'rgba(255,255,255,.1)' : '#E6F6FD' }}><pl.icon size={22} color={pl.dark ? '#8FDDF7' : C.navy} /></span>
+                  <span className="w-14 h-14 rounded-[18px] flex items-center justify-center" style={{ background: PLAN_GRAD[pl.k], boxShadow: PLAN_SHADOW[pl.k] }}><pl.icon size={26} color="#fff" strokeWidth={1.75} /></span>
                   <h3 className="mt-5 text-2xl" style={{ ...display, fontWeight: 800 }}>{t(pl.name)}</h3>
                   <p className="mt-1 text-sm" style={{ color: pl.dark ? 'rgba(255,255,255,.72)' : C.muted }}>{t(pl.who)}</p>
                   <div className="mt-6 pb-6" style={{ borderBottom: `1px solid ${pl.dark ? 'rgba(255,255,255,.12)' : C.border}` }}>
@@ -514,7 +526,7 @@ export default function Landing({ onStart, lang, setLang }) {
                   <ul className="mt-5 space-y-3 flex-1">
                     {pl.items.map((it) => (
                       <li key={it} className="flex items-start gap-3 text-[15px]">
-                        <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: pl.dark ? 'rgba(41,182,232,.2)' : '#E4F5EF' }}><Check size={13} color={pl.dark ? '#8FDDF7' : C.mint} strokeWidth={3} /></span>
+                        <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: PLAN_GRAD[pl.k] }}><Check size={12} color="#fff" strokeWidth={3.2} /></span>
                         <span style={{ color: pl.dark ? 'rgba(255,255,255,.9)' : C.ink }}>{t(it)}</span>
                       </li>
                     ))}
@@ -533,9 +545,9 @@ export default function Landing({ onStart, lang, setLang }) {
               <div className="min-w-[620px]">
               <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] text-[12.5px] sm:text-sm font-bold" style={{ background: '#F9FBFD', borderBottom: `1px solid ${C.border}` }}>
                 <div className="px-3 sm:px-5 py-4" style={{ ...display }}>{t('cmpTitle')}</div>
-                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><Wallet size={16} color={C.navy} className="hidden sm:block" />{t('plPersonal')}</div>
-                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><Briefcase size={16} color={C.navy} className="hidden sm:block" />{t('plPro')}</div>
-                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><Building2 size={16} color={C.navy} className="hidden sm:block" />{t('plBusiness')}</div>
+                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><span className="w-7 h-7 rounded-lg hidden sm:flex items-center justify-center shrink-0" style={{ background: PLAN_GRAD.personal }}><PLAN_ICON.personal size={15} color="#fff" strokeWidth={2} /></span>{t('plPersonal')}</div>
+                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><span className="w-7 h-7 rounded-lg hidden sm:flex items-center justify-center shrink-0" style={{ background: PLAN_GRAD.pro }}><PLAN_ICON.pro size={15} color="#fff" strokeWidth={2} /></span>{t('plPro')}</div>
+                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><span className="w-7 h-7 rounded-lg hidden sm:flex items-center justify-center shrink-0" style={{ background: PLAN_GRAD.business }}><PLAN_ICON.business size={15} color="#fff" strokeWidth={2} /></span>{t('plBusiness')}</div>
               </div>
               {[
                 ['r1', t('plFree'), t('plProPrice'), t('plBizPrice')],
@@ -553,7 +565,7 @@ export default function Landing({ onStart, lang, setLang }) {
                   <div className="px-3 sm:px-5 py-3.5 font-medium" style={{ color: C.muted }}>{t(k)}</div>
                   {[a, b, c].map((v, j) => (
                     <div key={j} className="px-3 sm:px-5 py-3.5 font-semibold" style={{ color: C.ink }}>
-                      {v === true ? <Check size={18} color={C.mint} strokeWidth={3} /> : v === null ? <span style={{ color: '#B8C1CF' }}>—</span> : v}
+                      {v === true ? <span className="w-[22px] h-[22px] rounded-full inline-flex items-center justify-center" style={{ background: C.mint }}><Check size={13} color="#fff" strokeWidth={3.2} /></span> : v === null ? <span style={{ color: '#B8C1CF' }}>—</span> : v}
                     </div>
                   ))}
                 </div>
