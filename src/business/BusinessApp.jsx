@@ -742,6 +742,15 @@ function AccountPage({ ctx }) {
     } catch (err) { flash(err.message, 'error'); } finally { setUploading(null); }
   }
 
+  const [kybBusy, setKybBusy] = useState(false);
+  async function startKyb() {
+    setKybBusy(true);
+    try {
+      const r = await apiFetch('/business/me/kyb/start', { method: 'POST', token });
+      if (r.url) window.location.href = r.url;
+    } catch (e) { flash(e.message, 'error'); await load(); } finally { setKybBusy(false); }
+  }
+
   async function submit() {
     try {
       await apiFetch('/business/me/submit', { method: 'POST', token });
@@ -890,6 +899,32 @@ function AccountPage({ ctx }) {
               <button onClick={onKyc} className="mt-4 w-full h-10 rounded-xl text-sm font-bold text-white" style={{ background: K.navy }}>{t('rep_verify')}</button>
             )}
           </Card>
+          {biz?.kyb?.enabled && bizStatus !== 'draft' && (
+            <Card className="p-5">
+              <div className="flex items-center gap-2 mb-2"><ShieldCheck size={18} style={{ color: K.navy }} /><h2 className="text-base font-bold">{t('kyb_title')}</h2></div>
+              {biz.kyb.status === 'Approved' ? (
+                <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: K.mint }}><CheckCircle2 size={16} />{t('kyb_done')}</p>
+              ) : biz.kyb.status === 'Declined' ? (
+                <p className="text-sm" style={{ color: K.danger }}>{t('kyb_declined')}</p>
+              ) : biz.kyb.status && !biz.kyb.url ? (
+                <p className="text-sm" style={{ color: K.muted }}>{t('kyb_review')}</p>
+              ) : (
+                <>
+                  <p className="text-sm" style={{ color: K.muted }}>{t('kyb_desc')}</p>
+                  {!biz.kyb.feePaid && biz.kyb.fee > 0 && (
+                    <div className="mt-3 rounded-xl p-3 flex items-center justify-between text-sm" style={{ background: K.skySoft }}>
+                      <span style={{ color: K.navy }}>{t('kyb_fee')}</span>
+                      <span className="font-bold" style={{ color: K.navy }}>{biz.kyb.fee.toLocaleString('fr-FR')} HTG</span>
+                    </div>
+                  )}
+                  <button onClick={startKyb} disabled={kybBusy} className="mt-3 w-full h-10 rounded-xl text-sm font-bold text-white" style={{ background: K.navy, opacity: kybBusy ? 0.7 : 1 }}>
+                    {kybBusy ? '…' : biz.kyb.url ? t('kyb_continue') : biz.kyb.feePaid || !biz.kyb.fee ? t('kyb_start') : t('kyb_pay_start')}
+                  </button>
+                  {!biz.kyb.feePaid && biz.kyb.fee > 0 && <p className="text-xs mt-2" style={{ color: K.muted }}>{t('kyb_fee_note')}</p>}
+                </>
+              )}
+            </Card>
+          )}
           <Card className="p-5">
             <h2 className="text-base font-bold mb-3">{t('receive')}</h2>
             <button onClick={() => setShowReceive(true)} className="w-full flex items-center gap-3 p-3 rounded-2xl border" style={{ borderColor: K.border }}>
