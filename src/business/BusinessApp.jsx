@@ -924,7 +924,10 @@ function AccountPage({ ctx }) {
                     <>
                       <div className="mt-3 rounded-xl p-3 flex items-center justify-between text-sm" style={{ background: K.skySoft }}>
                         <span style={{ color: K.navy }}>{t('kyb_fee')}</span>
-                        <span className="font-bold" style={{ color: K.navy }}>{biz.kyb.fee.toLocaleString('fr-FR')} HTG</span>
+                        <span className="text-right" style={{ color: K.navy }}>
+                          <span className="block font-bold">{biz.kyb.feeUsd ? `${biz.kyb.feeUsd} $ US` : `${biz.kyb.fee.toLocaleString('fr-FR')} HTG`}</span>
+                          {biz.kyb.feeUsd ? <span className="block text-xs">≈ {biz.kyb.fee.toLocaleString('fr-FR')} HTG</span> : null}
+                        </span>
                       </div>
                       {biz.kyb.pendingPayment ? (
                         <p className="mt-3 text-sm rounded-xl p-3 flex items-start gap-2" style={{ background: K.amberSoft }}><Clock size={16} className="shrink-0 mt-0.5" style={{ color: K.amber }} />{t('kyb_pending_payment')}</p>

@@ -129,7 +129,7 @@ const D = {
   kyb_title: ['Verifikasyon antrepriz', 'Vérification de l’entreprise', 'Business verification'],
   kyb_desc: ['Nou verifye antrepriz ou otomatikman nan rejis ofisyèl la, ansanm ak dirijan ak aksyonè li yo. Sa nesesè pou aktive tout fonksyon kont antrepriz la.', 'Nous vérifions automatiquement votre entreprise dans le registre officiel, ainsi que ses dirigeants et actionnaires. C’est nécessaire pour activer toutes les fonctions du compte entreprise.', 'We automatically verify your business in the official registry, along with its officers and shareholders. This is required to unlock all business account features.'],
   kyb_fee: ['Frè ouvèti kont antrepriz', 'Frais d’ouverture du compte entreprise', 'Business account opening fee'],
-  kyb_fee_note: ['Yon sèl fwa. Si verifikasyon an bezwen refè, ou p ap peye ankò.', 'Paiement unique. Si la vérification doit être refaite, vous ne payez pas à nouveau.', 'One-time payment. If the verification needs to be redone, you won’t pay again.'],
+  kyb_fee_note: ['Yon sèl fwa, peye an goud selon tal BRH jodi a. Si verifikasyon an bezwen refè, ou p ap peye ankò.', 'Paiement unique, réglé en gourdes au taux BRH du jour. Si la vérification doit être refaite, vous ne payez pas à nouveau.', 'One-time payment, settled in gourdes at today’s BRH rate. If the verification needs to be redone, you won’t pay again.'],
   kyb_pay_with: ['Peye ak', 'Payer avec', 'Pay with'],
   kyb_pay_balance: ['Balans BLICPay', 'Solde BLICPay', 'BLICPay balance'],
   kyb_balance: ['Balans', 'Solde', 'Balance'],
