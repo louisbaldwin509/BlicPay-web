@@ -743,6 +743,15 @@ function AccountPage({ ctx }) {
   }
 
   const [kybBusy, setKybBusy] = useState(false);
+  async function payKybWithBalance() {
+    setKybBusy(true);
+    try {
+      await apiFetch('/business/me/kyb/pay', { method: 'POST', body: { method: 'balance' }, token });
+      flash(t('kyb_paid'));
+      await load();
+    } catch (e) { flash(e.message, 'error'); } finally { setKybBusy(false); }
+  }
+
   async function startKyb() {
     setKybBusy(true);
     try {
@@ -911,16 +920,44 @@ function AccountPage({ ctx }) {
               ) : (
                 <>
                   <p className="text-sm" style={{ color: K.muted }}>{t('kyb_desc')}</p>
-                  {!biz.kyb.feePaid && biz.kyb.fee > 0 && (
-                    <div className="mt-3 rounded-xl p-3 flex items-center justify-between text-sm" style={{ background: K.skySoft }}>
-                      <span style={{ color: K.navy }}>{t('kyb_fee')}</span>
-                      <span className="font-bold" style={{ color: K.navy }}>{biz.kyb.fee.toLocaleString('fr-FR')} HTG</span>
-                    </div>
+                  {!biz.kyb.feePaid && biz.kyb.fee > 0 ? (
+                    <>
+                      <div className="mt-3 rounded-xl p-3 flex items-center justify-between text-sm" style={{ background: K.skySoft }}>
+                        <span style={{ color: K.navy }}>{t('kyb_fee')}</span>
+                        <span className="font-bold" style={{ color: K.navy }}>{biz.kyb.fee.toLocaleString('fr-FR')} HTG</span>
+                      </div>
+                      {biz.kyb.pendingPayment ? (
+                        <p className="mt-3 text-sm rounded-xl p-3 flex items-start gap-2" style={{ background: K.amberSoft }}><Clock size={16} className="shrink-0 mt-0.5" style={{ color: K.amber }} />{t('kyb_pending_payment')}</p>
+                      ) : (
+                        <>
+                          <p className="mt-4 text-xs font-bold uppercase tracking-wide" style={{ color: K.muted }}>{t('kyb_pay_with')}</p>
+                          <div className="mt-2 space-y-2">
+                            {[
+                              ['balance', t('kyb_pay_balance'), `${t('kyb_balance')} : ${Number(balance || 0).toLocaleString('fr-FR')} HTG`, Wallet, () => payKybWithBalance(), Number(balance || 0) < biz.kyb.fee],
+                              ['moncash', 'MonCash', t('kyb_pay_mobile'), null, () => onDeposit({ amount: biz.kyb.fee, purpose: 'kyb_fee' }), false],
+                              ['natcash', 'NatCash', t('kyb_pay_mobile'), null, () => onDeposit({ amount: biz.kyb.fee, purpose: 'kyb_fee' }), false],
+                            ].map(([id, label, sub, Icon, fn, disabled]) => (
+                              <button key={id} onClick={fn} disabled={kybBusy || disabled} className="w-full flex items-center gap-3 p-3 rounded-xl border text-left" style={{ borderColor: K.border, opacity: disabled ? 0.5 : 1 }}>
+                                <span className="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden shrink-0" style={{ background: K.skySoft, color: K.navy }}>
+                                  {Icon ? <Icon size={17} /> : <img src={`/logos/${id}-icon.png`} alt="" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
+                                </span>
+                                <span className="flex-1 min-w-0"><span className="block text-sm font-semibold">{label}</span><span className="block text-xs" style={{ color: K.muted }}>{disabled ? t('kyb_low_balance') : sub}</span></span>
+                                <ChevronRight size={16} style={{ color: K.muted }} />
+                              </button>
+                            ))}
+                          </div>
+                          <p className="text-xs mt-2" style={{ color: K.muted }}>{t('kyb_fee_note')}</p>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {biz.kyb.feePaid && biz.kyb.fee > 0 && <p className="mt-3 text-sm font-semibold flex items-center gap-1.5" style={{ color: K.mint }}><CheckCircle2 size={15} />{t('kyb_paid')}</p>}
+                      <button onClick={startKyb} disabled={kybBusy} className="mt-3 w-full h-10 rounded-xl text-sm font-bold text-white" style={{ background: K.navy, opacity: kybBusy ? 0.7 : 1 }}>
+                        {kybBusy ? '…' : biz.kyb.url ? t('kyb_continue') : t('kyb_start')}
+                      </button>
+                    </>
                   )}
-                  <button onClick={startKyb} disabled={kybBusy} className="mt-3 w-full h-10 rounded-xl text-sm font-bold text-white" style={{ background: K.navy, opacity: kybBusy ? 0.7 : 1 }}>
-                    {kybBusy ? '…' : biz.kyb.url ? t('kyb_continue') : biz.kyb.feePaid || !biz.kyb.fee ? t('kyb_start') : t('kyb_pay_start')}
-                  </button>
-                  {!biz.kyb.feePaid && biz.kyb.fee > 0 && <p className="text-xs mt-2" style={{ color: K.muted }}>{t('kyb_fee_note')}</p>}
                 </>
               )}
             </Card>

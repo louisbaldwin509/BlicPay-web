@@ -1098,7 +1098,8 @@ export default function BlicPayApp() {
     { q: tr('lp_q5'), a: tr('lp_a5') },
   ];
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
-  const [betaNotice, setBetaNotice] = useState(''); // mod tès prive: mesaj apre enskripsyon
+  const [betaNotice, setBetaNotice] = useState('');
+  const [depositPurpose, setDepositPurpose] = useState(null); // 'kyb_fee' = depo pou frè ouvèti antrepriz // mod tès prive: mesaj apre enskripsyon
   const [otp, setOtp] = useState(null); // { challengeId, email } — kòd imèl pou nouvo aparèy
   const [otpCode, setOtpCode] = useState('');
   const [otpCooldown, setOtpCooldown] = useState(0);
@@ -1535,8 +1536,11 @@ export default function BlicPayApp() {
     setView('auth');
   }
 
-  function startDeposit() {
-    setAmount('');
+  // opts (opsyonèl): { amount, purpose } — egz. peye frè ouvèti kont antrepriz (purpose 'kyb_fee').
+  function startDeposit(opts) {
+    const special = opts && typeof opts === 'object' && opts.purpose ? opts : null;
+    setDepositPurpose(special ? special.purpose : null);
+    setAmount(special ? String(special.amount) : '');
     setFlowKind('deposit');
     setMethodCat(null);
     setSelectedMethod(null);
@@ -1632,11 +1636,9 @@ export default function BlicPayApp() {
     if (flowKind === 'deposit' && m.id === 'moncash') {
       setProcessing(true);
       try {
-        const { paymentUrl } = await apiFetch('/deposits/moncash/start', {
-          method: 'POST',
-          token,
-          body: { amount: Number(amount) },
-        });
+        const { paymentUrl } = depositPurpose === 'kyb_fee'
+          ? await apiFetch('/business/me/kyb/pay', { method: 'POST', token, body: { method: 'moncash' } })
+          : await apiFetch('/deposits/moncash/start', { method: 'POST', token, body: { amount: Number(amount) } });
         window.location.href = paymentUrl;
       } catch (err) {
         flash(err.message || tt("Nou pa t ka kòmanse peman MonCash la."), 'error');
@@ -1811,6 +1813,7 @@ export default function BlicPayApp() {
           transactionId: natcashTransactionId.trim(),
           proofImage: base64,
           proofMimeType: natcashProofFile.type,
+          ...(depositPurpose ? { purpose: depositPurpose } : {}),
         },
       });
 
