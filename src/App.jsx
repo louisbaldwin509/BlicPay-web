@@ -23,7 +23,7 @@ import {
   Bell, Wallet, ArrowUpRight, ArrowDownLeft, Clock, Settings, Home,
   ArrowLeftRight, Plus, Check, Copy, ChevronRight, ArrowLeft, ShieldCheck,
   DollarSign, Smartphone, Banknote, X, AlertCircle, Building2, Eye, EyeOff, RefreshCw, Users, BadgeCheck, PiggyBank,
-  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode, Landmark
+  Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode, Landmark, Store, Wrench, Truck, Briefcase, Sprout
 } from 'lucide-react';
 
 // Coupe l'URL réelle de ton backend ici une fois qu'il est déployé
@@ -208,6 +208,9 @@ const REG_VOLUMES = [['lt25k', 'Mwens pase 25 000 HTG'], ['25k_100k', '25 000 �
 const REG_STEPS = ['Idantite', 'Kowòdone', 'Pyès idantite', 'Pwofil finansye', 'Sekirite@@step', 'Verifikasyon@@step'];
 // Kont antrepriz: 3 etap sou antrepriz la AVAN etap reprezantan legal la.
 const BIZ_STEPS = ['Antrepriz la', 'Aktivite', 'Kowòdone antrepriz'];
+// Kont pwo: 2 etap sou aktivite a AVAN etap pèsonèl yo.
+const PRO_STEPS = ['Aktivite pwofesyonèl', 'Kowòdone pwofesyonèl'];
+const stepsOff = (k) => (k === 'business' ? BIZ_STEPS.length : k === 'pro' ? PRO_STEPS.length : 0);
 const locL = (o, lang) => (o ? o[lang] || o.fr || o.ht || '' : '');
 const optLabel = (list, v) => { const f = list.find(([k]) => k === v); return f ? tt(f[1]) : ''; };
 
@@ -1121,15 +1124,16 @@ export default function BlicPayApp() {
     occupation: '', employer: '', sourceOfFunds: '', expectedMonthlyVolume: '', isPep: null,
   });
   const [certifiedAccurate, setCertifiedAccurate] = useState(false);
-  const [regKind, setRegKind] = useState('personal'); // 'personal' | 'business'
+  const [regKind, setRegKind] = useState('personal'); // 'personal' | 'pro' | 'business'
   const [bizTypes, setBizTypes] = useState(null);
   const [bizForm, setBizForm] = useState({
     legalName: '', tradeName: '', legalForm: '', nif: '', patenteNumber: '', incorporationDate: '', sector: '',
     activityDescription: '', employeesRange: '', turnoverRange: '', expectedMonthlyVolume: '', sourceOfFunds: '', accountPurpose: '', foreignActivity: null,
     address: '', city: '', businessPhone: '', businessEmail: '', website: '', repTitle: '',
+    proCategory: '', proMode: '', proPageUrl: '',
   });
   React.useEffect(() => {
-    if (regKind === 'business' && !bizTypes) apiFetch('/business/types').then(setBizTypes).catch(() => {});
+    if (regKind !== 'personal' && !bizTypes) apiFetch('/business/types').then(setBizTypes).catch(() => {});
   }, [regKind, bizTypes]);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [registerStep, setRegisterStep] = useState(1);
@@ -1447,22 +1451,35 @@ export default function BlicPayApp() {
   function goRegisterStep(step) {
     setAuthError('');
     const f = authForm;
-    const off = regKind === 'business' ? BIZ_STEPS.length : 0;
+    const off = stepsOff(regKind);
     const ps = registerStep - off; // etap pèsonèl (reprezantan an)
     const b = bizForm;
     if (step > registerStep) {
-      if (off && registerStep === 1) {
+      if (regKind === 'pro' && registerStep === 1) {
+        if (!b.proCategory) { setAuthError(tt('Chwazi kategori aktivite ou.')); return; }
+        if (!b.legalName.trim()) { setAuthError(tt('Non aktivite a obligatwa.')); return; }
+        if (b.activityDescription.trim().length < 10) { setAuthError(tt('Dekri aktivite ou an kèk mo.')); return; }
+        if (!b.proMode) { setAuthError(tt('Di nou si ou gen yon lokal oswa si ou vann an liy.')); return; }
+        if (b.proMode === 'online' && !b.proPageUrl.trim()) { setAuthError(tt('Bay lyen paj pwofesyonèl ou.')); return; }
+      }
+      if (regKind === 'pro' && registerStep === 2) {
+        if (!b.nif.trim()) { setAuthError(tt('NIF ou obligatwa.')); return; }
+        if (!b.address.trim() || !b.city.trim()) { setAuthError(tt('Adrès ak vil aktivite a obligatwa.')); return; }
+        if (!b.businessPhone.trim()) { setAuthError(tt('Telefòn pwofesyonèl la obligatwa.')); return; }
+        if (!b.expectedMonthlyVolume || !b.sourceOfFunds) { setAuthError(tt('Reponn tout kesyon sou aktivite a.')); return; }
+      }
+      if (regKind === 'business' && registerStep === 1) {
         if (!b.legalName.trim() || !b.legalForm) { setAuthError(tt('Non antrepriz la ak fòm legal la obligatwa.')); return; }
         if (!b.nif.trim()) { setAuthError(tt('NIF antrepriz la obligatwa.')); return; }
         if (!b.incorporationDate) { setAuthError(tt('Dat kreyasyon antrepriz la obligatwa.')); return; }
         if (!b.sector.trim()) { setAuthError(tt('Sektè aktivite a obligatwa.')); return; }
       }
-      if (off && registerStep === 2) {
+      if (regKind === 'business' && registerStep === 2) {
         if (b.activityDescription.trim().length < 10) { setAuthError(tt('Dekri aktivite antrepriz la an kèk mo.')); return; }
         if (!b.employeesRange || !b.turnoverRange || !b.expectedMonthlyVolume || !b.sourceOfFunds || !b.accountPurpose) { setAuthError(tt('Reponn tout kesyon sou aktivite a.')); return; }
         if (b.foreignActivity === null) { setAuthError(tt('Reponn tout kesyon sou aktivite a.')); return; }
       }
-      if (off && registerStep === 3) {
+      if (regKind === 'business' && registerStep === 3) {
         if (!b.address.trim() || !b.city.trim()) { setAuthError(tt('Adrès ak vil antrepriz la obligatwa.')); return; }
         if (!b.businessPhone.trim()) { setAuthError(tt('Telefòn antrepriz la obligatwa.')); return; }
         if (!b.repTitle.trim()) { setAuthError(tt('Pozisyon ou nan antrepriz la obligatwa.')); return; }
@@ -1511,10 +1528,14 @@ export default function BlicPayApp() {
     setAuthLoading(true);
     try {
       const f = authForm;
-      const reg = await apiFetch(regKind === 'business' ? '/business/register' : '/auth/register', {
+      const proCompany = () => {
+        const { legalName, nif, address, city, businessPhone, businessEmail, website, activityDescription, expectedMonthlyVolume, sourceOfFunds, proCategory, proMode, proPageUrl } = bizForm;
+        return { legalForm: 'pro', legalName, tradeName: legalName, nif, address, city, businessPhone, businessEmail, website, activityDescription, expectedMonthlyVolume, sourceOfFunds, proCategory, proMode, proPageUrl: proMode === 'online' ? proPageUrl : '', repTitle: 'Titulaire', accountPurpose: 'receive' };
+      };
+      const reg = await apiFetch(regKind !== 'personal' ? '/business/register' : '/auth/register', {
         method: 'POST',
         body: {
-          ...(regKind === 'business' ? { company: { ...bizForm, foreignActivity: !!bizForm.foreignActivity } } : {}),
+          ...(regKind === 'business' ? { company: { ...bizForm, foreignActivity: !!bizForm.foreignActivity } } : regKind === 'pro' ? { company: proCompany() } : {}),
           firstName: f.firstName, lastName: f.lastName, phone: f.phone.trim(), password: f.password,
           dateOfBirth: f.dateOfBirth, gender: f.gender, nationality: f.nationality, birthPlace: f.birthPlace,
           email: f.email.trim(), addressLine: f.address, city: f.city, country: f.country, department: f.country === 'HT' ? f.department : '',
@@ -2724,7 +2745,7 @@ export default function BlicPayApp() {
 
       <div className={view === 'landing' || isBizDash || view === 'auth' || view === 'forgotpassword' ? 'w-full min-h-full' : 'max-w-md mx-auto min-h-full'} style={{ background: C.bg }}>
         {view === 'landing' ? (
-          <Landing onStart={(m) => { setRegKind(m === 'register-business' ? 'business' : 'personal'); setAuthMode(m === 'register' || m === 'register-business' ? 'register' : 'login'); setRegisterStep(1); setAuthError(''); setBetaNotice(''); setView('auth'); }} lang={lang} setLang={setLang} />
+          <Landing onStart={(m) => { setRegKind(m === 'register-business' ? 'business' : m === 'register-pro' ? 'pro' : 'personal'); setAuthMode(m.startsWith('register') ? 'register' : 'login'); setRegisterStep(1); setAuthError(''); setBetaNotice(''); setView('auth'); }} lang={lang} setLang={setLang} />
         ) : (
         <>
 
@@ -2816,7 +2837,7 @@ export default function BlicPayApp() {
           </div>
         )}
 
-        {view === 'auth' && (() => { const off = regKind === 'business' ? BIZ_STEPS.length : 0; const ps = registerStep - off; const allSteps = off ? [...BIZ_STEPS, ...REG_STEPS] : REG_STEPS; return (
+        {view === 'auth' && (() => { const off = stepsOff(regKind); const ps = registerStep - off; const allSteps = regKind === 'business' ? [...BIZ_STEPS, ...REG_STEPS] : regKind === 'pro' ? [...PRO_STEPS, ...REG_STEPS] : REG_STEPS; const PRO_ICONS = { shop: Store, online: Globe, services: Wrench, transport: Truck, liberal: Briefcase, agri: Sprout }; return (
           <AuthShell lang={lang} onLang={() => setShowLangPicker((v) => !v)} onHome={() => setView('landing')}>
             {otp && !betaNotice ? (
               <div className="fadein">
@@ -2866,7 +2887,7 @@ export default function BlicPayApp() {
               {authMode === 'login' ? tt('Byenveni ankò') : tt('Kreye kont BLICPay ou')}
             </h1>
             <p className="mt-2 text-[15px]" style={{ color: C.muted }}>
-              {authMode === 'login' ? tt('Konekte nan kont BLICPay ou.') : tt('Gratis, an kèk minit. Ou pral bezwen yon pyès idantite pou verifye kont ou apre.')}
+              {authMode === 'login' ? tt('Konekte nan kont BLICPay ou.') : regKind === 'personal' ? tt('Gratis, an kèk minit. Ou pral bezwen yon pyès idantite pou verifye kont ou apre.') : tt('Enskripsyon an pran kèk minit. Dokiman yo ak frè ouvèti a ap mande apre, nan espas kliyan ou.')}
             </p>
 
 
@@ -2914,11 +2935,12 @@ export default function BlicPayApp() {
               <div className="mt-7">
                 {(() => null)()}
                 {registerStep === 1 && (
-                  <div className="grid grid-cols-2 gap-2 mb-6">
-                    {[['personal', User, tt('Kont pèsonèl')], ['business', Building2, tt('Kont antrepriz')]].map(([k, Icon, label]) => (
-                      <button key={k} type="button" onClick={() => { setRegKind(k); setAuthError(''); }} className="h-14 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold"
+                  <div className="grid grid-cols-3 gap-2 mb-6">
+                    {[['personal', User, tt('Pèsonèl@@acct'), tt('Gratis')], ['pro', Briefcase, tt('Pwofesyonèl@@acct'), tt('Endepandan, komèsan')], ['business', Building2, tt('Antrepriz@@acct'), tt('Sosyete, ONG')]].map(([k, Icon, label, sub]) => (
+                      <button key={k} type="button" onClick={() => { setRegKind(k); setAuthError(''); }} className="rounded-xl flex flex-col items-center justify-center gap-1 px-2 py-3 text-sm font-semibold text-center"
                         style={{ border: `1.5px solid ${regKind === k ? C.navy : C.border}`, background: regKind === k ? '#EEF3FB' : '#fff', color: regKind === k ? C.navy : C.ink }}>
-                        <Icon size={18} /> {label}
+                        <Icon size={19} /> <span>{label}</span>
+                        <span className="text-[11px] font-medium leading-tight" style={{ color: C.muted }}>{sub}</span>
                       </button>
                     ))}
                   </div>
@@ -2930,16 +2952,68 @@ export default function BlicPayApp() {
                   ))}
                 </div>
                 <div className="mt-2.5 flex items-center justify-between text-[12.5px]">
-                  <span className="font-semibold" style={{ color: C.ink }}>{off && registerStep <= off ? tt(allSteps[registerStep - 1]) : tt(allSteps[registerStep - 1])}{off && registerStep > off ? ` — ${tt('Reprezantan legal')}` : ''}</span>
+                  <span className="font-semibold" style={{ color: C.ink }}>{off && registerStep <= off ? tt(allSteps[registerStep - 1]) : tt(allSteps[registerStep - 1])}{regKind === 'business' && registerStep > off ? ` — ${tt('Reprezantan legal')}` : ''}</span>
                   <span style={{ color: C.muted }}>{tt('Etap {0} sou {1}', registerStep, allSteps.length)}</span>
                 </div>
 
 
-                {off > 0 && registerStep === 1 && (
+                {regKind === 'pro' && registerStep === 1 && (
+                  <div className="mt-6 space-y-5">
+                    <div>
+                      <span className="block text-[13px] font-semibold mb-2" style={{ color: C.ink }}>{tt('Ki kalite aktivite ou fè?')}</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {Object.entries(bizTypes?.proCategories || {}).map(([k, v]) => { const Icon = PRO_ICONS[k] || Briefcase; const on = bizForm.proCategory === k; return (
+                          <button key={k} type="button" onClick={() => setBizForm((x) => ({ ...x, proCategory: k, proMode: k === 'online' ? 'online' : x.proMode }))} className="text-left rounded-xl px-3 py-2.5"
+                            style={{ border: `1.5px solid ${on ? C.navy : C.border}`, background: on ? '#EEF3FB' : '#fff' }}>
+                            <div className="flex items-center gap-2 text-[13.5px] font-semibold" style={{ color: on ? C.navy : C.ink }}><Icon size={16} /> {locL(v.label, lang)}</div>
+                            <div className="text-[11.5px] mt-0.5 leading-snug" style={{ color: C.muted }}>{locL(v.hint, lang)}</div>
+                          </button>
+                        ); })}
+                      </div>
+                      {bizTypes?.proRefused && (
+                        <details className="mt-2.5 rounded-xl px-3.5 py-2.5 text-[12.5px]" style={{ background: '#FFF7ED', border: '1px solid #FED7AA', color: '#9A3412' }}>
+                          <summary className="cursor-pointer font-semibold">{tt('Aktivite BLICPay pa aksepte')}</summary>
+                          <ul className="mt-1.5 list-disc pl-5 space-y-0.5">{bizTypes.proRefused.map((x, i) => <li key={i}>{locL(x, lang)}</li>)}</ul>
+                        </details>
+                      )}
+                    </div>
+                    <AuthField label={tt('Non aktivite a (non komèsyal)')}><AuthInput value={bizForm.legalName} onChange={(e) => setBizForm((x) => ({ ...x, legalName: e.target.value }))} placeholder={tt('Egz. Marie Boutik, JP Mekanik')} /></AuthField>
+                    <label className="block">
+                      <span className="block text-[13px] font-semibold mb-1.5" style={{ color: C.ink }}>{tt('Dekri aktivite ou')}</span>
+                      <textarea rows={3} value={bizForm.activityDescription} onChange={(e) => setBizForm((x) => ({ ...x, activityDescription: e.target.value }))} placeholder={tt('Kisa ou vann oswa ki sèvis ou ofri, depi konbyen tan...')}
+                        className="w-full rounded-xl text-[15px] px-4 py-3" style={{ border: `1px solid ${C.border}`, color: C.ink, resize: 'vertical' }} />
+                    </label>
+                    <div>
+                      <span className="block text-[13px] font-semibold mb-1.5" style={{ color: C.ink }}>{tt('Ki jan ou travay?')}</span>
+                      <ChoiceGroup value={bizForm.proMode} onChange={(v) => setBizForm((x) => ({ ...x, proMode: v }))} options={[['physical', 'Mwen gen yon lokal'], ['online', 'An liy sèlman']]} />
+                    </div>
+                    {bizForm.proMode === 'online' && (
+                      <>
+                        <AuthField label={tt('Lyen paj pwofesyonèl ou')} icon={Globe}><AuthInput icon value={bizForm.proPageUrl} onChange={(e) => setBizForm((x) => ({ ...x, proPageUrl: e.target.value }))} placeholder="instagram.com/..." /></AuthField>
+                        <RegNote icon={ShieldCheck}>{tt('Apre enskripsyon an, n ap ba ou yon kòd BLICPAY pou mete nan bio paj ou a. Se konsa nou verifye paj la se pou ou.')}</RegNote>
+                      </>
+                    )}
+                  </div>
+                )}
+                {regKind === 'pro' && registerStep === 2 && (
+                  <div className="mt-6 space-y-4">
+                    <AuthField label={tt('NIF ou')}><AuthInput value={bizForm.nif} onChange={(e) => setBizForm((x) => ({ ...x, nif: e.target.value }))} placeholder="000-000-000-0" /></AuthField>
+                    <AuthField label={bizForm.proMode === 'online' ? tt('Adrès ou (lakay ou aksepte)') : tt('Adrès lokal la')}><AuthInput value={bizForm.address} onChange={(e) => setBizForm((x) => ({ ...x, address: e.target.value }))} /></AuthField>
+                    <AuthField label={tt('Vil / komin')}><AuthInput value={bizForm.city} onChange={(e) => setBizForm((x) => ({ ...x, city: e.target.value }))} /></AuthField>
+                    <div className="grid grid-cols-2 gap-3">
+                      <AuthField label={tt('Telefòn pwofesyonèl')} icon={Phone}><AuthInput icon inputMode="tel" value={bizForm.businessPhone} onChange={(e) => setBizForm((x) => ({ ...x, businessPhone: e.target.value }))} /></AuthField>
+                      <AuthField label={tt('Imèl pwofesyonèl (opsyonèl)')} icon={Mail}><AuthInput icon type="email" value={bizForm.businessEmail} onChange={(e) => setBizForm((x) => ({ ...x, businessEmail: e.target.value }))} /></AuthField>
+                    </div>
+                    <AuthField label={tt('Volim pa mwa sou BLICPay')}><AuthSelect value={bizForm.expectedMonthlyVolume} onChange={(e) => setBizForm((x) => ({ ...x, expectedMonthlyVolume: e.target.value }))} options={Object.entries(bizTypes?.monthlyVolumes || {}).map(([k, v]) => [k, locL(v, lang)])} /></AuthField>
+                    <AuthField label={tt('Sous revni aktivite a')}><AuthSelect value={bizForm.sourceOfFunds} onChange={(e) => setBizForm((x) => ({ ...x, sourceOfFunds: e.target.value }))} options={Object.entries(bizTypes?.fundSources || {}).filter(([k]) => k !== 'investment').map(([k, v]) => [k, locL(v, lang)])} /></AuthField>
+                    <RegNote>{tt('Dokiman yo (NIF, prèv adrès, relve 3 mwa, prèv aktivite) ap mande apre, nan espas pwo w la.')}</RegNote>
+                  </div>
+                )}
+                {regKind === 'business' && registerStep === 1 && (
                   <div className="mt-6 space-y-4">
                     <AuthField label={tt('Non legal antrepriz la (rezon sosyal)')}><AuthInput value={bizForm.legalName} onChange={(e) => setBizForm((x) => ({ ...x, legalName: e.target.value }))} placeholder="Ex. Boulangerie Saint-Marc S.A." /></AuthField>
                     <AuthField label={tt('Non komèsyal (opsyonèl)')}><AuthInput value={bizForm.tradeName} onChange={(e) => setBizForm((x) => ({ ...x, tradeName: e.target.value }))} /></AuthField>
-                    <AuthField label={tt('Fòm legal')}><AuthSelect value={bizForm.legalForm} onChange={(e) => setBizForm((x) => ({ ...x, legalForm: e.target.value }))} options={Object.entries(bizTypes?.legalForms || {}).map(([k, v]) => [k, locL(v.label, lang)])} /></AuthField>
+                    <AuthField label={tt('Fòm legal')}><AuthSelect value={bizForm.legalForm} onChange={(e) => setBizForm((x) => ({ ...x, legalForm: e.target.value }))} options={Object.entries(bizTypes?.legalForms || {}).filter(([k]) => !['pro', 'individual'].includes(k)).map(([k, v]) => [k, locL(v.label, lang)])} /></AuthField>
                     <div className="grid grid-cols-2 gap-3">
                       <AuthField label="NIF"><AuthInput value={bizForm.nif} onChange={(e) => setBizForm((x) => ({ ...x, nif: e.target.value }))} placeholder="000-000-000-0" /></AuthField>
                       <AuthField label={tt('Nimewo patant (opsyonèl)')}><AuthInput value={bizForm.patenteNumber} onChange={(e) => setBizForm((x) => ({ ...x, patenteNumber: e.target.value }))} /></AuthField>
@@ -2951,7 +3025,7 @@ export default function BlicPayApp() {
                     <RegNote icon={Building2}>{tt('Nou mande menm enfòmasyon ak yon bank pou louvri yon kont antrepriz. Dokiman legal yo ap mande apre, nan espas antrepriz la.')}</RegNote>
                   </div>
                 )}
-                {off > 0 && registerStep === 2 && (
+                {regKind === 'business' && registerStep === 2 && (
                   <div className="mt-6 space-y-5">
                     <label className="block">
                       <span className="block text-[13px] font-semibold mb-1.5" style={{ color: C.ink }}>{tt('Kisa antrepriz la fè?')}</span>
@@ -2971,7 +3045,7 @@ export default function BlicPayApp() {
                     </div>
                   </div>
                 )}
-                {off > 0 && registerStep === 3 && (
+                {regKind === 'business' && registerStep === 3 && (
                   <div className="mt-6 space-y-4">
                     <AuthField label={tt('Adrès antrepriz la')}><AuthInput value={bizForm.address} onChange={(e) => setBizForm((x) => ({ ...x, address: e.target.value }))} /></AuthField>
                     <AuthField label={tt('Vil / komin')}><AuthInput value={bizForm.city} onChange={(e) => setBizForm((x) => ({ ...x, city: e.target.value }))} /></AuthField>
@@ -3095,13 +3169,13 @@ export default function BlicPayApp() {
 
                 {ps === 6 && (
                   <div className="mt-6 space-y-3">
-                    {regKind === 'business' && (
+                    {regKind !== 'personal' && (
                       <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
                         <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: '#F7F9FC', borderBottom: `1px solid ${C.border}` }}>
-                          <span className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: C.muted }}>{tt('Antrepriz la')}</span>
+                          <span className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: C.muted }}>{regKind === 'pro' ? tt('Aktivite pwofesyonèl') : tt('Antrepriz la')}</span>
                           <button type="button" onClick={() => setRegisterStep(1)} className="text-[12.5px] font-semibold" style={{ color: C.navy }}>{tt('Modifye@@review')}</button>
                         </div>
-                        {[[tt('Non legal'), bizForm.legalName], [tt('Fòm legal'), locL(bizTypes?.legalForms?.[bizForm.legalForm]?.label, lang)], ['NIF', bizForm.nif], [tt('Sektè aktivite'), bizForm.sector], [tt('Adrès antrepriz la'), [bizForm.address, bizForm.city].filter(Boolean).join(', ')], [tt('Pozisyon ou nan antrepriz la'), bizForm.repTitle]].filter(([, v]) => v).map(([k, v], i) => (
+                        {(regKind === 'pro' ? [[tt('Non aktivite a (non komèsyal)'), bizForm.legalName], [tt('Kategori'), locL(bizTypes?.proCategories?.[bizForm.proCategory]?.label, lang)], ['NIF', bizForm.nif], [tt('Paj'), bizForm.proMode === 'online' ? bizForm.proPageUrl : ''], [tt('Adrès'), [bizForm.address, bizForm.city].filter(Boolean).join(', ')]] : [[tt('Non legal'), bizForm.legalName], [tt('Fòm legal'), locL(bizTypes?.legalForms?.[bizForm.legalForm]?.label, lang)], ['NIF', bizForm.nif], [tt('Sektè aktivite'), bizForm.sector], [tt('Adrès antrepriz la'), [bizForm.address, bizForm.city].filter(Boolean).join(', ')], [tt('Pozisyon ou nan antrepriz la'), bizForm.repTitle]]).filter(([, v]) => v).map(([k, v], i) => (
                           <div key={k} className="flex items-start justify-between gap-4 px-4 py-2.5 text-[13.5px]" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
                             <span style={{ color: C.muted }}>{k}</span><span className="font-semibold text-right" style={{ color: C.ink }}>{v}</span>
                           </div>

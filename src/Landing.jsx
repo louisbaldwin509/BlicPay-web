@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ArrowRight, ArrowLeftRight, BadgeCheck, Building2, Check, ChevronDown, CreditCard, Globe, Lock, Menu,
   Phone, QrCode, ShieldCheck, Smartphone, Sparkles, Wallet, X, Fingerprint, Zap, ScanLine, Store,
-} from 'lucide-react';
+  Briefcase } from 'lucide-react';
 
 const C = {
   ink: '#0B1B33', muted: '#5D6B7E', border: '#E6EAF1', bg: '#F5F8FC',
@@ -22,31 +22,48 @@ const D = {
   navPlans: ['Kont yo', 'Comptes', 'Accounts'],
   plEyebrow: ['Kont BLICPay', 'Comptes BLICPay', 'BLICPay accounts'],
   plTitle: ['Yon kont pou chak bezwen.', 'Un compte pour chaque besoin.', 'An account for every need.'],
-  plSub: ['Pou lavi chak jou oswa pou antrepriz ou — pri klè, san sipriz.', 'Pour le quotidien ou pour votre entreprise — des tarifs clairs, sans surprise.', 'For everyday life or for your business — clear pricing, no surprises.'],
+  plSub: ['Pou lavi chak jou, pou aktivite w oswa pou antrepriz ou — pri klè, san sipriz.', 'Pour le quotidien, pour votre activité ou pour votre entreprise — des tarifs clairs, sans surprise.', 'For everyday life, your trade or your company — clear pricing, no surprises.'],
+  plPro: ['Pwofesyonèl', 'Professionnel', 'Professional'],
+  plProFor: ['Pou endepandan, komèsan ak vandè an liy.', 'Pour les indépendants, commerçants et vendeurs en ligne.', 'For freelancers, merchants and online sellers.'],
+  plProPrice: ['100 $ US', '100 $ US', 'US$100'],
+  plOpenPro: ['Louvri yon kont pwo', 'Ouvrir un compte pro', 'Open a pro account'],
+  pr1: ['Tout avantaj kont pèsonèl la', 'Tous les avantages du compte personnel', 'Everything in Personal'],
+  pr2: ['Plafon pi wo pase kont pèsonèl la', 'Plafonds plus élevés que le compte personnel', 'Higher limits than Personal'],
+  pr3: ['Resevwa peman kliyan pa QR, sou non aktivite w', 'Encaissement par QR code au nom de votre activité', 'Collect customer payments by QR, in your trading name'],
+  pr4: ['Aksepte menm san lokal: vant an liy, sèvis, transpò', 'Accessible même sans local : vente en ligne, services, transport', 'Works without premises: online sales, services, transport'],
+  pr5: ['Tablo bò pwofesyonèl: vant ak istorik', 'Tableau de bord pro : encaissements et historique', 'Pro dashboard: payments and history'],
+  pr6: ['Dosye egzamine pa ekip konfòmite BLICPay', 'Dossier examiné par l’équipe conformité BLICPay', 'File reviewed by the BLICPay compliance team'],
+  vProQr: ['QR pwo', 'QR pro', 'Pro QR'],
+  vProCheck: ['NIF + adrès + relve + prèv aktivite', 'NIF + adresse + relevé + preuve d’activité', 'NIF + address + statement + proof of activity'],
+  r12: ['Plafon retrè', 'Plafonds de retrait', 'Withdrawal limits'],
+  vStd: ['Estanda', 'Standard', 'Standard'],
+  vHigh: ['Pi wo', 'Élevés', 'Higher'],
+  vHighest: ['Pi wo nèt', 'Les plus élevés', 'Highest'],
   plPersonal: ['Pèsonèl', 'Personnel', 'Personal'],
   plPersonalFor: ['Pou depans ak transfè chak jou.', 'Pour vos dépenses et transferts du quotidien.', 'For everyday spending and transfers.'],
   plFree: ['Gratis', 'Gratuit', 'Free'],
   plFreeSub: ['Pa gen frè ouvèti, pa gen abònman', 'Ni frais d’ouverture, ni abonnement', 'No opening fee, no subscription'],
   plBusiness: ['Antrepriz', 'Entreprise', 'Business'],
   plBusinessFor: ['Pou komès, PME ak gwo antrepriz.', 'Pour les commerces, PME et grandes entreprises.', 'For shops, SMEs and larger companies.'],
-  plBizPrice: ['100 $ US', '100 $ US', 'US$100'],
+  plBizPrice: ['200 $ US', '200 $ US', 'US$200'],
   plBizPriceSub: ['Frè ouvèti yon sèl fwa — pa gen abònman', 'Frais d’ouverture unique — sans abonnement', 'One-time opening fee — no subscription'],
-  plPopular: ['Pou pwofesyonèl', 'Pour les pros', 'For professionals'],
+  plPopular: ['Pi popilè', 'Le plus choisi', 'Most popular'],
   plOpenPersonal: ['Louvri yon kont pèsonèl', 'Ouvrir un compte personnel', 'Open a personal account'],
   plOpenBusiness: ['Louvri yon kont antrepriz', 'Ouvrir un compte entreprise', 'Open a business account'],
   p1: ['Transfè gratis e enstantane ant kliyan BLICPay', 'Transferts gratuits et instantanés entre clients BLICPay', 'Free, instant transfers between BLICPay clients'],
   p2: ['Depo pa MonCash, NatCash oswa nan ajans — depi 100 HTG', 'Dépôts par MonCash, NatCash ou en agence — dès 100 HTG', 'Deposits via MonCash, NatCash or at a branch — from 100 HTG'],
-  p3: ['Retrè jiska 80 000 HTG pa jou', 'Retraits jusqu’à 80 000 HTG par jour', 'Withdrawals up to 80,000 HTG per day'],
+  p3: ['Retrè nan ajans ak nan pwen sèvis BLICPay', 'Retraits en agence et dans les points de service BLICPay', 'Withdrawals at BLICPay branches and service points'],
   p4: ['Kòd QR pèsonèl pou resevwa lajan', 'QR code personnel pour recevoir de l’argent', 'Personal QR code to receive money'],
   p5: ['PIN, Face ID ak kòd pa imèl pou pwoteje kont ou', 'PIN, Face ID et code par e-mail pour protéger votre compte', 'PIN, Face ID and email codes to protect your account'],
   p6: ['Kat vityèl ak fizik — byento', 'Cartes virtuelle et physique — bientôt', 'Virtual and physical cards — coming soon'],
-  b1: ['Tout avantaj kont pèsonèl la', 'Tous les avantages du compte personnel', 'Everything in Personal'],
-  b2: ['Retrè jiska 500 000 HTG pa jou ak 5 milyon pa mwa', 'Retraits jusqu’à 500 000 HTG par jour et 5 millions par mois', 'Withdrawals up to 500,000 HTG per day and 5 million per month'],
+  b1: ['Tout avantaj kont pwo a', 'Tous les avantages du compte Pro', 'Everything in Pro'],
+  b2: ['Plafon ki pi wo yo, adapte pou volim antrepriz', 'Les plafonds les plus élevés, adaptés aux volumes d’entreprise', 'Our highest limits, built for company volumes'],
   b3: ['Resevwa peman kliyan ou yo pa QR, sou non antrepriz la', 'Encaissement par QR code au nom de votre entreprise', 'Collect customer payments by QR, in your business name'],
   b4: ['Badj « antrepriz verifye » kliyan ou yo wè', 'Badge « entreprise vérifiée » visible par vos clients', '“Verified business” badge your customers see'],
   b5: ['Tablo bò pwofesyonèl: vant, analiz, istorik', 'Tableau de bord pro : encaissements, analyses, historique', 'Pro dashboard: payments, analytics, history'],
   b6: ['Verifikasyon ofisyèl antrepriz la (rejis, benefisyè)', 'Vérification officielle de l’entreprise (registre, bénéficiaires)', 'Official business verification (registry, owners)'],
   b7: ['Kat antrepriz — byento', 'Cartes entreprise — bientôt', 'Business cards — coming soon'],
+  b8: ['Pou sosyete (S.A., SNC), ONG, asosyasyon ak kooperativ', 'Pour les sociétés (S.A., SNC), ONG, associations et coopératives', 'For companies (S.A., SNC), NGOs, associations and cooperatives'],
   cmpTitle: ['Konpare kont yo', 'Comparer les comptes', 'Compare accounts'],
   cmpFeature: ['', '', ''],
   r1: ['Frè ouvèti', 'Frais d’ouverture', 'Opening fee'],
@@ -67,7 +84,7 @@ const D = {
   vBizQr: ['QR antrepriz', 'QR entreprise', 'Business QR'],
   vKyc: ['Pyès idantite + selfi', 'Pièce d’identité + selfie', 'ID + selfie'],
   vKyb: ['Dokiman legal + rejis + benefisyè', 'Documents légaux + registre + bénéficiaires', 'Legal docs + registry + owners'],
-  plNote: ['Frè retrè 1,25 % la aplike sèlman sou lajan ki te depoze pa MonCash oswa NatCash. Frè ouvèti antrepriz la peye an goud selon tal BRH jou a.', 'Les frais de retrait de 1,25 % s’appliquent uniquement à l’argent déposé par MonCash ou NatCash. Les frais d’ouverture entreprise sont réglés en gourdes au taux BRH du jour.', 'The 1.25% withdrawal fee only applies to money deposited via MonCash or NatCash. The business opening fee is paid in gourdes at the daily BRH rate.'],
+  plNote: ['Frè retrè 1,25 % la aplike sèlman sou lajan ki te depoze pa MonCash oswa NatCash. Frè ouvèti kont pwo ak antrepriz yo peye an goud selon tal BRH jou a. Plafon kont ou yo parèt nan espas kliyan an apre ouvèti a.', 'Les frais de retrait de 1,25 % s’appliquent uniquement à l’argent déposé par MonCash ou NatCash. Les frais d’ouverture des comptes Pro et Entreprise sont réglés en gourdes au taux BRH du jour. Les plafonds de votre compte sont affichés dans votre espace client après l’ouverture.', 'The 1.25% withdrawal fee only applies to money deposited via MonCash or NatCash. Pro and Business opening fees are paid in gourdes at the daily BRH rate. Your account limits are shown in your client area once the account is open.'],
   login: ['Konekte', 'Se connecter', 'Sign in'],
   signup: ['Kreye kont', 'Créer un compte', 'Create account'],
   badge: ['Kont dijital • Kat • Transfè', 'Compte numérique • Carte • Transferts', 'Digital account • Card • Transfers'],
@@ -470,10 +487,11 @@ export default function Landing({ onStart, lang, setLang }) {
             <p className="mt-4 text-lg" style={{ color: C.muted }}>{t('plSub')}</p>
           </Reveal>
 
-          <div className="mt-14 grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          <div className="mt-14 grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {[
               { k: 'personal', name: 'plPersonal', who: 'plPersonalFor', price: 'plFree', priceSub: 'plFreeSub', items: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'], cta: 'plOpenPersonal', action: 'register', icon: Wallet, dark: false },
-              { k: 'business', name: 'plBusiness', who: 'plBusinessFor', price: 'plBizPrice', priceSub: 'plBizPriceSub', items: ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7'], cta: 'plOpenBusiness', action: 'register-business', icon: Building2, dark: true },
+              { k: 'pro', name: 'plPro', who: 'plProFor', price: 'plProPrice', priceSub: 'plBizPriceSub', items: ['pr1', 'pr2', 'pr3', 'pr4', 'pr5', 'pr6'], cta: 'plOpenPro', action: 'register-pro', icon: Briefcase, dark: true },
+              { k: 'business', name: 'plBusiness', who: 'plBusinessFor', price: 'plBizPrice', priceSub: 'plBizPriceSub', items: ['b1', 'b8', 'b2', 'b3', 'b4', 'b6', 'b7'], cta: 'plOpenBusiness', action: 'register-business', icon: Building2, dark: false },
             ].map((pl, n) => (
               <Reveal key={pl.k} delay={n * 120}>
                 <div className="lp2-card relative h-full rounded-[28px] p-8 flex flex-col" style={pl.dark
@@ -505,36 +523,37 @@ export default function Landing({ onStart, lang, setLang }) {
           </div>
 
           <Reveal>
-            <div className="mt-16 max-w-5xl mx-auto rounded-[24px] bg-white border overflow-hidden" style={{ borderColor: C.border }}>
-              <div className="grid grid-cols-[1.15fr_1fr_1fr] text-[12.5px] sm:text-sm font-bold" style={{ background: '#F9FBFD', borderBottom: `1px solid ${C.border}` }}>
+            <div className="mt-16 max-w-6xl mx-auto rounded-[24px] bg-white border overflow-x-auto" style={{ borderColor: C.border }}>
+              <div className="min-w-[620px]">
+              <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] text-[12.5px] sm:text-sm font-bold" style={{ background: '#F9FBFD', borderBottom: `1px solid ${C.border}` }}>
                 <div className="px-3 sm:px-5 py-4" style={{ ...display }}>{t('cmpTitle')}</div>
                 <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><Wallet size={16} color={C.navy} className="hidden sm:block" />{t('plPersonal')}</div>
+                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><Briefcase size={16} color={C.navy} className="hidden sm:block" />{t('plPro')}</div>
                 <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><Building2 size={16} color={C.navy} className="hidden sm:block" />{t('plBusiness')}</div>
               </div>
               {[
-                ['r1', t('plFree'), t('plBizPrice')],
-                ['r2', t('vNone'), t('vNone')],
-                ['r3', t('vFreeInstant'), t('vFreeInstant')],
-                ['r4', '100 HTG', '100 HTG'],
-                ['r5', '80 000 HTG', '500 000 HTG'],
-                ['r6', '300 000 HTG', '2 000 000 HTG'],
-                ['r7', '500 000 HTG', '5 000 000 HTG'],
-                ['r8', t('vFee'), t('vFee')],
-                ['r9', t('vPersonalQr'), t('vBizQr')],
-                ['r10', null, true],
-                ['r11', t('vKyc'), t('vKyb')],
-              ].map(([k, a, b], i) => (
-                <div key={k} className="grid grid-cols-[1.15fr_1fr_1fr] text-[12.5px] sm:text-[14.5px]" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
+                ['r1', t('plFree'), t('plProPrice'), t('plBizPrice')],
+                ['r2', t('vNone'), t('vNone'), t('vNone')],
+                ['r3', t('vFreeInstant'), t('vFreeInstant'), t('vFreeInstant')],
+                ['r4', '100 HTG', '100 HTG', '100 HTG'],
+                ['r12', t('vStd'), t('vHigh'), t('vHighest')],
+                ['r8', t('vFee'), t('vFee'), t('vFee')],
+                ['r9', t('vPersonalQr'), t('vProQr'), t('vBizQr')],
+                ['r10', null, true, true],
+                ['r11', t('vKyc'), t('vProCheck'), t('vKyb')],
+              ].map(([k, a, b, c], i) => (
+                <div key={k} className="grid grid-cols-[1.2fr_1fr_1fr_1fr] text-[12.5px] sm:text-[14px]" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
                   <div className="px-3 sm:px-5 py-3.5 font-medium" style={{ color: C.muted }}>{t(k)}</div>
-                  {[a, b].map((v, j) => (
+                  {[a, b, c].map((v, j) => (
                     <div key={j} className="px-3 sm:px-5 py-3.5 font-semibold" style={{ color: C.ink }}>
                       {v === true ? <Check size={18} color={C.mint} strokeWidth={3} /> : v === null ? <span style={{ color: '#B8C1CF' }}>—</span> : v}
                     </div>
                   ))}
                 </div>
               ))}
+              </div>
             </div>
-            <p className="mt-4 max-w-5xl mx-auto text-xs leading-relaxed" style={{ color: C.muted }}>{t('plNote')}</p>
+            <p className="mt-4 max-w-6xl mx-auto text-xs leading-relaxed" style={{ color: C.muted }}>{t('plNote')}</p>
           </Reveal>
         </div>
       </section>

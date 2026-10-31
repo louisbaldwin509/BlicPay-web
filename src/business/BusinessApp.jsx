@@ -685,8 +685,12 @@ function AccountPage({ ctx }) {
   const req = biz?.requirements || { required: [], optional: [] };
   const missing = biz?.missing || [];
 
-  const FIELDS = ['legalName', 'tradeName', 'legalForm', 'nif', 'patenteNumber', 'incorporationDate', 'sector', 'activityDescription', 'employeesRange', 'turnoverRange', 'expectedMonthlyVolume', 'sourceOfFunds', 'accountPurpose', 'address', 'city', 'businessPhone', 'businessEmail', 'website', 'repTitle'];
-  const SELECTS = { legalForm: [types?.legalForms, true], turnoverRange: [types?.turnoverRanges], employeesRange: [types?.employeeRanges], expectedMonthlyVolume: [types?.monthlyVolumes], sourceOfFunds: [types?.fundSources], accountPurpose: [types?.accountPurposes] };
+  const isPro = profile?.legalForm === 'pro';
+  const PRO_MODES = { physical: { label: { ht: t('mode_physical'), fr: t('mode_physical'), en: t('mode_physical') } }, online: { label: { ht: t('mode_online'), fr: t('mode_online'), en: t('mode_online') } } };
+  const PRO_FIELDS = ['legalName', 'proCategory', 'proMode', 'proPageUrl', 'nif', 'activityDescription', 'expectedMonthlyVolume', 'sourceOfFunds', 'address', 'city', 'businessPhone', 'businessEmail'];
+  const COMPANY_FIELDS = ['legalName', 'tradeName', 'legalForm', 'nif', 'patenteNumber', 'incorporationDate', 'sector', 'activityDescription', 'employeesRange', 'turnoverRange', 'expectedMonthlyVolume', 'sourceOfFunds', 'accountPurpose', 'address', 'city', 'businessPhone', 'businessEmail', 'website', 'repTitle'];
+  const FIELDS = isPro ? PRO_FIELDS.filter((k) => k !== 'proPageUrl' || profile?.proMode === 'online') : COMPANY_FIELDS;
+  const SELECTS = { proCategory: [types?.proCategories, true], proMode: [PRO_MODES, true], legalForm: [types?.legalForms, true], turnoverRange: [types?.turnoverRanges], employeesRange: [types?.employeeRanges], expectedMonthlyVolume: [types?.monthlyVolumes], sourceOfFunds: [types?.fundSources], accountPurpose: [types?.accountPurposes] };
 
   function valueLabel(k, v) {
     if (!v) return '—';
@@ -778,6 +782,7 @@ function AccountPage({ ctx }) {
 
   const missingLabels = missing.map((m) => {
     const [kind, key] = m.split(':');
+    if (key === 'activity_proof') return t('doc_activity_proof');
     return kind === 'field' ? t(`field_${key}`) : loc(types?.documents?.[key], lang) || key;
   });
 
@@ -817,7 +822,7 @@ function AccountPage({ ctx }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
               {FIELDS.map((k) => (
                 <div key={k}>
-                  <p className="text-xs font-medium mb-1" style={{ color: K.muted }}>{t(`field_${k}`)}</p>
+                  <p className="text-xs font-medium mb-1" style={{ color: K.muted }}>{t(isPro && k === 'legalName' ? 'field_tradeName' : `field_${k}`)}</p>
                   {editing ? (
                     SELECTS[k] ? (
                       <select value={form[k] || ''} onChange={(e) => setForm({ ...form, [k]: e.target.value })} className="w-full h-10 px-3 rounded-xl border text-sm bg-white" style={{ borderColor: K.border }}>
@@ -855,16 +860,23 @@ function AccountPage({ ctx }) {
             <p className="text-xs mb-4" style={{ color: K.muted }}>{t('doc_formats')}</p>
             <input ref={fileRef} type="file" accept="image/jpeg,image/png,application/pdf" className="hidden" onChange={onFile} />
             <div className="space-y-2.5">
-              {[...req.required.map((d) => [d, true]), ...req.optional.map((d) => [d, false])].map(([docType, isReq]) => {
+              {[...req.required.map((d) => [d, true]), ...(req.anyOf || []).map((d, i) => [d, 'any', i]), ...req.optional.map((d) => [d, false])].map(([docType, isReq, anyIdx]) => {
                 const d = docs.find((x) => x.docType === docType);
                 const st = docStatus(d);
                 return (
-                  <div key={docType} className="flex items-center gap-3 p-3 rounded-2xl border" style={{ borderColor: K.border }}>
+                  <React.Fragment key={docType}>
+                  {isReq === 'any' && anyIdx === 0 && (
+                    <div className="pt-3 pb-1">
+                      <p className="text-sm font-bold">{t('pro_proofs')}</p>
+                      <p className="text-xs" style={{ color: K.muted }}>{t('pro_proofs_sub')}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 p-3 rounded-2xl border" style={{ borderColor: K.border }}>
                     <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: d ? K.skySoft : K.bg, color: d ? K.navy : K.muted }}><FileText size={18} /></span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold">{loc(types?.documents?.[docType], lang) || docType}</p>
                       <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                        <span className="text-[11px] font-semibold" style={{ color: isReq ? K.danger : K.muted }}>{isReq ? t('required') : t('optional')}</span>
+                        <span className="text-[11px] font-semibold" style={{ color: isReq === 'any' ? K.amber : isReq ? K.danger : K.muted }}>{isReq === 'any' ? t('pro_one_of') : isReq ? t('required') : t('optional')}</span>
                         {st && <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-md" style={{ background: st[0], color: st[1] }}>{React.createElement(st[3], { size: 11 })}{st[2]}</span>}
                         {d?.note && <span className="text-[11px]" style={{ color: K.danger }}>{d.note}</span>}
                       </div>
@@ -876,6 +888,7 @@ function AccountPage({ ctx }) {
                       </button>
                     )}
                   </div>
+                  </React.Fragment>
                 );
               })}
             </div>
@@ -899,12 +912,12 @@ function AccountPage({ ctx }) {
 
         <div className="space-y-5">
           <Card className="p-5">
-            <h2 className="text-base font-bold mb-4">{t('representative')}</h2>
+            <h2 className="text-base font-bold mb-4">{isPro ? t('pro_holder') : t('representative')}</h2>
             <div className="flex items-center gap-3">
               <span className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white" style={{ background: K.navy }}>{initials(user?.fullName)}</span>
               <div className="min-w-0">
                 <p className="font-semibold truncate">{user?.fullName}</p>
-                <p className="text-xs" style={{ color: K.muted }}>{profile.repTitle || '—'} • {user?.phone}</p>
+                <p className="text-xs" style={{ color: K.muted }}>{isPro ? t('pro_holder') : profile.repTitle || '—'} • {user?.phone}</p>
               </div>
             </div>
             {biz?.repVerified ? (
@@ -913,16 +926,25 @@ function AccountPage({ ctx }) {
               <button onClick={onKyc} className="mt-4 w-full h-10 rounded-xl text-sm font-bold text-white" style={{ background: K.navy }}>{t('rep_verify')}</button>
             )}
           </Card>
-          {biz?.kyb?.enabled && bizStatus === 'draft' && (
+          {isPro && profile.proMode === 'online' && profile.proVerifyCode && bizStatus !== 'approved' && (
             <Card className="p-5">
-              <div className="flex items-center gap-2 mb-2"><ShieldCheck size={18} style={{ color: K.navy }} /><h2 className="text-base font-bold">{t('kyb_title')}</h2></div>
-              <p className="text-sm" style={{ color: K.muted }}>{t('kyb_need_file')}</p>
+              <h2 className="text-base font-bold mb-2">{t('pro_code_title')}</h2>
+              <div className="rounded-xl py-3 text-center text-xl font-bold tracking-widest" style={{ background: K.skySoft, color: K.navy }}>{profile.proVerifyCode}</div>
+              <p className="text-xs mt-2.5" style={{ color: K.muted }}>{t('pro_code_desc', { 0: profile.proPageUrl || '' })}</p>
             </Card>
           )}
-          {biz?.kyb?.enabled && bizStatus !== 'draft' && (
+          {(biz?.kyb?.enabled || isPro) && bizStatus === 'draft' && (
             <Card className="p-5">
-              <div className="flex items-center gap-2 mb-2"><ShieldCheck size={18} style={{ color: K.navy }} /><h2 className="text-base font-bold">{t('kyb_title')}</h2></div>
-              {biz.kyb.status === 'Approved' ? (
+              <div className="flex items-center gap-2 mb-2"><ShieldCheck size={18} style={{ color: K.navy }} /><h2 className="text-base font-bold">{isPro ? t('pro_fee_title') : t('kyb_title')}</h2></div>
+              <p className="text-sm" style={{ color: K.muted }}>{isPro ? t('pro_need_file') : t('kyb_need_file')}</p>
+            </Card>
+          )}
+          {(biz?.kyb?.enabled || isPro) && bizStatus !== 'draft' && !(isPro && bizStatus === 'approved') && (
+            <Card className="p-5">
+              <div className="flex items-center gap-2 mb-2"><ShieldCheck size={18} style={{ color: K.navy }} /><h2 className="text-base font-bold">{isPro ? t('pro_fee_title') : t('kyb_title')}</h2></div>
+              {isPro && biz.kyb.feePaid ? (
+                <p className="text-sm flex items-start gap-1.5" style={{ color: K.mint }}><CheckCircle2 size={16} className="shrink-0 mt-0.5" />{t('pro_paid_review')}</p>
+              ) : biz.kyb.status === 'Approved' ? (
                 <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: K.mint }}><CheckCircle2 size={16} />{t('kyb_done')}</p>
               ) : biz.kyb.status === 'Declined' ? (
                 <p className="text-sm" style={{ color: K.danger }}>{t('kyb_declined')}</p>
@@ -930,11 +952,11 @@ function AccountPage({ ctx }) {
                 <p className="text-sm" style={{ color: K.muted }}>{t('kyb_review')}</p>
               ) : (
                 <>
-                  <p className="text-sm" style={{ color: K.muted }}>{t('kyb_desc')}</p>
+                  <p className="text-sm" style={{ color: K.muted }}>{isPro ? t('pro_fee_desc') : t('kyb_desc')}</p>
                   {!biz.kyb.feePaid && biz.kyb.fee > 0 ? (
                     <>
                       <div className="mt-3 rounded-xl p-3 flex items-center justify-between text-sm" style={{ background: K.skySoft }}>
-                        <span style={{ color: K.navy }}>{t('kyb_fee')}</span>
+                        <span style={{ color: K.navy }}>{isPro ? t('pro_fee_title') : t('kyb_fee')}</span>
                         <span className="text-right" style={{ color: K.navy }}>
                           <span className="block font-bold">{biz.kyb.feeUsd ? `${biz.kyb.feeUsd} $ US` : `${biz.kyb.fee.toLocaleString('fr-FR')} HTG`}</span>
                           {biz.kyb.feeUsd ? <span className="block text-xs">≈ {biz.kyb.fee.toLocaleString('fr-FR')} HTG</span> : null}
