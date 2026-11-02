@@ -1400,7 +1400,7 @@ export default function BlicPayApp() {
         body: { identifier: loginId.trim(), password: authForm.password, deviceId: getDeviceId() },
       });
       if (r.otpRequired) { setOtp({ challengeId: r.challengeId, email: r.email }); setOtpCode(''); setOtpCooldown(60); return; }
-      await enterSession(r.token, r.user);
+      await enterSession(r.token, r.user, authForm.password);
     } catch (err) {
       if (err.code === 'PRIVATE_BETA') setBetaNotice(err.message); else setAuthError(err.message);
     } finally {
@@ -1409,7 +1409,7 @@ export default function BlicPayApp() {
   }
 
   // Louvri sesyon an apre koneksyon (dirèk oswa apre kòd imèl la).
-  async function enterSession(newToken, newUser) {
+  async function enterSession(newToken, newUser, password) {
       setOtp(null);
       setToken(newToken);
       setUser(newUser);
@@ -1418,6 +1418,13 @@ export default function BlicPayApp() {
       try {
         localStorage.setItem('blicpay_session', JSON.stringify({ token: newToken, user: newUser }));
       } catch { /* localStorage endispoinib — kontinye san sove sesyon an */ }
+      // Sou sit la: modpas → (kòd imèl si nouvo aparèy) → kòd PIN. Si kliyan an poko gen PIN, li kreye l kounye a.
+      try {
+        const { hasPin: hp } = await apiFetch('/pin/status', { token: newToken });
+        setHasPin(hp);
+        if (hp) { setAppLocked(true); setPinScreen('unlock'); setPinDigits(''); }
+        else if (password) { setPinSetupPassword(password); setPinScreen('setup'); setPinDigits(''); }
+      } catch { /* sèvè a pa reponn — PIN ap mande pita */ }
       await loadWallet(newToken);
       await loadKycStatusSilently(newToken);
       await loadVerificationRequests(newToken);
@@ -1430,7 +1437,7 @@ export default function BlicPayApp() {
     setAuthLoading(true);
     try {
       const r = await apiFetch('/auth/login/verify', { method: 'POST', body: { challengeId: otp.challengeId, code: otpCode, deviceId: getDeviceId(), deviceLabel: deviceLabel() } });
-      await enterSession(r.token, r.user);
+      await enterSession(r.token, r.user, authForm.password);
     } catch (err) {
       if (err.code === 'PRIVATE_BETA') { setOtp(null); setBetaNotice(err.message); } else setAuthError(err.message);
     } finally {
