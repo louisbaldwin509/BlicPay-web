@@ -24,7 +24,7 @@ import {
   ArrowLeftRight, Plus, Check, Copy, ChevronRight, ArrowLeft, ShieldCheck,
   DollarSign, Smartphone, Banknote, X, AlertCircle, Building2, Eye, EyeOff, RefreshCw, Users, BadgeCheck, PiggyBank,
   Lock, Calendar, Percent, TrendingUp, HandCoins, Globe, Camera, User, LogOut, Phone, Mail, Search, Star, FileText, QrCode, Landmark, Briefcase
-} from 'lucide-react';
+, HelpCircle } from 'lucide-react';
 
 // Coupe l'URL réelle de ton backend ici une fois qu'il est déployé
 // (Railway, Render, etc.) — ex: "https://blicpay-api.up.railway.app"
@@ -2726,6 +2726,14 @@ export default function BlicPayApp() {
   // Sou telefòn, patikilye yo kenbe tablo bò mobil la (app la la pou sa).
   const isPersonalDesk = isDesktop && user?.accountType !== 'business';
   const isBizDash = view === 'dashboard' && !!token && token !== DEMO_TOKEN && (user?.accountType === 'business' || isPersonalDesk);
+  // Lòt ekran yo (sipò, paramèt, depo, transfè...) sou ÒDINATÈ: ba anwo lajè + kontni nan yon kat santre.
+  const deskShell = isDesktop && !!token && token !== DEMO_TOKEN && !isBizDash && !['landing', 'auth', 'forgotpassword'].includes(view);
+  const deskNav = [
+    ['dashboard', tr('navHome'), Home],
+    ['history', tr('navHistory'), Clock],
+    ['transfer', tr('navTransfer'), ArrowLeftRight],
+    ['settings', tr('navSettings'), Settings],
+  ];
 
   return (
     <div style={{ background: C.bg, minHeight: '100%', color: C.ink }} className="w-full">
@@ -2760,7 +2768,37 @@ export default function BlicPayApp() {
         </div>
       )}
 
-      <div className={view === 'landing' || isBizDash || view === 'auth' || view === 'forgotpassword' ? 'w-full min-h-full' : 'max-w-md mx-auto min-h-full'} style={{ background: C.bg }}>
+      {deskShell && (
+        <header className="sticky top-0 z-40 border-b backdrop-blur" style={{ background: 'rgba(255,255,255,.92)', borderColor: C.border }}>
+          <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center gap-3">
+            <button onClick={() => setView('dashboard')} aria-label="BLICPay"><img src="/brand/logo-full.png" alt="BLICPay" className="h-8 w-auto" /></button>
+            <nav className="mx-auto flex items-center gap-1 p-1 rounded-full" style={{ background: C.bg }}>
+              {deskNav.map(([id, label, Icon]) => (
+                <button key={id} onClick={() => setView(id)} className="px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1.5 transition"
+                  style={view === id ? { background: C.navy, color: '#fff' } : { color: C.muted }}>
+                  <Icon size={15} />{label}
+                </button>
+              ))}
+            </nav>
+            <div className="flex items-center gap-1.5">
+              <button onClick={() => setShowLangPicker((v) => !v)} className="w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: C.border }} aria-label={tr('langLabel')}><Globe size={17} /></button>
+              <button onClick={() => { setSupportSent(false); setView('support'); }} className="w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: C.border, ...(view === 'support' ? { background: C.navy, color: '#fff' } : {}) }} aria-label="Support"><HelpCircle size={17} /></button>
+              <div className="flex items-center gap-2 pl-1 pr-3 h-10 rounded-full border" style={{ borderColor: C.border }}>
+                <span className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+                  {(user?.fullName || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
+                </span>
+                <span className="text-left leading-tight">
+                  <span className="block text-sm font-semibold max-w-[150px] truncate">{user?.fullName}</span>
+                  <span className="block text-[11px]" style={{ color: C.muted }}>{user?.clientId}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </header>
+      )}
+
+      <div className={view === 'landing' || isBizDash || view === 'auth' || view === 'forgotpassword' ? 'w-full min-h-full' : deskShell ? 'max-w-2xl mx-auto my-8 rounded-[28px] border pb-6 overflow-visible' : 'max-w-md mx-auto min-h-full'}
+        style={deskShell ? { background: C.bg, borderColor: C.border, boxShadow: '0 20px 50px -30px rgba(11,27,51,.35)' } : { background: C.bg }}>
         {view === 'landing' ? (
           <Landing onStart={(m) => { setRegKind(m === 'register-business' ? 'business' : m === 'register-pro' ? 'pro' : 'personal'); setAuthMode(m.startsWith('register') ? 'register' : 'login'); setRegisterStep(1); setAuthError(''); setBetaNotice(''); setView('auth'); }} lang={lang} setLang={setLang} />
         ) : (
@@ -2784,7 +2822,7 @@ export default function BlicPayApp() {
         )}
 
         {/* HEADER */}
-        {view !== 'auth' && view !== 'forgotpassword' && !isBizDash && (
+        {view !== 'auth' && view !== 'forgotpassword' && !isBizDash && !deskShell && (
           <div className="flex items-center justify-between px-5 pt-6 pb-2">
             <div className="flex items-center gap-2">
               <img src="/brand/logo-full.png" alt="BLICPay" style={{ height: 36, width: 'auto' }} />
