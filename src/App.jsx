@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import BusinessApp from './business/BusinessApp.jsx';
+import BusinessApp, { THEMES } from './business/BusinessApp.jsx';
 import ReceiveQR from './ReceiveQR.jsx';
 import Landing from './Landing.jsx';
 import { CATEGORY_ART } from './CategoryArt.jsx';
@@ -161,6 +161,7 @@ const C = {
   danger: '#D14343',
 };
 
+const C0 = { ...C }; // koulè orijinal yo (tèm kont yo chanje navy/sky/bg sou òdinatè)
 const fontDisplay = { fontFamily: "'Manrope', sans-serif" };
 const fontMono = { fontFamily: "'IBM Plex Mono', monospace" };
 
@@ -1151,6 +1152,8 @@ export default function BlicPayApp() {
     mq.addEventListener?.('change', on);
     return () => mq.removeEventListener?.('change', on);
   }, []);
+  const [deskPage, setDeskPage] = useState('dashboard'); // paj tablo bò òdinatè a
+  const [deskMode, setDeskMode] = useState(null); // 'personal' | 'pro' | 'company' (BusinessApp di l)
   const [accountVerified, setAccountVerified] = useState(false); // badge PÈMANAN kont lan (User.verified) — pa depann de dènye demand lan
   const [verificationRequests, setVerificationRequests] = useState([]); // demand admin voye pou dokiman siplemantè (prèv adrès, elt.) — apa de KYC
   const [vrActive, setVrActive] = useState(null); // demand ki louvri pou telechajman kounye a
@@ -2728,12 +2731,12 @@ export default function BlicPayApp() {
   const isBizDash = view === 'dashboard' && !!token && token !== DEMO_TOKEN && (user?.accountType === 'business' || isPersonalDesk);
   // Lòt ekran yo (sipò, paramèt, depo, transfè...) sou ÒDINATÈ: ba anwo lajè + kontni nan yon kat santre.
   const deskShell = isDesktop && !!token && token !== DEMO_TOKEN && !isBizDash && !['landing', 'auth', 'forgotpassword'].includes(view);
-  const deskNav = [
-    ['dashboard', tr('navHome'), Home],
-    ['history', tr('navHistory'), Clock],
-    ['transfer', tr('navTransfer'), ArrowLeftRight],
-    ['settings', tr('navSettings'), Settings],
-  ];
+  // Menm koulè ak tablo bò a (Pèsonèl ble, Pwo lò, Antrepriz nwa) pou ekran sa yo.
+  if (deskShell || isBizDash) {
+    const th = THEMES[deskMode || (user?.accountType === 'business' ? 'company' : 'personal')];
+    Object.assign(C, { navy: th.navy, sky: th.sky, bg: th.bg });
+  } else Object.assign(C, C0);
+
 
   return (
     <div style={{ background: C.bg, minHeight: '100%', color: C.ink }} className="w-full">
@@ -2768,37 +2771,9 @@ export default function BlicPayApp() {
         </div>
       )}
 
-      {deskShell && (
-        <header className="sticky top-0 z-40 border-b backdrop-blur" style={{ background: 'rgba(255,255,255,.92)', borderColor: C.border }}>
-          <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center gap-3">
-            <button onClick={() => setView('dashboard')} aria-label="BLICPay"><img src="/brand/logo-full.png" alt="BLICPay" className="h-8 w-auto" /></button>
-            <nav className="mx-auto flex items-center gap-1 p-1 rounded-full" style={{ background: C.bg }}>
-              {deskNav.map(([id, label, Icon]) => (
-                <button key={id} onClick={() => setView(id)} className="px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1.5 transition"
-                  style={view === id ? { background: C.navy, color: '#fff' } : { color: C.muted }}>
-                  <Icon size={15} />{label}
-                </button>
-              ))}
-            </nav>
-            <div className="flex items-center gap-1.5">
-              <button onClick={() => setShowLangPicker((v) => !v)} className="w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: C.border }} aria-label={tr('langLabel')}><Globe size={17} /></button>
-              <button onClick={() => { setSupportSent(false); setView('support'); }} className="w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: C.border, ...(view === 'support' ? { background: C.navy, color: '#fff' } : {}) }} aria-label="Support"><HelpCircle size={17} /></button>
-              <div className="flex items-center gap-2 pl-1 pr-3 h-10 rounded-full border" style={{ borderColor: C.border }}>
-                <span className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
-                  {(user?.fullName || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
-                </span>
-                <span className="text-left leading-tight">
-                  <span className="block text-sm font-semibold max-w-[150px] truncate">{user?.fullName}</span>
-                  <span className="block text-[11px]" style={{ color: C.muted }}>{user?.clientId}</span>
-                </span>
-              </div>
-            </div>
-          </div>
-        </header>
-      )}
-
-      <div className={view === 'landing' || isBizDash || view === 'auth' || view === 'forgotpassword' ? 'w-full min-h-full' : deskShell ? 'max-w-2xl mx-auto my-8 rounded-[28px] border pb-6 overflow-visible' : 'max-w-md mx-auto min-h-full'}
-        style={deskShell ? { background: C.bg, borderColor: C.border, boxShadow: '0 20px 50px -30px rgba(11,27,51,.35)' } : { background: C.bg }}>
+      {(() => { const content = (
+      <div className={view === 'landing' || isBizDash || view === 'auth' || view === 'forgotpassword' ? 'w-full min-h-full' : deskShell ? 'max-w-2xl mx-auto rounded-[28px] border pb-6' : 'max-w-md mx-auto min-h-full'}
+        style={deskShell ? { background: '#fff', borderColor: C.border, boxShadow: '0 20px 50px -30px rgba(11,27,51,.35)' } : { background: C.bg }}>
         {view === 'landing' ? (
           <Landing onStart={(m) => { setRegKind(m === 'register-business' ? 'business' : m === 'register-pro' ? 'pro' : 'personal'); setAuthMode(m.startsWith('register') ? 'register' : 'login'); setRegisterStep(1); setAuthError(''); setBetaNotice(''); setView('auth'); }} lang={lang} setLang={setLang} />
         ) : (
@@ -2818,6 +2793,7 @@ export default function BlicPayApp() {
             onChangePassword={() => { setPwForm({ current: '', next: '', confirm: '' }); setPwError(''); setView('changepassword'); }}
             onLogout={logout}
             personal={isPersonalDesk} verified={accountVerified} kycPending={kycStatus === 'annatant'}
+            initialPage={deskPage} onMode={setDeskMode}
           />
         )}
 
@@ -5735,6 +5711,19 @@ export default function BlicPayApp() {
       </>
       )}
       </div>
+      ); return deskShell ? (
+        <BusinessApp
+          shell onMode={setDeskMode} onPage={(id) => { setDeskPage(id); setView('dashboard'); }}
+          token={token} user={user} lang={lang} setLang={setLang} balance={balance} apiFetch={apiFetch} flash={flash}
+          notifications={notifications} unreadCount={unreadCount} showNotif={showNotifPanel} onToggleNotif={openNotifPanel}
+          onDeposit={startDeposit} onWithdraw={startWithdraw} onTransfer={() => setView('transfer')}
+          onKyc={() => { setKycStep('entwo'); setView('kyc'); }}
+          onSettings={() => setView('settings')} onSupport={() => { setSupportSent(false); setView('support'); }}
+          onChangePassword={() => { setPwForm({ current: '', next: '', confirm: '' }); setPwError(''); setView('changepassword'); }}
+          onLogout={logout}
+          personal={user?.accountType !== 'business'} verified={accountVerified} kycPending={kycStatus === 'annatant'}
+        >{content}</BusinessApp>
+      ) : content; })()}
     </div>
   );
 }

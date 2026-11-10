@@ -34,7 +34,7 @@ const K = {
 //  - Pèsonèl : ble syèl, klè — kat Basic
 //  - Pwo     : ankr + lò — kat Standard
 //  - Antrepriz: nwa premium + syan — kat Premium
-const THEMES = {
+export const THEMES = {
   // (3d: imaj 3D pou chak kalite kont — /public/3d, Fluent Emoji MIT)
   personal: { hero: 'money_bag', plan: 'shield', navy: '#1B6FD0', navyDeep: '#0D4A9E', sky: '#3CC4F0', skySoft: '#E7F4FE', bg: '#F1F6FC', label: ['Pèsonèl', 'Personnel', 'Personal'], card: 'ocean' },
   pro: { hero: 'shopping_bags', plan: 'crown', navy: '#22304A', navyDeep: '#131A29', sky: '#F2A93B', skySoft: '#FCF1DE', bg: '#F7F5F0', label: ['Pwo', 'Pro', 'Pro'], card: 'world' },
@@ -1169,10 +1169,13 @@ export default function BusinessApp({
   onDeposit, onWithdraw, onTransfer, onKyc, onSettings, onSupport, onChangePassword, onLogout,
   // Kont patikilye sou òdinatè: menm tablo bò lajè a, san pati antrepriz yo.
   personal = false, verified = false, kycPending = false,
+  // shell: sèlman ba anwo + ray la, ak `children` kòm kontni (lòt ekran sit la sou òdinatè).
+  shell = false, children = null, initialPage = 'dashboard', onPage, onMode,
 }) {
   const [biz, setBiz] = useState(null); // repons /business/me
   // Mòd: 'personal' | 'pro' | 'company' — tèks yo chanje dapre mòd la ("personal:wallet", "pro:wallet"...).
   const mode = personal ? 'personal' : biz?.business?.legalForm === 'pro' ? 'pro' : 'company';
+  useEffect(() => { onMode?.(mode); }, [mode]); // App.jsx aplike menm koulè yo sou lòt ekran yo
   // Aplike tèm kont lan (K se palèt tout paj yo itilize).
   const theme = THEMES[mode];
   Object.assign(K, { navy: theme.navy, navyDeep: theme.navyDeep, sky: theme.sky, skySoft: theme.skySoft, bg: theme.bg });
@@ -1180,7 +1183,9 @@ export default function BusinessApp({
     const base = makeT(lang);
     return (key, vars) => { const k = `${mode}:${key}`; const v = base(k, vars); return v !== k ? v : base(key, vars); };
   }, [lang, mode]);
-  const [page, setPage] = useState('dashboard');
+  const [page, setPageState] = useState(initialPage || 'dashboard');
+  const setPage = (id) => (shell ? onPage?.(id) : setPageState(id));
+  const activePage = shell ? null : page;
   const [ops, setOps] = useState([]);
   const [usdRate, setUsdRate] = useState(null);
   const [types, setTypes] = useState(null);
@@ -1191,6 +1196,12 @@ export default function BusinessApp({
   const [search, setSearch] = useState('');
 
   async function load() {
+    if (shell) {
+      // Mòd "shell": sèlman non antrepriz la pou ba anwo a.
+      if (!personal) { try { const me = await apiFetch('/business/me', { token }); setBiz(me?.business ? me : null); } catch { /* */ } }
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const to = new Date();
     const from = new Date(to.getFullYear(), to.getMonth() - 11, 1);
@@ -1232,7 +1243,7 @@ export default function BusinessApp({
   }
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [token]);
-  useEffect(() => { window.scrollTo?.(0, 0); }, [page]);
+  useEffect(() => { window.scrollTo?.(0, 0); }, [page, shell]);
 
   // ---------- Kalkil ----------
   const profile = biz?.business;
@@ -1325,7 +1336,7 @@ export default function BusinessApp({
           {NAV.map((n) => (
             <button key={n.id} onClick={() => setPage(n.id)}
               className="px-4 py-2 rounded-full text-sm font-semibold transition"
-              style={page === n.id ? { background: K.navy, color: '#fff' } : { color: K.muted }}>
+              style={activePage === n.id ? { background: K.navy, color: '#fff' } : { color: K.muted }}>
               {n.label}
             </button>
           ))}
@@ -1410,7 +1421,7 @@ export default function BusinessApp({
       {NAV.map((n) => (
         <button key={n.id} onClick={() => setPage(n.id)} title={n.label}
           className="w-11 h-11 rounded-2xl flex items-center justify-center transition"
-          style={page === n.id ? { background: K.navy, color: '#fff' } : { color: K.muted, background: K.card, border: `1px solid ${K.border}` }}>
+          style={activePage === n.id ? { background: K.navy, color: '#fff' } : { color: K.muted, background: K.card, border: `1px solid ${K.border}` }}>
           <n.icon size={19} />
         </button>
       ))}
@@ -1427,8 +1438,8 @@ export default function BusinessApp({
       <div className="flex">
         {NAV.map((n) => (
           <button key={n.id} onClick={() => setPage(n.id)} className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-semibold"
-            style={{ color: page === n.id ? K.navy : K.muted }}>
-            <span className="w-10 h-7 rounded-full flex items-center justify-center" style={page === n.id ? { background: K.skySoft } : {}}><n.icon size={18} /></span>
+            style={{ color: activePage === n.id ? K.navy : K.muted }}>
+            <span className="w-10 h-7 rounded-full flex items-center justify-center" style={activePage === n.id ? { background: K.skySoft } : {}}><n.icon size={18} /></span>
             {n.label}
           </button>
         ))}
@@ -1461,11 +1472,12 @@ export default function BusinessApp({
       <div className="max-w-[1440px] mx-auto flex">
         {sideRail}
         <main className="flex-1 min-w-0 px-4 lg:px-6 xl:pl-2 pt-6 pb-28 md:pb-10">
-          {page === 'dashboard' && <DashboardPage ctx={ctx} />}
-          {page === 'analytics' && <AnalyticsPage ctx={ctx} />}
-          {page === 'activity' && <ActivityPage ctx={ctx} />}
-          {page === 'card' && <CardPage ctx={ctx} />}
-          {page === 'account' && (personal ? <PersonalAccountPage ctx={ctx} /> : <AccountPage ctx={ctx} />)}
+          {shell && <div className="max-w-2xl mx-auto">{children}</div>}
+          {!shell && page === 'dashboard' && <DashboardPage ctx={ctx} />}
+          {!shell && page === 'analytics' && <AnalyticsPage ctx={ctx} />}
+          {!shell && page === 'activity' && <ActivityPage ctx={ctx} />}
+          {!shell && page === 'card' && <CardPage ctx={ctx} />}
+          {!shell && page === 'account' && (personal ? <PersonalAccountPage ctx={ctx} /> : <AccountPage ctx={ctx} />)}
         </main>
       </div>
       {bottomNav}
