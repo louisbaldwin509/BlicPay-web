@@ -30,6 +30,15 @@ const K = {
   danger: '#D14343',
   dangerSoft: '#FCEBEB',
 };
+// Chak kalite kont gen pwòp idantite vizyèl li (koulè prensipal + aksan + fon):
+//  - Pèsonèl : ble syèl, klè — kat Basic
+//  - Pwo     : ankr + lò — kat Standard
+//  - Antrepriz: nwa premium + syan — kat Premium
+const THEMES = {
+  personal: { navy: '#1B6FD0', navyDeep: '#0D4A9E', sky: '#3CC4F0', skySoft: '#E7F4FE', bg: '#F1F6FC', label: ['Pèsonèl', 'Personnel', 'Personal'], card: 'ocean' },
+  pro: { navy: '#22304A', navyDeep: '#131A29', sky: '#F2A93B', skySoft: '#FCF1DE', bg: '#F7F5F0', label: ['Pwo', 'Pro', 'Pro'], card: 'world' },
+  company: { navy: '#101828', navyDeep: '#05080F', sky: '#2EC5E8', skySoft: '#E6F3F7', bg: '#F1F3F6', label: ['Antrepriz', 'Entreprise', 'Business'], card: 'shield' },
+};
 
 const METHOD_NAMES = { moncash: 'MonCash', natcash: 'NatCash', usdt: 'USDT', zelle: 'Zelle', biwo: null };
 const DAY = 86400000;
@@ -244,10 +253,9 @@ function BarList({ rows, color, t }) {
 // ---------------------------------------------------------------------------
 function BizCard({ variant = 'shield', name, number = '**** **** **** ****', small = false }) {
   const img = { ocean: '/cards/card-ocean.jpg', world: '/cards/card-world.jpg', shield: '/cards/card-shield.jpg' }[variant];
-  const dark = variant !== 'world';
   return (
     <div className="relative w-full overflow-hidden rounded-2xl shadow-md" style={{ aspectRatio: '1.586', backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-      <div className={`absolute inset-x-0 bottom-0 ${small ? 'p-3' : 'p-4'}`} style={{ color: dark ? '#fff' : K.navyDeep }}>
+      <div className={`absolute inset-x-0 bottom-0 ${small ? 'p-3' : 'p-4'}`} style={{ color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,.45)' }}>
         <p className={`${small ? 'text-xs' : 'text-sm'} font-mono tracking-widest opacity-90`}>{number}</p>
         <p className={`${small ? 'text-[11px]' : 'text-xs'} font-semibold uppercase tracking-wide mt-1 truncate`}>{name}</p>
       </div>
@@ -412,7 +420,7 @@ function DashboardPage({ ctx }) {
               <h2 className="text-base font-bold">{t('nav_card')}</h2>
               <span className="text-[11px] font-semibold px-2 py-1 rounded-full" style={{ background: K.amberSoft, color: K.amber }}>{t('card_soon')}</span>
             </div>
-            <BizCard variant={personal ? 'ocean' : 'shield'} name={bizName} />
+            <BizCard variant={ctx.theme.card} name={bizName} />
             <div className="grid grid-cols-2 gap-2 mt-4">
               <button onClick={onDeposit} className="h-10 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 text-white" style={{ background: K.navy }}><Plus size={15} />{t('deposit')}</button>
               <button onClick={onTransfer} className="h-10 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 border" style={{ borderColor: K.border }}><Send size={15} />{t('transfer')}</button>
@@ -1149,6 +1157,9 @@ export default function BusinessApp({
   const [biz, setBiz] = useState(null); // repons /business/me
   // Mòd: 'personal' | 'pro' | 'company' — tèks yo chanje dapre mòd la ("personal:wallet", "pro:wallet"...).
   const mode = personal ? 'personal' : biz?.business?.legalForm === 'pro' ? 'pro' : 'company';
+  // Aplike tèm kont lan (K se palèt tout paj yo itilize).
+  const theme = THEMES[mode];
+  Object.assign(K, { navy: theme.navy, navyDeep: theme.navyDeep, sky: theme.sky, skySoft: theme.skySoft, bg: theme.bg });
   const t = useMemo(() => {
     const base = makeT(lang);
     return (key, vars) => { const k = `${mode}:${key}`; const v = base(k, vars); return v !== k ? v : base(key, vars); };
@@ -1289,6 +1300,11 @@ export default function BusinessApp({
     <header className="sticky top-0 z-40 border-b backdrop-blur" style={{ background: 'rgba(255,255,255,.92)', borderColor: K.border }}>
       <div className="max-w-[1440px] mx-auto px-4 lg:px-6 h-16 flex items-center gap-3">
         <img src="/brand/logo-full.png" alt="BLICPay" className="h-8 w-auto" />
+        <span className="hidden sm:inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-xs font-bold"
+          style={mode === 'personal' ? { background: K.skySoft, color: K.navy } : mode === 'pro' ? { background: 'linear-gradient(135deg,#FFC85A,#E8901C)', color: '#2A1A00' } : { background: K.navy, color: '#fff' }}>
+          {mode === 'personal' ? <User size={13} /> : mode === 'pro' ? <BadgeCheck size={13} /> : <Building2 size={13} />}
+          {theme.label[{ ht: 0, fr: 1, en: 2 }[lang] ?? 1]}
+        </span>
         <nav className="hidden md:flex mx-auto items-center gap-1 p-1 rounded-full" style={{ background: K.bg }}>
           {NAV.map((n) => (
             <button key={n.id} onClick={() => setPage(n.id)}
@@ -1420,7 +1436,7 @@ export default function BusinessApp({
 
 
 
-  const ctx = { personal, mode, usd, verified, kycPending, t, lang, user, token, apiFetch, flash, balance, ops, months, stats, recentPeople, types, biz, profile, bizStatus, approved, bizName, loading, load, search, setSearch, setPage, setShowReceive, describe, dateFmt, timeFmt, hello, firstName, isIn, isOut, pageHeader, onDeposit, onWithdraw, onTransfer, onKyc, onSettings, onSupport, onChangePassword, onLogout };
+  const ctx = { personal, mode, theme, usd, verified, kycPending, t, lang, user, token, apiFetch, flash, balance, ops, months, stats, recentPeople, types, biz, profile, bizStatus, approved, bizName, loading, load, search, setSearch, setPage, setShowReceive, describe, dateFmt, timeFmt, hello, firstName, isIn, isOut, pageHeader, onDeposit, onWithdraw, onTransfer, onKyc, onSettings, onSupport, onChangePassword, onLogout };
 
   return (
     <div className="min-h-screen w-full" style={{ background: K.bg, color: K.ink }} onClick={() => { if (menuOpen) setMenuOpen(false); if (langOpen) setLangOpen(false); }}>
