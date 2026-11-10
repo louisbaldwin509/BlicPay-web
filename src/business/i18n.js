@@ -164,6 +164,8 @@ const D = {
   'personal:nav_account': ['Pwofil', 'Profil', 'Profile'],
   'personal:card_soon': ['Kat — byento', 'Carte — bientôt', 'Card — coming soon'],
   'pro:card_soon': ['Kat Pwo — byento', 'Carte Pro — bientôt', 'Pro card — coming soon'],
+  promo_send_title: ['Voye lajan an 2 segonn', 'Envoyez de l’argent en 2 secondes', 'Send money in 2 seconds'],
+  promo_send_body: ['Transfè BLICPay a BLICPay, gratis e imedya.', 'Transferts BLICPay à BLICPay, gratuits et instantanés.', 'BLICPay-to-BLICPay transfers, free and instant.'],
   pa_title: ['Pwofil mwen', 'Mon profil', 'My profile'],
   pa_sub: ['Enfòmasyon kont ou ak sekirite.', 'Les informations de votre compte et la sécurité.', 'Your account details and security.'],
   pa_name: ['Non konplè', 'Nom complet', 'Full name'],

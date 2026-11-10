@@ -35,9 +35,10 @@ const K = {
 //  - Pwo     : ankr + lò — kat Standard
 //  - Antrepriz: nwa premium + syan — kat Premium
 const THEMES = {
-  personal: { navy: '#1B6FD0', navyDeep: '#0D4A9E', sky: '#3CC4F0', skySoft: '#E7F4FE', bg: '#F1F6FC', label: ['Pèsonèl', 'Personnel', 'Personal'], card: 'ocean' },
-  pro: { navy: '#22304A', navyDeep: '#131A29', sky: '#F2A93B', skySoft: '#FCF1DE', bg: '#F7F5F0', label: ['Pwo', 'Pro', 'Pro'], card: 'world' },
-  company: { navy: '#101828', navyDeep: '#05080F', sky: '#2EC5E8', skySoft: '#E6F3F7', bg: '#F1F3F6', label: ['Antrepriz', 'Entreprise', 'Business'], card: 'shield' },
+  // (3d: imaj 3D pou chak kalite kont — /public/3d, Fluent Emoji MIT)
+  personal: { hero: 'money_bag', plan: 'shield', navy: '#1B6FD0', navyDeep: '#0D4A9E', sky: '#3CC4F0', skySoft: '#E7F4FE', bg: '#F1F6FC', label: ['Pèsonèl', 'Personnel', 'Personal'], card: 'ocean' },
+  pro: { hero: 'shopping_bags', plan: 'crown', navy: '#22304A', navyDeep: '#131A29', sky: '#F2A93B', skySoft: '#FCF1DE', bg: '#F7F5F0', label: ['Pwo', 'Pro', 'Pro'], card: 'world' },
+  company: { hero: 'office_building', plan: 'gem_stone', navy: '#101828', navyDeep: '#05080F', sky: '#2EC5E8', skySoft: '#E6F3F7', bg: '#F1F3F6', label: ['Antrepriz', 'Entreprise', 'Business'], card: 'shield' },
 };
 
 const METHOD_NAMES = { moncash: 'MonCash', natcash: 'NatCash', usdt: 'USDT', zelle: 'Zelle', biwo: null };
@@ -266,8 +267,13 @@ function BizCard({ variant = 'shield', name, number = '**** **** **** ****', sma
 // ---------------------------------------------------------------------------
 // Konpozan prensipal
 // ---------------------------------------------------------------------------
+// Imaj 3D (ak animasyon flote).
+function Img3D({ name, size = 40, className = '', style }) {
+  return <img src={`/3d/${name}.png`} alt="" aria-hidden="true" draggable="false" className={`select-none pointer-events-none ${className}`} style={{ width: size, height: size, ...style }} />;
+}
+
 function DashboardPage({ ctx }) {
-  const { personal, usd } = ctx;
+  const { personal, usd, theme } = ctx;
   const { t, lang, user, token, apiFetch, flash, balance, ops, months, stats, recentPeople, types, biz, profile, bizStatus, approved, bizName, loading, load, search, setSearch, setPage, setShowReceive, describe, dateFmt, timeFmt, hello, firstName, isIn, isOut, pageHeader, onDeposit, onWithdraw, onTransfer, onKyc, onSettings, onSupport, onChangePassword, onLogout } = ctx;
   const [mode, setMode] = useState('in');
   const recent = ops.slice(0, 6);
@@ -297,12 +303,12 @@ function DashboardPage({ ctx }) {
             {/* Pòtfèy */}
             <div className="md:col-span-5 rounded-3xl p-5 text-white relative overflow-hidden" style={{ background: `linear-gradient(145deg, ${K.navy} 0%, ${K.navyDeep} 100%)` }}>
               <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full opacity-20" style={{ background: K.sky }} />
+              <Img3D name={theme.hero} size={118} className="absolute right-2 top-12 bp-float" style={{ filter: 'drop-shadow(0 18px 22px rgba(0,0,0,.35))' }} />
               <div className="relative flex items-start justify-between">
                 <div>
                   <p className="text-sm font-semibold">{t('wallet')}</p>
                   <p className="text-[11px] opacity-70">{t('wallet_sub')}</p>
                 </div>
-                <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,.12)' }}><Wallet size={17} /></span>
               </div>
               <p className="relative text-[30px] font-bold mt-6 tracking-tight tabular-nums">{fmt(balance)} <span className="text-base font-semibold opacity-70">HTG</span></p>
               {usd(balance) && <p className="relative text-sm font-semibold opacity-80 tabular-nums">≈ {usd(balance)} $ US</p>}
@@ -324,14 +330,14 @@ function DashboardPage({ ctx }) {
             {/* Estatistik */}
             <div className="md:col-span-7 grid grid-cols-2 gap-4">
               {[
-                { label: t('balance'), value: balance, icon: Wallet, tone: K.navy, soft: K.skySoft, pct: undefined, foot: user?.clientId },
-                { label: t('money_in'), value: stats.inCur, icon: ArrowDownLeft, tone: K.mint, soft: K.mintSoft, pct: stats.inPct },
-                { label: t('money_out'), value: stats.outCur, icon: ArrowUpRight, tone: K.navy, soft: K.skySoft, pct: stats.outPct },
-                { label: t('pending'), value: stats.pendingAmount, icon: Clock, tone: K.amber, soft: K.amberSoft, foot: t('pending_sub', { n: stats.pendingCount }) },
+                { label: t('balance'), value: balance, img: 'coin', soft: K.skySoft, pct: undefined, foot: user?.clientId },
+                { label: t('money_in'), value: stats.inCur, img: 'dollar_banknote', soft: K.mintSoft, pct: stats.inPct },
+                { label: t('money_out'), value: stats.outCur, img: 'money_with_wings', soft: K.skySoft, pct: stats.outPct },
+                { label: t('pending'), value: stats.pendingAmount, img: 'hourglass', soft: K.amberSoft, foot: t('pending_sub', { n: stats.pendingCount }) },
               ].map((s) => (
                 <Card key={s.label} className="p-4 flex flex-col">
                   <div className="flex items-center justify-between">
-                    <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: s.soft, color: s.tone }}><s.icon size={17} /></span>
+                    <span className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: s.soft }}><Img3D name={s.img} size={30} /></span>
                     <MoreHorizontal size={16} style={{ color: K.muted }} />
                   </div>
                   <p className="text-xs font-medium mt-3" style={{ color: K.muted }}>{s.label}</p>
@@ -405,7 +411,7 @@ function DashboardPage({ ctx }) {
             </div>
             <div className="flex gap-3 mt-4 overflow-x-auto pb-1">
               {recentPeople.length === 0 ? (
-                <p className="text-xs py-2" style={{ color: K.muted }}>{t('quick_send_empty')}</p>
+                <div className="flex items-center gap-3 py-1"><Img3D name="envelope_with_arrow" size={44} /><p className="text-xs" style={{ color: K.muted }}>{t('quick_send_empty')}</p></div>
               ) : recentPeople.map((p) => (
                 <button key={p.party} onClick={onTransfer} className="flex flex-col items-center gap-1.5 w-16 shrink-0">
                   <span className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: p.partyBiz ? K.navy : K.skySoft, color: p.partyBiz ? '#fff' : K.navy }}>{initials(p.party)}</span>
@@ -414,6 +420,14 @@ function DashboardPage({ ctx }) {
               ))}
             </div>
           </Card>
+
+          <button onClick={onTransfer} className="w-full text-left rounded-3xl p-5 relative overflow-hidden text-white" style={{ background: `linear-gradient(135deg, ${K.navy} 0%, ${K.navyDeep} 100%)` }}>
+            <div className="absolute -left-8 -bottom-10 w-32 h-32 rounded-full opacity-20" style={{ background: K.sky }} />
+            <Img3D name="rocket" size={92} className="absolute right-2 -top-1 bp-float" style={{ filter: 'drop-shadow(0 14px 18px rgba(0,0,0,.35))' }} />
+            <p className="relative text-base font-bold pr-24">{t('promo_send_title')}</p>
+            <p className="relative text-xs mt-1 opacity-80 pr-24">{t('promo_send_body')}</p>
+            <span className="relative inline-flex items-center gap-1 mt-3 h-8 px-3 rounded-full text-xs font-bold" style={{ background: K.sky, color: K.navyDeep }}>{t('transfer')}<ChevronRight size={14} /></span>
+          </button>
 
           <Card className="p-5">
             <div className="flex items-center justify-between mb-4">
@@ -439,6 +453,7 @@ function DashboardPage({ ctx }) {
           </Card>
 
           <div className="rounded-3xl p-5 relative overflow-hidden" style={{ background: bizStatus === 'approved' ? K.mintSoft : K.skySoft }}>
+            <Img3D name={bizStatus === 'approved' ? theme.plan : 'locked'} size={84} className="absolute right-3 top-3 bp-float" style={{ filter: 'drop-shadow(0 12px 14px rgba(0,0,0,.18))' }} />
             <div className="flex items-center gap-2">
               <span className="w-9 h-9 rounded-xl flex items-center justify-center text-white" style={{ background: (personal ? bizStatus === 'approved' : approved) ? K.mint : K.navy }}>{(personal ? bizStatus === 'approved' : approved) ? <ShieldCheck size={17} /> : personal ? <User size={17} /> : <Building2 size={17} />}</span>
               <div>
@@ -446,7 +461,7 @@ function DashboardPage({ ctx }) {
                 <BizStatusBadge status={bizStatus} t={t} />
               </div>
             </div>
-            <p className="text-sm mt-3" style={{ color: K.ink }}>
+            <p className="text-sm mt-3 pr-16" style={{ color: K.ink }}>
               {personal
                 ? (bizStatus === 'approved' ? t('plan_active', { d: fmt(types?.caps?.personal?.daily ?? 80000), m: fmt(types?.caps?.personal?.monthly ?? 500000) }) : bizStatus === 'submitted' ? t('plan_review') : t('plan_todo'))
                 : approved
@@ -1440,6 +1455,7 @@ export default function BusinessApp({
 
   return (
     <div className="min-h-screen w-full" style={{ background: K.bg, color: K.ink }} onClick={() => { if (menuOpen) setMenuOpen(false); if (langOpen) setLangOpen(false); }}>
+      <style>{`@keyframes bpFloat { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-7px) rotate(2deg); } } .bp-float { animation: bpFloat 5s ease-in-out infinite; } @media (prefers-reduced-motion: reduce) { .bp-float { animation: none; } }`}</style>
       {topBar}
       <div className="max-w-[1440px] mx-auto flex">
         {sideRail}
