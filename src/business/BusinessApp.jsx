@@ -330,14 +330,15 @@ function DashboardPage({ ctx }) {
             {/* Estatistik */}
             <div className="md:col-span-7 grid grid-cols-2 gap-4">
               {[
-                { label: t('balance'), value: balance, img: 'coin', soft: K.skySoft, pct: undefined, foot: user?.clientId },
-                { label: t('money_in'), value: stats.inCur, img: 'dollar_banknote', soft: K.mintSoft, pct: stats.inPct },
-                { label: t('money_out'), value: stats.outCur, img: 'money_with_wings', soft: K.skySoft, pct: stats.outPct },
-                { label: t('pending'), value: stats.pendingAmount, img: 'hourglass', soft: K.amberSoft, foot: t('pending_sub', { n: stats.pendingCount }) },
+                // Ikòn nan stil sit la: kare an gradyan + ikòn blan (koulè tèm kont lan pou balans lan).
+                { label: t('balance'), value: balance, icon: Wallet, grad: `linear-gradient(135deg, ${K.sky}, ${K.navy})`, glow: K.navy, pct: undefined, foot: user?.clientId },
+                { label: t('money_in'), value: stats.inCur, icon: ArrowDownLeft, grad: 'linear-gradient(135deg, #34D399, #0F8F6B)', glow: '#0F8F6B', pct: stats.inPct },
+                { label: t('money_out'), value: stats.outCur, icon: ArrowUpRight, grad: 'linear-gradient(135deg, #FB7185, #D6304C)', glow: '#D6304C', pct: stats.outPct },
+                { label: t('pending'), value: stats.pendingAmount, icon: Clock, grad: 'linear-gradient(135deg, #FFC85A, #E8901C)', glow: '#E8901C', foot: t('pending_sub', { n: stats.pendingCount }) },
               ].map((s) => (
                 <Card key={s.label} className="p-4 flex flex-col">
                   <div className="flex items-center justify-between">
-                    <span className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: s.soft }}><Img3D name={s.img} size={30} /></span>
+                    <span className="w-11 h-11 rounded-2xl flex items-center justify-center text-white" style={{ background: s.grad, boxShadow: `0 8px 16px -8px ${s.glow}` }}><s.icon size={20} strokeWidth={2.2} /></span>
                     <MoreHorizontal size={16} style={{ color: K.muted }} />
                   </div>
                   <p className="text-xs font-medium mt-3" style={{ color: K.muted }}>{s.label}</p>
