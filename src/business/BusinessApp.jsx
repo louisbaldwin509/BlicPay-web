@@ -267,6 +267,22 @@ function BizCard({ variant = 'shield', name, number = '**** **** **** ****', sma
 // ---------------------------------------------------------------------------
 // Konpozan prensipal
 // ---------------------------------------------------------------------------
+
+const TILE_TONES = {
+  mint: ['#34D399', '#0F8F6B'], rose: ['#FB7185', '#D6304C'], amber: ['#FFC85A', '#E8901C'],
+  violet: ['#A78BFA', '#6D28D9'], slate: ['#94A3B8', '#475569'],
+};
+// Ikòn "pro": kare an gradyan + ikòn blan (menm stil ak estatistik yo).
+function Tile({ icon: Icon, tone = 'brand', size = 36 }) {
+  const [a, b] = tone === 'brand' ? [K.sky, K.navy] : TILE_TONES[tone] || TILE_TONES.slate;
+  return (
+    <span className="inline-flex items-center justify-center shrink-0 text-white"
+      style={{ width: size, height: size, borderRadius: Math.round(size * 0.32), background: `linear-gradient(135deg, ${a}, ${b})`, boxShadow: `0 6px 14px -8px ${b}` }}>
+      <Icon size={Math.round(size * 0.47)} strokeWidth={2.2} />
+    </span>
+  );
+}
+
 // Imaj 3D (ak animasyon flote).
 function Img3D({ name, size = 40, className = '', style }) {
   return <img src={`/3d/${name}.png`} alt="" aria-hidden="true" draggable="false" className={`select-none pointer-events-none ${className}`} style={{ width: size, height: size, ...style }} />;
@@ -445,9 +461,9 @@ function DashboardPage({ ctx }) {
           <Card className="p-5">
             <h2 className="text-base font-bold mb-3">{t('quick_action')}</h2>
             <div className="grid grid-cols-3 gap-2">
-              {[[QrCode, t('receive'), () => setShowReceive(true)], [ArrowUpRight, t('withdraw'), onWithdraw], [MoreHorizontal, t('more'), () => setPage('account')]].map(([Icon, label, fn]) => (
+              {[[QrCode, t('receive'), () => setShowReceive(true), 'brand'], [ArrowUpRight, t('withdraw'), onWithdraw, 'rose'], [MoreHorizontal, t('more'), () => setPage('account'), 'slate']].map(([Icon, label, fn, tone]) => (
                 <button key={label} onClick={fn} className="rounded-2xl py-3.5 flex flex-col items-center gap-1.5 text-xs font-semibold border hover:shadow-sm transition" style={{ borderColor: K.border }}>
-                  <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: K.skySoft, color: K.navy }}><Icon size={17} /></span>{label}
+                  <Tile icon={Icon} tone={tone} size={38} />{label}
                 </button>
               ))}
             </div>
@@ -1032,7 +1048,7 @@ function AccountPage({ ctx }) {
           <Card className="p-5">
             <h2 className="text-base font-bold mb-3">{t('receive')}</h2>
             <button onClick={() => setShowReceive(true)} className="w-full flex items-center gap-3 p-3 rounded-2xl border" style={{ borderColor: K.border }}>
-              <span className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: K.skySoft, color: K.navy }}><QrCode size={18} /></span>
+              <Tile icon={QrCode} size={40} />
               <span className="text-sm font-semibold flex-1 text-left">{t('recv_title')}</span><ChevronRight size={16} style={{ color: K.muted }} />
             </button>
           </Card>
@@ -1077,7 +1093,7 @@ function PersonalAccountPage({ ctx }) {
             <div className="mt-5 divide-y" style={{ borderColor: K.border }}>
               {rows.map(([Icon, label, v]) => (
                 <div key={label} className="flex items-center gap-3 py-3">
-                  <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: K.skySoft, color: K.navy }}><Icon size={16} /></span>
+                  <Tile icon={Icon} tone={{ [t('pa_name')]: 'brand', [t('pa_client_id')]: 'violet', [t('pa_phone')]: 'mint', [t('pa_email')]: 'amber' }[label] || 'brand'} size={36} />
                   <p className="text-sm flex-1" style={{ color: K.muted }}>{label}</p>
                   <p className="text-sm font-semibold">{v}</p>
                   {label === t('pa_client_id') && (
@@ -1102,14 +1118,14 @@ function PersonalAccountPage({ ctx }) {
             <button onClick={() => setShowReceive(true)} className="mt-4 h-11 w-full rounded-xl text-sm font-bold flex items-center justify-center gap-2 text-white" style={{ background: K.navy }}><QrCode size={17} />{t('pa_show_qr')}</button>
           </Card>
           <Card className="p-2">
-            {[[Settings, t('settings'), onSettings], [KeyRound, t('change_password'), onChangePassword], [HelpCircle, t('support'), onSupport]].map(([Icon, label, fn]) => (
+            {[[Settings, t('settings'), onSettings, 'slate'], [KeyRound, t('change_password'), onChangePassword, 'violet'], [HelpCircle, t('support'), onSupport, 'amber']].map(([Icon, label, fn, tone]) => (
               <button key={label} onClick={fn} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold hover:bg-slate-50">
-                <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: K.bg, color: K.ink }}><Icon size={16} /></span>
+                <Tile icon={Icon} tone={tone} size={36} />
                 <span className="flex-1 text-left">{label}</span><ChevronRight size={16} style={{ color: K.muted }} />
               </button>
             ))}
             <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold hover:bg-red-50" style={{ color: K.danger }}>
-              <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: K.dangerSoft }}><LogOut size={16} /></span>{t('logout')}
+              <Tile icon={LogOut} tone="rose" size={36} />{t('logout')}
             </button>
           </Card>
         </div>

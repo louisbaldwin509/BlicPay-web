@@ -161,6 +161,21 @@ const C = {
   danger: '#D14343',
 };
 
+
+// Ikòn "pro" pou tout sit la: kare an gradyan + ikòn blan + lonbraj koulè.
+const TILE_TONES = {
+  mint: ['#34D399', '#0F8F6B'], rose: ['#FB7185', '#D6304C'], amber: ['#FFC85A', '#E8901C'],
+  violet: ['#A78BFA', '#6D28D9'], slate: ['#94A3B8', '#475569'], whatsapp: ['#4ADE80', '#16A34A'],
+};
+function IconTile({ icon: Icon, tone = 'brand', size = 36, iconSize }) {
+  const [a, b] = tone === 'brand' ? [C.sky, C.navy] : TILE_TONES[tone] || TILE_TONES.slate;
+  return (
+    <span className="inline-flex items-center justify-center shrink-0 text-white"
+      style={{ width: size, height: size, borderRadius: Math.round(size * 0.32), background: `linear-gradient(135deg, ${a}, ${b})`, boxShadow: `0 6px 14px -8px ${b}` }}>
+      <Icon size={iconSize || Math.round(size * 0.47)} strokeWidth={2.2} />
+    </span>
+  );
+}
 const C0 = { ...C }; // koulè orijinal yo (tèm kont yo chanje navy/sky/bg sou òdinatè)
 const fontDisplay = { fontFamily: "'Manrope', sans-serif" };
 const fontMono = { fontFamily: "'IBM Plex Mono', monospace" };
@@ -3449,31 +3464,23 @@ export default function BlicPayApp() {
             <div className="mt-4 grid grid-cols-4 gap-2.5">
               <button onClick={startDeposit} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
                 style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E4F5EF' }}>
-                  <ArrowDownLeft size={16} color={C.mint} />
-                </div>
+                <IconTile icon={ArrowDownLeft} tone="mint" size={36} />
                 <span className="text-xs font-semibold">{tr('tileDeposit')}</span>
               </button>
               <button onClick={startWithdraw} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
                 style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#FBEAEA' }}>
-                  <ArrowUpRight size={16} color={C.danger} />
-                </div>
+                <IconTile icon={ArrowUpRight} tone="rose" size={36} />
                 <span className="text-xs font-semibold">{tr('tileWithdraw')}</span>
               </button>
               <button onClick={() => setView('transfer')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
                 style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E6F0FB' }}>
-                  <ArrowLeftRight size={16} color={C.navy} />
-                </div>
+                <IconTile icon={ArrowLeftRight} tone="brand" size={36} />
                 <span className="text-xs font-semibold">{tr('tileTransfer')}</span>
               </button>
               {user?.clientId && (
                 <button onClick={() => setShowMyQr(true)} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
                   style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E6F6FD' }}>
-                    <QrCode size={16} color={C.navy} />
-                  </div>
+                  <IconTile icon={QrCode} tone="brand" size={36} />
                   <span className="text-xs font-semibold">{tr('tileReceive')}</span>
                 </button>
               )}
@@ -3487,7 +3494,7 @@ export default function BlicPayApp() {
               if (pocketTotal + goalTotal <= 0) return null;
               return (
                 <button onClick={() => setView(goalTotal > 0 ? 'termdepo' : 'blicdepo')} className="bp-btn mt-4 w-full p-4 rounded-xl flex items-center gap-3 text-left" style={{ background: '#EEF4FF', border: '1px solid #D6E2F7' }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#D6E2F7' }}><PiggyBank size={17} color={C.navy} /></div>
+                  <IconTile icon={PiggyBank} tone="brand" size={36} />
                   <div className="flex-1">
                     <p className="text-sm font-semibold">{tt("Ou gen {0} nan epay ou", money(pocketTotal + goalTotal))}</p>
                     <p className="text-xs" style={{ color: C.muted }}>{tt("Sèvis epay la fèmen sou BLICPay — transfere lajan an nan kont prensipal ou.")}</p>
@@ -3530,9 +3537,7 @@ export default function BlicPayApp() {
                 YON kliyan presizeman (prèv adrès, elt.), apa de badge KYC prensipal la */}
             {verificationRequests.filter((r) => r.status === 'requested' || r.status === 'rejected').map((r) => (
               <div key={r.id} className="mt-4 p-4 rounded-xl flex items-center gap-3" style={{ background: '#FBEAEA', border: `1px solid #F0C0C0` }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#F0C0C0' }}>
-                  <FileText size={16} color={C.danger} />
-                </div>
+                <IconTile icon={FileText} tone="rose" size={36} />
                 <div className="flex-1">
                   <p className="text-sm font-semibold" style={{ color: C.danger }}>
                     {tt(VR_TYPE_LABELS[r.type]) || tt("Dokiman mande")}
@@ -3553,9 +3558,7 @@ export default function BlicPayApp() {
             ))}
             {verificationRequests.filter((r) => r.status === 'submitted').map((r) => (
               <div key={r.id} className="mt-4 p-4 rounded-xl flex items-center gap-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: '#EEF1F6' }}>
-                  <Clock size={16} color={C.muted} />
-                </div>
+                <IconTile icon={Clock} tone="slate" size={36} />
                 <div className="flex-1">
                   <p className="text-sm font-semibold" style={{ color: C.navy }}>{tt(VR_TYPE_LABELS[r.type]) || tt("Dokiman voye")}</p>
                   <p className="text-xs mt-0.5" style={{ color: C.muted }}>{tt("N ap egzamine sa ou voye a.")}</p>
@@ -4340,9 +4343,7 @@ export default function BlicPayApp() {
                     style={{ background: C.card, border: `1px solid ${C.border}` }}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E4F5EF' }}>
-                          <PiggyBank size={16} color={C.mint} />
-                        </div>
+                        <IconTile icon={PiggyBank} tone="mint" size={36} />
                         <span className="text-sm font-semibold">{p.name}</span>
                       </div>
                       <ChevronRight size={16} color={C.muted} />
@@ -4397,23 +4398,17 @@ export default function BlicPayApp() {
                 <div className="mt-6 grid grid-cols-3 gap-2.5">
                   <button onClick={() => setPocketMode('deposit')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
                     style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E4F5EF' }}>
-                      <ArrowDownLeft size={16} color={C.mint} />
-                    </div>
+                    <IconTile icon={ArrowDownLeft} tone="mint" size={36} />
                     <span className="text-xs font-semibold">{tt("Epay")}</span>
                   </button>
                   <button onClick={() => setPocketMode('transfer')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
                     style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#E6F0FB' }}>
-                      <ArrowLeftRight size={16} color={C.navy} />
-                    </div>
+                    <IconTile icon={ArrowLeftRight} tone="brand" size={36} />
                     <span className="text-xs font-semibold">{tt("Transfere")}</span>
                   </button>
                   <button onClick={() => setPocketMode('spend')} className="bp-btn rounded-xl p-3 flex flex-col items-center gap-2 text-center"
                     style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#FBEAEA' }}>
-                      <ArrowUpRight size={16} color={C.danger} />
-                    </div>
+                    <IconTile icon={ArrowUpRight} tone="rose" size={36} />
                     <span className="text-xs font-semibold">{tt("Retire")}</span>
                   </button>
                 </div>
@@ -4844,18 +4839,18 @@ export default function BlicPayApp() {
             <p className="mt-6 text-xs font-semibold" style={{ color: C.muted }}>{tr('accountSection')}</p>
             <div className="mt-2 rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
               <button onClick={openEditProfile}
-                className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card }}>
-                <div className="flex items-center gap-2.5">
-                  <User size={16} color={C.muted} />
+                className="w-full flex items-center justify-between px-4 py-3" style={{ background: C.card }}>
+                <div className="flex items-center gap-3">
+                  <IconTile icon={User} tone="brand" size={32} />
                   <span className="text-sm font-medium">{tr('editProfile')}</span>
                 </div>
                 <ChevronRight size={15} color={C.muted} />
               </button>
               <button onClick={() => { if (!accountVerified) { setKycStep('entwo'); setView('kyc'); } }}
                 disabled={accountVerified}
-                className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}`, opacity: accountVerified ? 0.55 : 1, cursor: accountVerified ? 'default' : 'pointer' }}>
-                <div className="flex items-center gap-2.5">
-                  <ShieldCheck size={16} color={C.muted} />
+                className="w-full flex items-center justify-between px-4 py-3" style={{ background: C.card, borderTop: `1px solid ${C.border}`, opacity: accountVerified ? 0.55 : 1, cursor: accountVerified ? 'default' : 'pointer' }}>
+                <div className="flex items-center gap-3">
+                  <IconTile icon={ShieldCheck} tone="mint" size={32} />
                   <span className="text-sm font-medium">KYC</span>
                 </div>
                 {accountVerified ? (
@@ -4867,9 +4862,9 @@ export default function BlicPayApp() {
                 )}
               </button>
               <button onClick={() => { setPwForm({ current: '', next: '', confirm: '' }); setPwError(''); setView('changepassword'); }}
-                className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
-                <div className="flex items-center gap-2.5">
-                  <Lock size={16} color={C.muted} />
+                className="w-full flex items-center justify-between px-4 py-3" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
+                <div className="flex items-center gap-3">
+                  <IconTile icon={Lock} tone="slate" size={32} />
                   <span className="text-sm font-medium">{tr('changePassword')}</span>
                 </div>
                 <ChevronRight size={15} color={C.muted} />
@@ -4880,9 +4875,9 @@ export default function BlicPayApp() {
             <p className="mt-6 text-xs font-semibold" style={{ color: C.muted }}>{tr('prefsSection')}</p>
             <div className="mt-2 rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
               <button onClick={() => setShowLangPicker(true)}
-                className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card }}>
-                <div className="flex items-center gap-2.5">
-                  <Globe size={16} color={C.muted} />
+                className="w-full flex items-center justify-between px-4 py-3" style={{ background: C.card }}>
+                <div className="flex items-center gap-3">
+                  <IconTile icon={Globe} tone="violet" size={32} />
                   <span className="text-sm font-medium">{tr('langLabel')}</span>
                 </div>
                 <div className="flex items-center gap-1.5" style={{ color: C.muted }}>
@@ -4890,9 +4885,9 @@ export default function BlicPayApp() {
                   <ChevronRight size={15} />
                 </div>
               </button>
-              <div className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
-                <div className="flex items-center gap-2.5">
-                  <Eye size={16} color={C.muted} />
+              <div className="w-full flex items-center justify-between px-4 py-3" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
+                <div className="flex items-center gap-3">
+                  <IconTile icon={Eye} tone="slate" size={32} />
                   <span className="text-sm font-medium">{tr('hideBalanceDefault')}</span>
                 </div>
                 <button onClick={() => setHideBalance((h) => !h)}
@@ -4908,17 +4903,17 @@ export default function BlicPayApp() {
             <p className="mt-6 text-xs font-semibold" style={{ color: C.muted }}>{tr('supportSection')}</p>
             <div className="mt-2 rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
               <button onClick={() => { setSupportSent(false); setView('support'); }}
-                className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card }}>
-                <div className="flex items-center gap-2.5">
-                  <Bell size={16} color={C.muted} />
+                className="w-full flex items-center justify-between px-4 py-3" style={{ background: C.card }}>
+                <div className="flex items-center gap-3">
+                  <IconTile icon={Bell} tone="amber" size={32} />
                   <span className="text-sm font-medium">{tr('contactSupport')}</span>
                 </div>
                 <ChevronRight size={15} color={C.muted} />
               </button>
               <button onClick={() => { setAppOpenFaq(null); setView('faq'); }}
-                className="w-full flex items-center justify-between px-4 py-3.5" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
-                <div className="flex items-center gap-2.5">
-                  <AlertCircle size={16} color={C.muted} />
+                className="w-full flex items-center justify-between px-4 py-3" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
+                <div className="flex items-center gap-3">
+                  <IconTile icon={AlertCircle} tone="amber" size={32} />
                   <span className="text-sm font-medium">{tr('faq')}</span>
                 </div>
                 <ChevronRight size={15} color={C.muted} />
@@ -5045,9 +5040,7 @@ export default function BlicPayApp() {
             <div className="mt-5 space-y-2.5">
               <a href="tel:+13073460474"
                 className="bp-btn w-full flex items-center gap-3 p-3.5 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: '#E6F0FB' }}>
-                  <Phone size={17} color={C.navy} />
-                </div>
+                <IconTile icon={Phone} tone="brand" size={40} />
                 <div className="flex-1">
                   <p className="text-sm font-semibold">{tr('callUs')}</p>
                   <p className="text-xs mt-0.5" style={{ color: C.muted }}>+1 307 346 0474</p>
@@ -5056,9 +5049,7 @@ export default function BlicPayApp() {
               </a>
               <a href="https://wa.me/13073460474" target="_blank" rel="noopener noreferrer"
                 className="bp-btn w-full flex items-center gap-3 p-3.5 rounded-xl" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: '#E4F5EF' }}>
-                  <Smartphone size={17} color={C.mint} />
-                </div>
+                <IconTile icon={Smartphone} tone="whatsapp" size={40} />
                 <div className="flex-1">
                   <p className="text-sm font-semibold">{tr('chatWhatsapp')}</p>
                   <p className="text-xs mt-0.5" style={{ color: C.muted }}>+1 307 346 0474</p>
