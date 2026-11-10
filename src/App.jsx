@@ -1143,6 +1143,14 @@ export default function BlicPayApp() {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [kycStatus, setKycStatus] = useState('pa verifye'); // estati DÈNYE demand la : 'pa verifye' | 'annatant' | 'verifye'
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1024px)').matches);
+  React.useEffect(() => {
+    const mq = window.matchMedia?.('(min-width: 1024px)');
+    if (!mq) return undefined;
+    const on = (e) => setIsDesktop(e.matches);
+    mq.addEventListener?.('change', on);
+    return () => mq.removeEventListener?.('change', on);
+  }, []);
   const [accountVerified, setAccountVerified] = useState(false); // badge PÈMANAN kont lan (User.verified) — pa depann de dènye demand lan
   const [verificationRequests, setVerificationRequests] = useState([]); // demand admin voye pou dokiman siplemantè (prèv adrès, elt.) — apa de KYC
   const [vrActive, setVrActive] = useState(null); // demand ki louvri pou telechajman kounye a
@@ -2707,8 +2715,10 @@ export default function BlicPayApp() {
   const userSolGroup = userSolMembership?.group || solGroups.find((g) => g.id === activeSolGroupId);
 
 
-  // Kont antrepriz: tablo bò lajè (stil "Monetra") olye tablo bò telefòn nan.
-  const isBizDash = view === 'dashboard' && !!token && token !== DEMO_TOKEN && user?.accountType === 'business';
+  // Kont antrepriz (tout ekran) ak kont patikilye sou ÒDINATÈ: tablo bò lajè a.
+  // Sou telefòn, patikilye yo kenbe tablo bò mobil la (app la la pou sa).
+  const isPersonalDesk = isDesktop && user?.accountType !== 'business';
+  const isBizDash = view === 'dashboard' && !!token && token !== DEMO_TOKEN && (user?.accountType === 'business' || isPersonalDesk);
 
   return (
     <div style={{ background: C.bg, minHeight: '100%', color: C.ink }} className="w-full">
@@ -2762,6 +2772,7 @@ export default function BlicPayApp() {
             onSettings={() => setView('settings')} onSupport={() => { setSupportSent(false); setView('support'); }}
             onChangePassword={() => { setPwForm({ current: '', next: '', confirm: '' }); setPwError(''); setView('changepassword'); }}
             onLogout={logout}
+            personal={isPersonalDesk} verified={accountVerified} kycPending={kycStatus === 'annatant'}
           />
         )}
 

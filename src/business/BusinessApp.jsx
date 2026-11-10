@@ -9,7 +9,7 @@ import {
   LayoutGrid, BarChart3, ListOrdered, CreditCard, Building2, Bell, Settings, HelpCircle, LogOut,
   Search, Plus, ArrowDownLeft, ArrowUpRight, Send, QrCode, MoreHorizontal, Globe, Download, Upload,
   FileText, CheckCircle2, AlertCircle, Clock, X, ShieldCheck, Copy, Wallet, TrendingUp, TrendingDown,
-  ChevronRight, Lock, RefreshCw, Users, Activity,
+  ChevronRight, Lock, RefreshCw, Users, Activity, User, BadgeCheck, KeyRound, Mail, Phone,
 } from 'lucide-react';
 import { makeT, loc } from './i18n.js';
 
@@ -259,6 +259,7 @@ function BizCard({ variant = 'shield', name, number = '**** **** **** ****', sma
 // Konpozan prensipal
 // ---------------------------------------------------------------------------
 function DashboardPage({ ctx }) {
+  const { personal, usd } = ctx;
   const { t, lang, user, token, apiFetch, flash, balance, ops, months, stats, recentPeople, types, biz, profile, bizStatus, approved, bizName, loading, load, search, setSearch, setPage, setShowReceive, describe, dateFmt, timeFmt, hello, firstName, isIn, isOut, pageHeader, onDeposit, onWithdraw, onTransfer, onKyc, onSettings, onSupport, onChangePassword, onLogout } = ctx;
   const [mode, setMode] = useState('in');
   const recent = ops.slice(0, 6);
@@ -296,6 +297,7 @@ function DashboardPage({ ctx }) {
                 <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,.12)' }}><Wallet size={17} /></span>
               </div>
               <p className="relative text-[30px] font-bold mt-6 tracking-tight tabular-nums">{fmt(balance)} <span className="text-base font-semibold opacity-70">HTG</span></p>
+              {usd(balance) && <p className="relative text-sm font-semibold opacity-80 tabular-nums">≈ {usd(balance)} $ US</p>}
               <div className="relative mt-2 flex items-center gap-2 text-xs">
                 <BizStatusBadge status={bizStatus} t={t} />
               </div>
@@ -410,7 +412,7 @@ function DashboardPage({ ctx }) {
               <h2 className="text-base font-bold">{t('nav_card')}</h2>
               <span className="text-[11px] font-semibold px-2 py-1 rounded-full" style={{ background: K.amberSoft, color: K.amber }}>{t('card_soon')}</span>
             </div>
-            <BizCard variant="shield" name={bizName} />
+            <BizCard variant={personal ? 'ocean' : 'shield'} name={bizName} />
             <div className="grid grid-cols-2 gap-2 mt-4">
               <button onClick={onDeposit} className="h-10 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 text-white" style={{ background: K.navy }}><Plus size={15} />{t('deposit')}</button>
               <button onClick={onTransfer} className="h-10 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 border" style={{ borderColor: K.border }}><Send size={15} />{t('transfer')}</button>
@@ -428,21 +430,23 @@ function DashboardPage({ ctx }) {
             </div>
           </Card>
 
-          <div className="rounded-3xl p-5 relative overflow-hidden" style={{ background: approved ? K.mintSoft : K.skySoft }}>
+          <div className="rounded-3xl p-5 relative overflow-hidden" style={{ background: bizStatus === 'approved' ? K.mintSoft : K.skySoft }}>
             <div className="flex items-center gap-2">
-              <span className="w-9 h-9 rounded-xl flex items-center justify-center text-white" style={{ background: approved ? K.mint : K.navy }}>{approved ? <ShieldCheck size={17} /> : <Building2 size={17} />}</span>
+              <span className="w-9 h-9 rounded-xl flex items-center justify-center text-white" style={{ background: (personal ? bizStatus === 'approved' : approved) ? K.mint : K.navy }}>{(personal ? bizStatus === 'approved' : approved) ? <ShieldCheck size={17} /> : personal ? <User size={17} /> : <Building2 size={17} />}</span>
               <div>
                 <p className="text-sm font-bold">{t('plan_title')}</p>
                 <BizStatusBadge status={bizStatus} t={t} />
               </div>
             </div>
             <p className="text-sm mt-3" style={{ color: K.ink }}>
-              {approved
+              {personal
+                ? (bizStatus === 'approved' ? t('plan_active', { d: fmt(types?.caps?.personal?.daily ?? 80000), m: fmt(types?.caps?.personal?.monthly ?? 500000) }) : bizStatus === 'submitted' ? t('plan_review') : t('plan_todo'))
+                : approved
                 ? t('plan_active', { d: fmt(types?.caps?.[profile?.legalForm === 'pro' ? 'pro' : 'business']?.daily ?? 500000), m: fmt(types?.caps?.[profile?.legalForm === 'pro' ? 'pro' : 'business']?.monthly ?? 5000000) })
                 : bizStatus === 'submitted' ? t('plan_review') : t('plan_todo')}
             </p>
-            <button onClick={() => setPage('account')} className="mt-4 h-10 px-4 rounded-xl text-sm font-bold flex items-center gap-1.5 text-white" style={{ background: approved ? K.mint : K.navy }}>
-              {approved || bizStatus === 'submitted' ? t('plan_cta_view') : t('plan_cta_todo')}<ChevronRight size={16} />
+            <button onClick={() => (personal && bizStatus === 'draft' ? onKyc?.() : setPage('account'))} className="mt-4 h-10 px-4 rounded-xl text-sm font-bold flex items-center gap-1.5 text-white" style={{ background: bizStatus === 'approved' ? K.mint : K.navy }}>
+              {bizStatus === 'approved' || bizStatus === 'submitted' ? t('plan_cta_view') : t('plan_cta_todo')}<ChevronRight size={16} />
             </button>
           </div>
         </div>
@@ -636,6 +640,7 @@ function ActivityPage({ ctx }) {
 }
 
 function CardPage({ ctx }) {
+  const { personal } = ctx;
   const { t, lang, user, token, apiFetch, flash, balance, ops, months, stats, recentPeople, types, biz, profile, bizStatus, approved, bizName, loading, load, search, setSearch, setPage, setShowReceive, describe, dateFmt, timeFmt, hello, firstName, isIn, isOut, pageHeader, onDeposit, onWithdraw, onTransfer, onKyc, onSettings, onSupport, onChangePassword, onLogout } = ctx;
   const allCaps = types?.caps || { personal: { daily: 80000, weekly: 300000, monthly: 500000 }, pro: { daily: 200000, weekly: 800000, monthly: 1500000 }, business: { daily: 500000, weekly: 2000000, monthly: 5000000 } };
   const isPro = profile?.legalForm === 'pro';
@@ -656,15 +661,15 @@ function CardPage({ ctx }) {
       </div>
       <Card className="p-5">
         <h2 className="text-lg font-bold mb-4">{t('card_limits')}</h2>
-        <div className="grid grid-cols-3 gap-3 text-sm">
+        <div className={`grid ${personal ? 'grid-cols-2' : 'grid-cols-3'} gap-3 text-sm`}>
           <div />
-          <p className="text-xs font-semibold" style={{ color: K.muted }}>{t('personal_limits')}</p>
-          <p className="text-xs font-semibold" style={{ color: K.navy }}>{isPro ? t('pro_limits') : t('business_limits')}</p>
+          {!personal && <p className="text-xs font-semibold" style={{ color: K.muted }}>{t('personal_limits')}</p>}
+          <p className="text-xs font-semibold" style={{ color: K.navy }}>{personal ? t('personal_limits') : isPro ? t('pro_limits') : t('business_limits')}</p>
           {[['daily', t('per_day')], ['weekly', t('per_week')], ['monthly', t('per_month')]].map(([k, label]) => (
             <React.Fragment key={k}>
               <p className="font-medium py-2 border-t" style={{ borderColor: K.border }}>{label}</p>
-              <p className="py-2 border-t tabular-nums" style={{ borderColor: K.border, color: K.muted }}>{htg(caps.personal[k])}</p>
-              <p className="py-2 border-t font-bold tabular-nums" style={{ borderColor: K.border, color: K.navy }}>{htg(caps.business[k])}</p>
+              {!personal && <p className="py-2 border-t tabular-nums" style={{ borderColor: K.border, color: K.muted }}>{htg(caps.personal[k])}</p>}
+              <p className="py-2 border-t font-bold tabular-nums" style={{ borderColor: K.border, color: K.navy }}>{htg(personal ? caps.personal[k] : caps.business[k])}</p>
             </React.Fragment>
           ))}
         </div>
@@ -1024,6 +1029,71 @@ function AccountPage({ ctx }) {
   );
 }
 
+function PersonalAccountPage({ ctx }) {
+  const { t, user, bizStatus, pageHeader, onKyc, onSettings, onSupport, onChangePassword, onLogout, setShowReceive, flash } = ctx;
+  const rows = [
+    [User, t('pa_name'), user?.fullName],
+    [Wallet, t('pa_client_id'), user?.clientId],
+    [Phone, t('pa_phone'), user?.phone],
+    [Mail, t('pa_email'), user?.email],
+  ].filter(([, , v]) => v);
+  return (
+    <>
+      {pageHeader(t('pa_title'), t('pa_sub'))}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div className="lg:col-span-7 space-y-5">
+          <Card className="p-5">
+            <div className="flex items-center gap-4">
+              <span className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold text-white" style={{ background: `linear-gradient(135deg, ${K.navy}, ${K.sky})` }}>{initials(user?.fullName || '')}</span>
+              <div className="min-w-0">
+                <p className="text-lg font-bold truncate flex items-center gap-1.5">{user?.fullName}{bizStatus === 'approved' && <BadgeCheck size={18} style={{ color: K.sky }} />}</p>
+                <BizStatusBadge status={bizStatus} t={t} />
+              </div>
+            </div>
+            <div className="mt-5 divide-y" style={{ borderColor: K.border }}>
+              {rows.map(([Icon, label, v]) => (
+                <div key={label} className="flex items-center gap-3 py-3">
+                  <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: K.skySoft, color: K.navy }}><Icon size={16} /></span>
+                  <p className="text-sm flex-1" style={{ color: K.muted }}>{label}</p>
+                  <p className="text-sm font-semibold">{v}</p>
+                  {label === t('pa_client_id') && (
+                    <button onClick={() => { navigator.clipboard?.writeText(v); flash(t('copied')); }} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ color: K.muted }} aria-label="copy"><Copy size={15} /></button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
+          {bizStatus !== 'approved' && (
+            <div className="rounded-3xl p-5" style={{ background: K.amberSoft }}>
+              <p className="font-bold flex items-center gap-2" style={{ color: K.amber }}><ShieldCheck size={18} />{bizStatus === 'submitted' ? t('plan_review') : t('pa_verify_title')}</p>
+              {bizStatus !== 'submitted' && <p className="text-sm mt-1.5">{t('plan_todo')}</p>}
+              {bizStatus !== 'submitted' && <button onClick={onKyc} className="mt-4 h-10 px-4 rounded-xl text-sm font-bold text-white" style={{ background: K.navy }}>{t('plan_cta_todo')}</button>}
+            </div>
+          )}
+        </div>
+        <div className="lg:col-span-5 space-y-5">
+          <Card className="p-5">
+            <h2 className="text-base font-bold mb-3">{t('pa_receive')}</h2>
+            <p className="text-sm" style={{ color: K.muted }}>{t('recv_body')}</p>
+            <button onClick={() => setShowReceive(true)} className="mt-4 h-11 w-full rounded-xl text-sm font-bold flex items-center justify-center gap-2 text-white" style={{ background: K.navy }}><QrCode size={17} />{t('pa_show_qr')}</button>
+          </Card>
+          <Card className="p-2">
+            {[[Settings, t('settings'), onSettings], [KeyRound, t('change_password'), onChangePassword], [HelpCircle, t('support'), onSupport]].map(([Icon, label, fn]) => (
+              <button key={label} onClick={fn} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold hover:bg-slate-50">
+                <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: K.bg, color: K.ink }}><Icon size={16} /></span>
+                <span className="flex-1 text-left">{label}</span><ChevronRight size={16} style={{ color: K.muted }} />
+              </button>
+            ))}
+            <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold hover:bg-red-50" style={{ color: K.danger }}>
+              <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: K.dangerSoft }}><LogOut size={16} /></span>{t('logout')}
+            </button>
+          </Card>
+        </div>
+      </div>
+    </>
+  );
+}
+
 function ReceiveModal({ ctx }) {
   const { t, lang, user, token, apiFetch, flash, balance, ops, months, stats, recentPeople, types, biz, profile, bizStatus, approved, bizName, loading, load, search, setSearch, setPage, setShowReceive, describe, dateFmt, timeFmt, hello, firstName, isIn, isOut, pageHeader, onDeposit, onWithdraw, onTransfer, onKyc, onSettings, onSupport, onChangePassword, onLogout } = ctx;
   const [amount, setAmount] = useState('');
@@ -1052,7 +1122,7 @@ function ReceiveModal({ ctx }) {
         <>
           <div className="rounded-3xl p-5 text-center" style={{ background: K.bg }}>
             <p className="font-bold flex items-center justify-center gap-1.5"><ShieldCheck size={16} style={{ color: K.mint }} />{bizName}</p>
-            <p className="text-xs" style={{ color: K.muted }}>{t('verified_business')} • {user?.clientId}</p>
+            <p className="text-xs" style={{ color: K.muted }}>{ctx.personal && !ctx.verified ? user?.clientId : `${t('verified_business')} • ${user?.clientId}`}</p>
             {qr ? <img src={qr} alt="QR" className="w-56 h-56 mx-auto mt-4 rounded-2xl bg-white p-2" /> : <div className="w-56 h-56 mx-auto mt-4" />}
             {Number(amount) > 0 && <p className="text-xl font-bold mt-3">{htg(Number(amount))}</p>}
           </div>
@@ -1073,11 +1143,19 @@ export default function BusinessApp({
   token, user, lang, setLang, balance, apiFetch, flash,
   notifications = [], unreadCount = 0, showNotif = false, onToggleNotif,
   onDeposit, onWithdraw, onTransfer, onKyc, onSettings, onSupport, onChangePassword, onLogout,
+  // Kont patikilye sou òdinatè: menm tablo bò lajè a, san pati antrepriz yo.
+  personal = false, verified = false, kycPending = false,
 }) {
-  const t = useMemo(() => makeT(lang), [lang]);
+  const [biz, setBiz] = useState(null); // repons /business/me
+  // Mòd: 'personal' | 'pro' | 'company' — tèks yo chanje dapre mòd la ("personal:wallet", "pro:wallet"...).
+  const mode = personal ? 'personal' : biz?.business?.legalForm === 'pro' ? 'pro' : 'company';
+  const t = useMemo(() => {
+    const base = makeT(lang);
+    return (key, vars) => { const k = `${mode}:${key}`; const v = base(k, vars); return v !== k ? v : base(key, vars); };
+  }, [lang, mode]);
   const [page, setPage] = useState('dashboard');
   const [ops, setOps] = useState([]);
-  const [biz, setBiz] = useState(null); // repons /business/me
+  const [usdRate, setUsdRate] = useState(null);
   const [types, setTypes] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showReceive, setShowReceive] = useState(false);
@@ -1090,12 +1168,15 @@ export default function BusinessApp({
     const to = new Date();
     const from = new Date(to.getFullYear(), to.getMonth() - 11, 1);
     const q = `?from=${encodeURIComponent(from.toISOString())}&to=${encodeURIComponent(to.toISOString())}`;
-    const [w, tr, me, ty] = await Promise.allSettled([
+    const skip = Promise.resolve(null);
+    const [w, tr, me, ty, bal] = await Promise.allSettled([
       apiFetch(`/wallet/transactions${q}`, { token }),
       apiFetch(`/transfers/my${q}`, { token }),
-      apiFetch('/business/me', { token }),
+      personal ? skip : apiFetch('/business/me', { token }),
       apiFetch('/business/types', { token }),
+      apiFetch('/wallet/balance', { token }),
     ]);
+    if (bal.status === 'fulfilled' && bal.value?.usdRate) setUsdRate(bal.value.usdRate);
     const list = [];
     if (w.status === 'fulfilled') {
       for (const x of w.value.transactions || []) {
@@ -1118,7 +1199,7 @@ export default function BusinessApp({
     }
     list.sort((a, b) => b.date - a.date);
     setOps(list);
-    if (me.status === 'fulfilled') setBiz(me.value.business ? me.value : null);
+    if (me.status === 'fulfilled' && me.value) setBiz(me.value.business ? me.value : null);
     if (ty.status === 'fulfilled') setTypes(ty.value);
     setLoading(false);
   }
@@ -1128,9 +1209,11 @@ export default function BusinessApp({
 
   // ---------- Kalkil ----------
   const profile = biz?.business;
-  const bizStatus = profile?.status || 'draft';
-  const approved = bizStatus === 'approved';
-  const bizName = profile?.tradeName || profile?.legalName || user?.fullName || '';
+  // Kont patikilye: "estati" a se verifikasyon idantite a (KYC).
+  const bizStatus = personal ? (verified ? 'approved' : kycPending ? 'submitted' : 'draft') : profile?.status || 'draft';
+  const approved = personal ? true : bizStatus === 'approved';
+  const bizName = personal ? user?.fullName || '' : profile?.tradeName || profile?.legalName || user?.fullName || '';
+  const usd = (v) => (usdRate ? (v / usdRate).toLocaleString(lang === 'en' ? 'en-US' : 'fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null);
 
   const isIn = (o) => (o.kind === 'deposit' || o.kind === 'in') && o.status === 'confirmed';
   const isOut = (o) => (o.kind === 'withdraw' || o.kind === 'out') && o.status === 'confirmed';
@@ -1196,7 +1279,7 @@ export default function BusinessApp({
     { id: 'analytics', icon: BarChart3, label: t('nav_analytics') },
     { id: 'activity', icon: ListOrdered, label: t('nav_activity') },
     { id: 'card', icon: CreditCard, label: t('nav_card') },
-    { id: 'account', icon: Building2, label: t('nav_account') },
+    { id: 'account', icon: personal ? User : Building2, label: t('nav_account') },
   ];
 
   const LANGS = [['ht', 'Kreyòl'], ['fr', 'Français'], ['en', 'English']];
@@ -1266,10 +1349,10 @@ export default function BusinessApp({
               <div className="absolute right-0 mt-2 w-60 rounded-2xl border shadow-xl p-1.5 z-50" style={{ background: K.card, borderColor: K.border }}>
                 <div className="px-3 py-2.5">
                   <p className="text-sm font-bold truncate">{bizName}</p>
-                  <p className="text-xs" style={{ color: K.muted }}>{user?.fullName} • {user?.clientId}</p>
+                  <p className="text-xs" style={{ color: K.muted }}>{personal ? user?.email || user?.phone : user?.fullName} • {user?.clientId}</p>
                 </div>
                 {[
-                  [Building2, t('nav_account'), () => setPage('account')],
+                  [personal ? User : Building2, t('nav_account'), () => setPage('account')],
                   [Settings, t('settings'), onSettings],
                   [Lock, t('change_password'), onChangePassword],
                   [HelpCircle, t('support'), onSupport],
@@ -1337,7 +1420,7 @@ export default function BusinessApp({
 
 
 
-  const ctx = { t, lang, user, token, apiFetch, flash, balance, ops, months, stats, recentPeople, types, biz, profile, bizStatus, approved, bizName, loading, load, search, setSearch, setPage, setShowReceive, describe, dateFmt, timeFmt, hello, firstName, isIn, isOut, pageHeader, onDeposit, onWithdraw, onTransfer, onKyc, onSettings, onSupport, onChangePassword, onLogout };
+  const ctx = { personal, mode, usd, verified, kycPending, t, lang, user, token, apiFetch, flash, balance, ops, months, stats, recentPeople, types, biz, profile, bizStatus, approved, bizName, loading, load, search, setSearch, setPage, setShowReceive, describe, dateFmt, timeFmt, hello, firstName, isIn, isOut, pageHeader, onDeposit, onWithdraw, onTransfer, onKyc, onSettings, onSupport, onChangePassword, onLogout };
 
   return (
     <div className="min-h-screen w-full" style={{ background: K.bg, color: K.ink }} onClick={() => { if (menuOpen) setMenuOpen(false); if (langOpen) setLangOpen(false); }}>
@@ -1349,7 +1432,7 @@ export default function BusinessApp({
           {page === 'analytics' && <AnalyticsPage ctx={ctx} />}
           {page === 'activity' && <ActivityPage ctx={ctx} />}
           {page === 'card' && <CardPage ctx={ctx} />}
-          {page === 'account' && <AccountPage ctx={ctx} />}
+          {page === 'account' && (personal ? <PersonalAccountPage ctx={ctx} /> : <AccountPage ctx={ctx} />)}
         </main>
       </div>
       {bottomNav}
