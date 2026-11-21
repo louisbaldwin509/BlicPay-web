@@ -1121,6 +1121,7 @@ export default function BlicPayApp() {
   ];
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
   const [betaNotice, setBetaNotice] = useState('');
+  const [depositAvail, setDepositAvail] = useState(null); // { open, level, maxHtg, reason } — rezèv kat la
   const [depositPurpose, setDepositPurpose] = useState(null); // 'kyb_fee' = depo pou frè ouvèti antrepriz // mod tès prive: mesaj apre enskripsyon
   const [otp, setOtp] = useState(null); // { challengeId, email } — kòd imèl pou nouvo aparèy
   const [otpCode, setOtpCode] = useState('');
@@ -1633,6 +1634,12 @@ export default function BlicPayApp() {
     setSelectedMethod(null);
     setReference(null);
     setView('deposit');
+    setDepositAvail(null);
+    if (!special) loadDepositAvail();
+  }
+
+  async function loadDepositAvail() {
+    try { setDepositAvail(await apiFetch('/deposits/availability', { token })); } catch { setDepositAvail(null); }
   }
 
   function startWithdraw() {
@@ -1659,6 +1666,13 @@ export default function BlicPayApp() {
     if (flowKind === 'deposit' && Number(amount) < 100) {
       flash(tt("Montan minimòm pou yon depo se 100 HTG."));
       return;
+    }
+    if (flowKind === 'deposit' && !depositPurpose && depositAvail) {
+      if (!depositAvail.open) { flash(tt("Rechaj yo pa disponib pou kounye a. Eseye ankò pita.")); return; }
+      if (depositAvail.maxHtg != null && Number(amount) > depositAvail.maxHtg) {
+        flash(tt("Pou kounye a, ou ka rechaje maksimòm {0} HTG alafwa.", depositAvail.maxHtg.toLocaleString('fr-FR')));
+        return;
+      }
     }
     if (flowKind === 'withdraw' && Number(amount) < 250) {
       flash(tt("Montan minimòm pou yon retrè se 250 HTG."));
@@ -5337,6 +5351,22 @@ export default function BlicPayApp() {
               <span className="absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-sm" style={{ color: C.muted }}>HTG</span>
             </div>
 
+            {flowKind === 'deposit' && !depositPurpose && depositAvail && !depositAvail.open && (
+              <div className="mt-4 rounded-2xl p-4 flex gap-3 items-start" style={{ background: '#FFF4E5', border: '1px solid #F7D9A8' }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)' }}><Clock size={18} color="#fff" /></div>
+                <div>
+                  <p className="text-sm font-bold" style={{ color: '#8A4B08' }}>{tt("Rechaj yo pa disponib pou kounye a")}</p>
+                  <p className="text-xs mt-0.5" style={{ color: '#8A4B08', opacity: 0.85 }}>{tt("Nou ap fè yon ti mizajou. Eseye ankò pita — kat ou ak peman ou yo kontinye mache nòmalman.")}</p>
+                </div>
+              </div>
+            )}
+            {flowKind === 'deposit' && !depositPurpose && depositAvail?.open && depositAvail.level === 'orange' && depositAvail.maxHtg != null && (
+              <div className="mt-3 rounded-xl px-3.5 py-2.5 flex gap-2 items-center text-xs" style={{ background: '#EEF5FD', color: C.navy, border: '1px solid #D6E4F7' }}>
+                <AlertCircle size={15} className="shrink-0" />
+                <span>{tt("Pou kounye a, maksimòm pa rechaj se {0} HTG.", depositAvail.maxHtg.toLocaleString('fr-FR'))}</span>
+              </div>
+            )}
+
             {(() => {
               // Yon metòd disponib pou flux sa a (depo oswa retrè)?
               const isOff = (m) => m.comingSoon || (flowKind === 'deposit' && (m.id === 'moncash' || m.id === 'natcash'));
@@ -5385,10 +5415,11 @@ export default function BlicPayApp() {
               {active.list.map((m) => {
                 const depositDisabled = flowKind === 'deposit' && (m.id === 'moncash' || m.id === 'natcash');
                 const disabled = m.comingSoon || depositDisabled;
+                const floatOff = flowKind === 'deposit' && !depositPurpose && depositAvail && !depositAvail.open;
                 return (
-                  <button key={m.id} onClick={() => pickMethod(m)} disabled={processing}
+                  <button key={m.id} onClick={() => pickMethod(m)} disabled={processing || floatOff}
                     className="bp-btn w-full flex items-center gap-3 p-3.5 rounded-xl text-left"
-                    style={{ background: C.card, border: `1px solid ${C.border}`, opacity: processing || disabled ? 0.6 : 1 }}>
+                    style={{ background: C.card, border: `1px solid ${C.border}`, opacity: processing || disabled || floatOff ? 0.5 : 1, filter: floatOff ? 'grayscale(1)' : 'none', cursor: floatOff ? 'not-allowed' : 'pointer' }}>
                     <div className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden" style={{ background: m.logo ? '#fff' : m.color, border: m.logo ? `1px solid ${C.border}` : 'none' }}>
                       {m.logo ? <img src={m.logo} alt={m.name} className="w-full h-full object-cover" /> : <m.icon size={19} color="#fff" />}
                     </div>
@@ -5399,7 +5430,7 @@ export default function BlicPayApp() {
                       </div>
                       <p className="text-xs mt-0.5" style={{ color: C.muted }}>{tt(m.desc)}</p>
                     </div>
-                    {!disabled && (processing && selectedMethod?.id === m.id
+                    {!disabled && !floatOff && (processing && selectedMethod?.id === m.id
                       ? <RefreshCw size={16} color={C.muted} style={{ animation: 'spin 0.8s linear infinite' }} />
                       : <ChevronRight size={16} color={C.muted} />)}
                   </button>
