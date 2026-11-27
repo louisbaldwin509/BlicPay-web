@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ArrowRight, ArrowLeftRight, BadgeCheck, Building2, Check, ChevronDown, CreditCard, Globe, Lock, Menu,
   Phone, QrCode, ShieldCheck, Smartphone, Sparkles, Wallet, X, Fingerprint, Zap, ScanLine, Store,
-  Briefcase, UserRound, ChevronRight, ArrowDownLeft, ArrowUpRight, Bell, Home, Clock, Banknote, LayoutGrid, Plus, Eye } from 'lucide-react';
+  Briefcase, UserRound, ChevronRight, ArrowDownLeft, ArrowUpRight, Bell, Home, Clock, Banknote, LayoutGrid, Plus, Eye, Settings, Search, BarChart3, List } from 'lucide-react';
 // Paj sit la ak adrès yo
 const PAGE_PATH = { home: '/', plans: '/comptes', card: '/carte', business: '/entreprises', security: '/securite', help: '/aide', about: '/a-propos', terms: '/conditions', privacy: '/confidentialite' };
 const PATH_PAGE = Object.fromEntries(Object.entries(PAGE_PATH).map(([k, v]) => [v, k]));
@@ -51,6 +51,44 @@ const D = {
   hpTx3s: ['Yè · 17:40', 'Hier · 17:40', 'Yesterday · 17:40'],
   hpPaid: ['Peman QR', 'Paiement QR', 'QR payment'],
   hpPaidSub: ['Reyisi an 2 segonn', 'Réussi en 2 secondes', 'Done in 2 seconds'],
+  dbNav1: ['Tablo bò', 'Tableau de bord', 'Dashboard'],
+  dbNav2: ['Analiz', 'Analytique', 'Analytics'],
+  dbNav3: ['Aktivite', 'Activité', 'Activity'],
+  dbNav4: ['Kat', 'Carte', 'Card'],
+  dbNav5: ['Kont', 'Compte', 'Account'],
+  dbHello: ['Bon apremidi, Isabelle', 'Bon après-midi, Isabelle', 'Good afternoon, Isabelle'],
+  dbSub: ['Swiv lajan aktivite w, peman kliyan w ak operasyon w an tan reyèl.', 'Suivez l’argent de votre activité, les paiements clients et vos opérations en temps réel.', 'Track your business money, customer payments and operations in real time.'],
+  dbSearch: ['Chèche yon tranzaksyon', 'Rechercher une transaction', 'Search a transaction'],
+  dbWallet: ['Bous Pwo', 'Portefeuille Pro', 'Pro wallet'],
+  dbWalletSub: ['Lajan disponib pou operasyon w', 'Fonds disponibles pour vos opérations', 'Funds available for your operations'],
+  dbVerified: ['Verifye', 'Vérifié', 'Verified'],
+  dbAddFunds: ['Ajoute lajan', 'Ajouter des fonds', 'Add funds'],
+  dbDeposit: ['Depoze', 'Déposer', 'Deposit'],
+  dbWithdraw: ['Retire', 'Retirer', 'Withdraw'],
+  dbTransfer: ['Transfè', 'Transfert', 'Transfer'],
+  dbAvail: ['Balans disponib', 'Solde disponible', 'Available balance'],
+  dbIn: ['Antre (30 jou)', 'Entrées (30 jours)', 'Inflows (30 days)'],
+  dbInSub: ['+18 % sou 30 jou anvan', '+18 % vs 30 jours précédents', '+18% vs previous 30 days'],
+  dbOut: ['Sòti (30 jou)', 'Sorties (30 jours)', 'Outflows (30 days)'],
+  dbOutSub: ['−6 % sou 30 jou anvan', '−6 % vs 30 jours précédents', '−6% vs previous 30 days'],
+  dbPending: ['Annatant', 'En attente', 'Pending'],
+  dbPendingSub: ['2 operasyon', '2 opérations', '2 operations'],
+  dbCard: ['Kat', 'Carte', 'Card'],
+  dbCardSoon: ['Kat Pwo — byento', 'Carte Pro — bientôt', 'Pro card — soon'],
+  dbFlow: ['Flou trezori', 'Flux de trésorerie', 'Cash flow'],
+  dbMonths: ['12 mwa', '12 mois', '12 months'],
+  dbInTab: ['Antre', 'Entrées', 'In'],
+  dbOutTab: ['Sòti', 'Sorties', 'Out'],
+  dbNet: ['Nèt', 'Net', 'Net'],
+  dbM: [['J', 'F', 'M', 'A', 'M', 'J', 'J', 'O', 'S', 'O', 'N', 'D'], ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'], ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']],
+  dbLatest: ['Dènye peman', 'Derniers encaissements', 'Latest payments'],
+  dbPay1: ['Peman QR · Marie J.', 'Paiement QR · Marie J.', 'QR payment · Marie J.'],
+  dbPay1s: ['Jodi a · 14:32', 'Aujourd’hui · 14:32', 'Today · 14:32'],
+  dbPay2: ['Peman QR · Jean-Robert', 'Paiement QR · Jean-Robert', 'QR payment · Jean-Robert'],
+  dbPay2s: ['Jodi a · 11:05', 'Aujourd’hui · 11:05', 'Today · 11:05'],
+  dbPay3: ['Peman QR · Nadège P.', 'Paiement QR · Nadège P.', 'QR payment · Nadège P.'],
+  dbPay3s: ['Yè · 18:47', 'Hier · 18:47', 'Yesterday · 18:47'],
+  dbChip: ['Nouvo peman kliyan', 'Nouveau paiement client', 'New customer payment'],
   navHome: ['Akèy', 'Accueil', 'Home'],
   navSecurity: ['Sekirite', 'Sécurité', 'Security'],
   navHelp: ['Èd', 'Aide', 'Help'],
@@ -402,7 +440,7 @@ function Reveal({ children, delay = 0, className = '' }) {
 
 // Telefòn ak ekran akèy aplikasyon BLICPay la — menm jan ak app la (kat anpile,
 // balans sou kat la, bouton « Depoze », aksyon, kat vityèl, tranzaksyon, ba glass).
-function HeroPhone({ t }) {
+function HeroPhone({ t, bare = false }) {
   const A = { canvas: '#F2F4F8', alt: '#F1F5F9', ink: '#0B1B33', muted: '#64748B', navy: '#0B1B33', cyan: '#00B4D8' };
   const jak = { fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif" };
   const W = 278, H = Math.round(W / (1438 / 905)), R = 14;
@@ -422,8 +460,8 @@ function HeroPhone({ t }) {
     </div>
   );
   return (
-    <div className="lp2-phone relative w-[330px] mx-auto lg:mr-28 lg:ml-0 my-4" style={jak}>
-      <div className="absolute -inset-16 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.28), transparent 62%)' }} />
+    <div className={bare ? "lp2-crisp relative w-[330px]" : "lp2-phone lp2-crisp relative w-[330px] mx-auto lg:mr-28 lg:ml-0 my-4"} style={jak}>
+      {!bare && <div className="absolute -inset-16 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.28), transparent 62%)' }} />}
       {/* bouton akote (aksyon, volim, kouran) */}
       <span className="absolute -left-[3px] top-[118px] w-[4px] h-[30px] rounded-l-[3px]" style={{ background: 'linear-gradient(90deg, #9EA2A8, #E6E8EB 60%, #C4C7CB)', boxShadow: '0 0 0 .5px rgba(0,0,0,.25)' }} />
       <span className="absolute -left-[3px] top-[172px] w-[4px] h-[56px] rounded-l-[3px]" style={{ background: 'linear-gradient(90deg, #9EA2A8, #E6E8EB 60%, #C4C7CB)', boxShadow: '0 0 0 .5px rgba(0,0,0,.25)' }} />
@@ -537,6 +575,7 @@ function HeroPhone({ t }) {
         </div>
         </div>
       </div>
+      {!bare && (<>
       {/* notifikasyon k ap flote */}
       <div className="lp2-bob absolute hidden sm:flex -left-36 top-[64%] rounded-2xl bg-white px-3.5 py-3 items-center gap-3" style={{ boxShadow: '0 20px 40px -16px rgba(0,0,0,.45)', fontFamily: 'inherit' }}>
         <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#E0F7FB' }}><ArrowLeftRight size={16} color="#0E7490" /></span>
@@ -552,7 +591,171 @@ function HeroPhone({ t }) {
           <p className="text-[13px] font-bold">{t('hpPaidSub')}</p>
         </div>
       </div>
+      </>)}
     </div>
+  );
+}
+
+// MacBook Pro ak tablo bò Pwo a (desine an kòd)
+function HeroLaptop({ t }) {
+  const P = { bg: '#F7F5F0', line: '#ECE6DA', ink: '#16181D', muted: '#7A7468', char: '#1F2329', gold: 'linear-gradient(135deg, #FFC85A, #E8901C)', goldSoft: '#FFF1D6', goldInk: '#9A5B00' };
+  const jak = { fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif" };
+  const SW = 872, SH = Math.round(872 / 1.54);
+  const tile = (Ic) => <span className="w-[26px] h-[26px] rounded-[8px] flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Ic size={13} color="#fff" /></span>;
+  const stats = [
+    [Wallet, 'dbAvail', '56 782', 'BP-482913'],
+    [ArrowDownLeft, 'dbIn', '21 370', 'dbInSub'],
+    [ArrowUpRight, 'dbOut', '8 620', 'dbOutSub'],
+    [Clock, 'dbPending', '1 250', 'dbPendingSub'],
+  ];
+  const bars = [22, 29, 27, 37, 33, 41, 39, 47, 44, 51, 56, 66];
+  const pays = [['dbPay1', 'dbPay1s', '+1 250'], ['dbPay2', 'dbPay2s', '+3 400'], ['dbPay3', 'dbPay3s', '+780']];
+  return (
+    <div className="lp2-crisp relative" style={{ width: 1000, ...jak }}>
+      {/* kouvèti */}
+      <div className="relative mx-auto rounded-t-[22px] p-[14px] pb-[20px]" style={{ width: 900, background: '#0A0B0E', boxShadow: '0 0 0 2px #B9BDC2, 0 0 0 3px #6E7278, 0 60px 120px -40px rgba(0,0,0,.8)' }}>
+        <div className="absolute left-1/2 -translate-x-1/2 top-[14px] w-[150px] h-[18px] rounded-b-[10px] z-20 flex items-center justify-center" style={{ background: '#0A0B0E' }}>
+          <span className="w-[6px] h-[6px] rounded-full" style={{ background: 'radial-gradient(circle at 35% 35%, #2B3A55, #0A0F18 70%)' }} />
+        </div>
+        <div className="relative overflow-hidden rounded-[6px]" style={{ width: SW, height: SH, background: P.bg, color: P.ink }}>
+          {/* fenèt navigatè */}
+          <div className="h-[48px] flex items-end px-3 pb-[6px] gap-3" style={{ background: '#E9EAEE', borderBottom: '1px solid #D5D7DC' }}>
+            <span className="flex gap-[6px] pb-[4px]">{['#FF5F57', '#FEBC2E', '#28C840'].map((c) => <span key={c} className="w-[9px] h-[9px] rounded-full" style={{ background: c }} />)}</span>
+            <span className="ml-auto mr-auto h-[20px] w-[300px] rounded-[6px] bg-white flex items-center justify-center gap-1.5 text-[9.5px] font-medium" style={{ color: '#3A3F47' }}><Lock size={9} />blicpayht.com</span>
+            <span className="w-[39px]" />
+          </div>
+          {/* ba anwo */}
+          <div className="h-[44px] bg-white flex items-center px-4 gap-3" style={{ borderBottom: `1px solid ${P.line}` }}>
+            <img src="/brand/logo-full.png" alt="" className="h-[22px] w-auto" />
+            <span className="h-[20px] px-2 rounded-full flex items-center gap-1 text-[9.5px] font-bold" style={{ background: P.goldSoft, color: P.goldInk }}><Store size={10} />Pro</span>
+            <div className="mx-auto flex items-center gap-0.5 p-[3px] rounded-full" style={{ background: '#F2EFE8' }}>
+              {['dbNav1', 'dbNav2', 'dbNav3', 'dbNav4', 'dbNav5'].map((k, n) => (
+                <span key={k} className="h-[24px] px-3 rounded-full flex items-center text-[10px] font-semibold" style={n === 0 ? { background: P.char, color: '#fff' } : { color: P.muted }}>{t(k)}</span>
+              ))}
+            </div>
+            <span className="h-[26px] px-2 rounded-full border flex items-center gap-1 text-[9.5px] font-semibold" style={{ borderColor: P.line }}><Globe size={11} />FR</span>
+            {[Bell, Settings].map((Ic, n) => <span key={n} className="w-[26px] h-[26px] rounded-full border flex items-center justify-center" style={{ borderColor: P.line }}><Ic size={12} color={P.ink} /></span>)}
+            <span className="flex items-center gap-1.5 pl-1">
+              <span className="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[9.5px] font-bold text-white" style={{ background: 'linear-gradient(135deg, #6B4E2E, #2B2118)' }}>BC</span>
+              <span className="leading-tight"><span className="block text-[10px] font-bold">Bella Cosmétiques</span><span className="block text-[8.5px]" style={{ color: P.muted }}>BP-482913</span></span>
+            </span>
+          </div>
+          <div className="flex">
+            {/* ray agòch */}
+            <div className="w-[46px] pt-3 flex flex-col items-center gap-2">
+              {[LayoutGrid, BarChart3, List, CreditCard, Building2].map((Ic, n) => (
+                <span key={n} className="w-[28px] h-[28px] rounded-[9px] flex items-center justify-center" style={n === 0 ? { background: P.char } : { background: '#fff', border: `1px solid ${P.line}` }}><Ic size={13} color={n === 0 ? '#fff' : P.muted} /></span>
+              ))}
+            </div>
+            <div className="flex-1 pr-4 pt-3">
+              <div className="flex items-end justify-between">
+                <div>
+                  <p className="text-[17px] font-extrabold tracking-tight">{t('dbHello')} 👋</p>
+                  <p className="text-[10px] mt-0.5" style={{ color: P.muted }}>{t('dbSub')}</p>
+                </div>
+                <span className="h-[26px] w-[190px] rounded-full bg-white border flex items-center gap-1.5 px-2.5 text-[9.5px]" style={{ borderColor: P.line, color: P.muted }}><Search size={11} />{t('dbSearch')}</span>
+              </div>
+              <div className="mt-3 grid gap-2.5" style={{ gridTemplateColumns: '214px 1fr 236px' }}>
+                {/* bous Pwo */}
+                <div className="relative overflow-hidden rounded-[16px] p-3.5 text-white" style={{ background: `linear-gradient(160deg, #2A2F37, ${P.char} 60%, #14171C)` }}>
+                  <div className="absolute -right-10 -top-10 w-[120px] h-[120px] rounded-full" style={{ background: 'rgba(255,200,90,.14)' }} />
+                  <p className="relative text-[11px] font-bold">{t('dbWallet')}</p>
+                  <p className="relative text-[8.5px] text-white/60">{t('dbWalletSub')}</p>
+                  <p className="relative mt-3 text-[25px] font-extrabold leading-none tracking-tight">56 782<span className="text-[11px] font-bold text-white/70 ml-1">HTG</span></p>
+                  <p className="relative text-[10px] font-semibold text-white/75 mt-1">≈ 432,79 $ US</p>
+                  <span className="relative mt-1.5 inline-flex items-center gap-1 h-[18px] px-1.5 rounded-full text-[8.5px] font-bold" style={{ background: 'rgba(52,211,153,.16)', color: '#6EE7B7' }}><ShieldCheck size={9} />{t('dbVerified')}</span>
+                  <span className="relative mt-2.5 h-[28px] rounded-[9px] flex items-center justify-center gap-1 text-[10px] font-bold" style={{ background: P.gold, color: '#2A1A00' }}><Plus size={11} strokeWidth={3} />{t('dbAddFunds')}</span>
+                  <div className="relative mt-1.5 grid grid-cols-3 gap-1.5">
+                    {[[ArrowDownLeft, 'dbDeposit'], [ArrowUpRight, 'dbWithdraw'], [ArrowLeftRight, 'dbTransfer']].map(([Ic, k]) => (
+                      <span key={k} className="h-[34px] rounded-[9px] flex flex-col items-center justify-center gap-0.5 text-[8.5px] font-semibold" style={{ background: 'rgba(255,255,255,.08)' }}><Ic size={10} />{t(k)}</span>
+                    ))}
+                  </div>
+                </div>
+                {/* estatistik */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  {stats.map(([Ic, k, v, sub]) => (
+                    <div key={k} className="rounded-[14px] bg-white p-2.5" style={{ border: `1px solid ${P.line}` }}>
+                      <div className="flex items-center justify-between">{tile(Ic)}<span className="text-[10px]" style={{ color: P.muted }}>•••</span></div>
+                      <p className="mt-2 text-[9.5px]" style={{ color: P.muted }}>{t(k)}</p>
+                      <p className="text-[16px] font-extrabold leading-tight">{v}<span className="text-[9px] font-bold ml-1" style={{ color: P.muted }}>HTG</span></p>
+                      <p className="text-[8.5px] mt-0.5" style={{ color: k === 'dbIn' ? '#0E9F6E' : P.muted }}>{sub.startsWith('BP') ? sub : t(sub)}</p>
+                    </div>
+                  ))}
+                </div>
+                {/* kat */}
+                <div className="rounded-[14px] bg-white p-2.5" style={{ border: `1px solid ${P.line}` }}>
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-bold">{t('dbCard')}</p>
+                    <span className="h-[17px] px-1.5 rounded-full flex items-center text-[8.5px] font-bold" style={{ background: P.goldSoft, color: P.goldInk }}>{t('dbCardSoon')}</span>
+                  </div>
+                  <div className="relative mt-2 rounded-[10px] overflow-hidden" style={{ height: Math.round(214 / (1438 / 905)) }}>
+                    <img src="/cards/card-world.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <span className="absolute left-3 bottom-2 text-[9.5px] font-semibold tracking-wider text-white" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>BELLA COSMÉTIQUES</span>
+                  </div>
+                  <div className="mt-2 grid grid-cols-2 gap-1.5">
+                    <span className="h-[26px] rounded-[8px] flex items-center justify-center gap-1 text-[9.5px] font-bold text-white" style={{ background: P.char }}><Plus size={10} strokeWidth={3} />{t('dbDeposit')}</span>
+                    <span className="h-[26px] rounded-[8px] flex items-center justify-center gap-1 text-[9.5px] font-bold" style={{ border: `1px solid ${P.line}` }}><ArrowLeftRight size={10} />{t('dbTransfer')}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2.5 grid gap-2.5" style={{ gridTemplateColumns: '1fr 236px' }}>
+                {/* flux trezori */}
+                <div className="rounded-[14px] bg-white p-3" style={{ border: `1px solid ${P.line}` }}>
+                  <div className="flex items-center justify-between">
+                    <div><p className="text-[11.5px] font-bold">{t('dbFlow')}</p><p className="text-[8.5px]" style={{ color: P.muted }}>{t('dbMonths')}</p></div>
+                    <div className="flex p-[2px] rounded-full" style={{ background: '#F2EFE8' }}>
+                      {['dbInTab', 'dbOutTab', 'dbNet'].map((k, n) => <span key={k} className="h-[20px] px-2.5 rounded-full flex items-center text-[9px] font-semibold" style={n === 0 ? { background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,.08)' } : { color: P.muted }}>{t(k)}</span>)}
+                    </div>
+                  </div>
+                  <div className="mt-2 h-[88px] flex items-end gap-[7px] relative">
+                    {[0, 1, 2].map((n) => <div key={n} className="absolute left-0 right-0 border-t border-dashed" style={{ bottom: 18 + n * 24, borderColor: P.line }} />)}
+                    {bars.map((h, n) => (
+                      <div key={n} className="relative flex-1 flex flex-col items-center justify-end gap-1 h-full">
+                        {n === 11 && <span className="absolute -top-1 h-[17px] px-1.5 rounded-full flex items-center text-[8.5px] font-bold text-white whitespace-nowrap" style={{ background: P.char }}>21 370 HTG</span>}
+                        <div className="w-full rounded-t-[5px]" style={{ height: h, background: n === 11 ? P.gold : 'linear-gradient(180deg, #F3D9A8, #EBC98A)' }} />
+                        <span className="text-[8px]" style={{ color: P.muted }}>{t('dbM')[n]}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* dènye peman */}
+                <div className="rounded-[14px] bg-white p-3" style={{ border: `1px solid ${P.line}` }}>
+                  <div className="flex items-center justify-between"><p className="text-[11px] font-bold">{t('dbLatest')}</p><span className="text-[9px]" style={{ color: P.muted }}>{t('hpAll')}</span></div>
+                  <div className="mt-1.5">
+                    {pays.map(([k, sub, v]) => (
+                      <div key={k} className="flex items-center gap-2 py-[7px]" style={{ borderTop: `1px solid ${P.line}` }}>
+                        <span className="w-[24px] h-[24px] rounded-full flex items-center justify-center" style={{ background: 'rgba(16,185,129,.12)' }}><QrCode size={11} color="#059669" /></span>
+                        <div className="flex-1 min-w-0"><p className="text-[10px] font-bold truncate">{t(k)}</p><p className="text-[8.5px]" style={{ color: P.muted }}>{t(sub)}</p></div>
+                        <span className="text-[10px] font-bold" style={{ color: '#059669' }}>{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* baz aliminyòm */}
+      <div className="relative mx-auto h-[20px] rounded-b-[22px]" style={{ width: 1000, background: 'linear-gradient(180deg, #E9EBEE 0%, #C3C6CB 45%, #8C9096 100%)', boxShadow: '0 30px 50px -20px rgba(0,0,0,.7)' }}>
+        <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[160px] h-[8px] rounded-b-[10px]" style={{ background: 'linear-gradient(180deg, #A4A8AE, #C9CCD1)' }} />
+      </div>
+    </div>
+  );
+}
+
+// MacBook + iPhone ansanm (sou òdinatè/tablèt); telefòn sèl sou ti ekran
+function HeroDevices({ t }) {
+  return (
+    <>
+      <div className="md:hidden flex justify-center"><HeroPhone t={t} /></div>
+      <div className="hidden md:flex justify-center">
+        <div className="lp2-devices relative shrink-0" style={{ width: 1230, height: 690 }}>
+          <div className="absolute right-0 top-0"><HeroLaptop t={t} /></div>
+          <div className="absolute left-0 bottom-0" style={{ zoom: 0.86 }}><HeroPhone t={t} bare /></div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -605,22 +808,22 @@ export default function Landing({ onStart, lang, setLang }) {
       <section id="top" className="relative overflow-hidden" style={{ background: `radial-gradient(1200px 600px at 85% -10%, rgba(34,211,238,.22), transparent 60%), linear-gradient(165deg, ${C.night} 0%, ${C.navyDeep} 55%, #0E2E66 100%)`, color: '#fff' }}>
         <div className="absolute inset-0 lp2-grid opacity-60" style={{ filter: 'invert(1)', maskImage: 'linear-gradient(180deg, #000 20%, transparent 85%)' }} />
         <div className="absolute -bottom-48 -left-40 w-[560px] h-[560px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.14), transparent 65%)' }} />
-        <div className="relative max-w-6xl mx-auto px-5 pt-14 pb-20 lg:pt-20 lg:pb-28 grid lg:grid-cols-2 gap-12 items-center">
-          <div>
+        <div className="relative max-w-6xl mx-auto px-5 pt-14 pb-16 lg:pt-20 lg:pb-20">
+          <div className="text-center max-w-3xl mx-auto">
             <Reveal>
               <span className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border" style={{ borderColor: 'rgba(34,211,238,.35)', background: 'rgba(34,211,238,.1)', color: '#CFF7FD' }}>
                 <Sparkles size={14} color={C.cyan} />{t('badge')}
               </span>
             </Reveal>
             <Reveal delay={80}>
-              <h1 className="mt-5 text-[40px] leading-[1.05] sm:text-[56px] tracking-tight" style={{ ...display, fontWeight: 800 }}>
+              <h1 className="mt-5 text-[40px] leading-[1.05] sm:text-[60px] tracking-tight" style={{ ...display, fontWeight: 800 }}>
                 {t('h1a')}<br />
                 <span style={{ background: `linear-gradient(90deg, ${C.cyan}, #A5F3FC)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{t('h1b')}</span>
               </h1>
             </Reveal>
-            <Reveal delay={160}><p className="mt-5 text-lg leading-relaxed max-w-xl" style={{ color: 'rgba(255,255,255,.74)' }}>{t('sub')}</p></Reveal>
+            <Reveal delay={160}><p className="mt-5 text-lg leading-relaxed max-w-2xl mx-auto" style={{ color: 'rgba(255,255,255,.74)' }}>{t('sub')}</p></Reveal>
             <Reveal delay={240}>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-8 flex flex-wrap gap-3 justify-center">
                 <button onClick={() => onStart('register')} className="lp2-btn h-12 px-6 rounded-full font-bold flex items-center gap-2" style={{ background: C.cyan, color: C.night, boxShadow: '0 14px 34px -12px rgba(34,211,238,.75)' }}>
                   {t('start')}<ArrowRight size={18} />
                 </button>
@@ -628,7 +831,7 @@ export default function Landing({ onStart, lang, setLang }) {
               </div>
             </Reveal>
             <Reveal delay={320}>
-              <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm" style={{ color: 'rgba(255,255,255,.7)' }}>
+              <div className="mt-7 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm" style={{ color: 'rgba(255,255,255,.7)' }}>
                 {[[BadgeCheck, 'trust1'], [Lock, 'trust2'], [ShieldCheck, 'trust3']].map(([Icon, k]) => (
                   <span key={k} className="inline-flex items-center gap-1.5"><Icon size={16} color={C.cyan} />{t(k)}</span>
                 ))}
@@ -636,9 +839,9 @@ export default function Landing({ onStart, lang, setLang }) {
             </Reveal>
           </div>
 
-          {/* Vizyèl: telefòn ak aplikasyon BLICPay la */}
-          <Reveal delay={200} className="relative flex justify-center lg:justify-end">
-            <HeroPhone t={t} />
+          {/* Vizyèl: MacBook (tablo bò Pwo) + iPhone (app la) */}
+          <Reveal delay={200} className="relative mt-14">
+            <HeroDevices t={t} />
           </Reveal>
         </div>
       </section>
@@ -1137,8 +1340,12 @@ export default function Landing({ onStart, lang, setLang }) {
         .lp2-float { animation: lp2Float 7s ease-in-out infinite; }
         @keyframes lp2Bob { 0%,100% { transform: translate3d(0,0,0); } 50% { transform: translate3d(0,-10px,0); } }
         .lp2-bob { animation: lp2Bob 5.5s ease-in-out infinite; }
-        .lp2-phone { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; font-variant-numeric: tabular-nums; }
-        .lp2-phone img { image-rendering: -webkit-optimize-contrast; }
+        .lp2-crisp { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; font-variant-numeric: tabular-nums; }
+        .lp2-crisp img { image-rendering: -webkit-optimize-contrast; }
+        .lp2-devices { zoom: .6; }
+        @media (min-width: 1024px) { .lp2-devices { zoom: .8; } }
+        @media (min-width: 1280px) { .lp2-devices { zoom: .96; } }
+        @media (min-width: 1440px) { .lp2-devices { zoom: 1.04; } }
         @media (min-width: 1280px) { .lp2-phone { zoom: 1.1; } }
         .lp2-grid { background-image: radial-gradient(rgba(20,58,115,.08) 1px, transparent 1px); background-size: 22px 22px; }
       `}</style>
