@@ -4,7 +4,10 @@ import React, { useEffect, useState } from 'react';
 import {
   ArrowRight, ArrowLeftRight, BadgeCheck, Building2, Check, ChevronDown, CreditCard, Globe, Lock, Menu,
   Phone, QrCode, ShieldCheck, Smartphone, Sparkles, Wallet, X, Fingerprint, Zap, ScanLine, Store,
-  Briefcase, UserRound } from 'lucide-react';
+  Briefcase, UserRound, ChevronRight } from 'lucide-react';
+// Paj sit la ak adrès yo
+const PAGE_PATH = { home: '/', plans: '/comptes', card: '/carte', business: '/entreprises', security: '/securite', help: '/aide', about: '/a-propos', terms: '/conditions', privacy: '/confidentialite' };
+const PATH_PAGE = Object.fromEntries(Object.entries(PAGE_PATH).map(([k, v]) => [v, k]));
 // Ikòn plan yo (Personnel / Pro / Entreprise)
 const PLAN_ICON = { personal: UserRound, pro: Store, business: Building2 };
 const PLAN_GRAD = {
@@ -26,6 +29,33 @@ const display = { fontFamily: "'Manrope', sans-serif" };
 
 // [kreyòl, français, english]
 const D = {
+  navHome: ['Akèy', 'Accueil', 'Home'],
+  navSecurity: ['Sekirite', 'Sécurité', 'Security'],
+  navHelp: ['Èd', 'Aide', 'Help'],
+  footProducts: ['Pwodwi', 'Produits', 'Products'],
+  phPlansT: ['Yon kont pou chak bezwen', 'Un compte pour chaque besoin', 'An account for every need'],
+  phPlansS: ['Pèsonèl, pwofesyonèl oswa antrepriz — pri klè, san abònman, san sipriz.', 'Personnel, professionnel ou entreprise — des tarifs clairs, sans abonnement ni surprise.', 'Personal, professional or business — clear pricing, no subscription, no surprises.'],
+  phCardT: ['Kat BLICPay', 'La carte BLICPay', 'The BLICPay card'],
+  phCardS: ['Peye sou entènèt toupatou nan mond lan ak lajan ki sou kont BLICPay ou.', 'Payez en ligne partout dans le monde avec l’argent de votre compte BLICPay.', 'Pay online worldwide with the money in your BLICPay account.'],
+  phBizT: ['BLICPay pou biznis', 'BLICPay pour les professionnels', 'BLICPay for business'],
+  phBizS: ['Resevwa peman kliyan w yo pa QR, swiv lavant ou epi bay kliyan w konfyans.', 'Encaissez vos clients par QR, suivez vos ventes et inspirez confiance.', 'Get paid by QR, track your sales and build trust.'],
+  phSecT: ['Sekirite w se priyorite nou', 'Votre sécurité, notre priorité', 'Your security comes first'],
+  phSecS: ['Lajan w ak done w pwoteje nan chak etap, depi ouvèti kont lan jiska chak peman.', 'Votre argent et vos données sont protégés à chaque étape, de l’ouverture du compte à chaque paiement.', 'Your money and data are protected at every step, from sign-up to every payment.'],
+  phHelpT: ['Kijan nou ka ede w?', 'Comment pouvons-nous vous aider ?', 'How can we help?'],
+  phHelpS: ['Repons pou kesyon yo poze plis, ak yon ekip ki la pou ou.', 'Les réponses aux questions fréquentes, et une équipe à votre écoute.', 'Answers to common questions, and a team that’s here for you.'],
+  phAboutS: ['Kiyès nou ye ak sa n ap bati pou Ayiti.', 'Qui nous sommes et ce que nous construisons pour Haïti.', 'Who we are and what we’re building for Haiti.'],
+  phLegalS: ['Dènye mizajou: novanm 2026', 'Dernière mise à jour : novembre 2026', 'Last updated: November 2026'],
+  tzPlansT: ['Chwazi kont ki fè pou ou', 'Choisissez le compte qui vous ressemble', 'Choose the account that fits you'],
+  tzSee: ['Wè detay yo', 'Voir le détail', 'See details'],
+  tzComparePlans: ['Konpare kont yo', 'Comparer les comptes', 'Compare accounts'],
+  tzCardBtn: ['Dekouvri kat la', 'Découvrir la carte', 'Discover the card'],
+  tzSecBtn: ['Aprann plis sou sekirite', 'En savoir plus sur la sécurité', 'Learn more about security'],
+  tzBizBtn: ['Dekouvri BLICPay biznis', 'Découvrir l’offre pro', 'Discover the business offer'],
+  whereT: ['Kote w ka itilize l', 'Où l’utiliser', 'Where to use it'],
+  whereH: ['Tout sit ak aplikasyon ou renmen yo', 'Tous vos sites et applications préférés', 'All your favorite sites and apps'],
+  whereS: ['Sou sit ak aplikasyon ki aksepte kat entènasyonal, pa egzanp:', 'Sur les sites et applications qui acceptent les cartes internationales, par exemple :', 'On websites and apps that accept international cards, for example:'],
+  whereNote: ['Non mak sa yo se pwopriyete mèt yo. BLICPay pa gen okenn lyen avèk yo. Kat la ap disponib byento.', 'Ces marques appartiennent à leurs propriétaires respectifs et ne sont pas affiliées à BLICPay. Carte disponible prochainement.', 'These brands belong to their respective owners and are not affiliated with BLICPay. Card coming soon.'],
+  helpContactT: ['Ou pa jwenn repons ou?', 'Vous ne trouvez pas votre réponse ?', 'Can’t find your answer?'],
   navFeatures: ['Sèvis', 'Services', 'Services'],
   navCard: ['Kat', 'Carte', 'Card'],
   navHow: ['Kijan l mache', 'Comment ça marche', 'How it works'],
@@ -159,7 +189,7 @@ const D = {
   card1: ['Kat vityèl lan disponib tousuit nan aplikasyon an', 'Carte virtuelle disponible immédiatement dans l’application', 'Virtual card available instantly in the app'],
   card2: ['Bloke / debloke kat ou nenpòt lè', 'Bloquez / débloquez votre carte à tout moment', 'Freeze / unfreeze your card anytime'],
   card3: ['Chak peman parèt an tan reyèl nan istorik ou', 'Chaque paiement apparaît en temps réel dans l’historique', 'Every payment shows up in real time in your history'],
-  cardNote: ['Kat yo ap lanse byento ak yon bank patnè — enskri kounye a pou w pami premye yo.', 'Les cartes seront lancées prochainement avec une banque partenaire — inscrivez-vous pour être parmi les premiers.', 'Cards launch soon with a partner bank — sign up now to be among the first.'],
+  cardNote: ['Kat yo ap lanse byento ak yon emetè patnè — enskri kounye a pou w pami premye yo.', 'Les cartes seront lancées prochainement avec un émetteur partenaire — inscrivez-vous pour être parmi les premiers.', 'Cards launch soon with a partner issuer — sign up now to be among the first.'],
 
   howEyebrow: ['Kijan l mache', 'Comment ça marche', 'How it works'],
   howTitle: ['Twa etap pou kòmanse.', 'Trois étapes pour commencer.', 'Three steps to get started.'],
@@ -214,15 +244,15 @@ const D = {
   terms: ['Kondisyon itilizasyon', 'Conditions d’utilisation', 'Terms of use'],
   privacy: ['Konfidansyalite', 'Confidentialité', 'Privacy'],
   rights: ['Tout dwa rezève.', 'Tous droits réservés.', 'All rights reserved.'],
-  disclaimer: ['BLICPay LLC se yon platfòm finansye rekonèt e anrejistre nan Ministè Kòmès ak Endistri Ayiti. Kat yo ap emèt pa yon bank patnè lè yo disponib.', 'BLICPay LLC est une plateforme financière reconnue et enregistrée auprès du Ministère du Commerce et de l’Industrie d’Haïti. Les cartes seront émises par une banque partenaire lorsqu’elles seront disponibles.', 'BLICPay LLC is a financial platform recognized and registered with the Haitian Ministry of Commerce and Industry. Cards will be issued by a partner bank once available.'],
+  disclaimer: ['BLICPAY se yon non komèsyal anrejistre nan Ministè Kòmès ak Endistri Ayiti (MCI), epi BLICPAY LLC se yon sosyete anrejistre nan Nouvo Meksik (Etazini). BLICPay pa yon bank. Kat yo ap emèt pa yon emetè patnè ki gen otorizasyon, lè yo disponib.', 'BLICPAY est un nom commercial enregistré auprès du Ministère du Commerce et de l’Industrie d’Haïti (MCI), et BLICPAY LLC une société enregistrée au Nouveau-Mexique (États-Unis). BLICPay n’est pas une banque. Les cartes seront émises par un émetteur partenaire agréé lorsqu’elles seront disponibles.', 'BLICPAY is a trade name registered with the Haitian Ministry of Commerce and Industry (MCI), and BLICPAY LLC is a company registered in New Mexico (USA). BLICPay is not a bank. Cards will be issued by a licensed partner issuer once available.'],
   aboutBody: ['BLICPay se yon platfòm fentèk ki fèt pou Ayisyen. Nou bay yon kont dijital ou ka rechaje fasilman, transfè imedyat ant kliyan BLICPay, peman pa QR pou moun ak antrepriz, epi byento kat vityèl ak fizik. Misyon nou: fè peman dijital vin senp, rapid e sekirize pou tout moun.', 'BLICPay est une plateforme fintech conçue pour les Haïtiens. Nous offrons un compte numérique facile à recharger, des transferts instantanés entre clients BLICPay, des paiements par QR pour particuliers et entreprises, et bientôt des cartes virtuelles et physiques. Notre mission : rendre le paiement numérique simple, rapide et sûr pour tous.', 'BLICPay is a fintech platform built for Haitians. We offer an easy-to-fund digital account, instant transfers between BLICPay users, QR payments for people and businesses, and soon virtual and physical cards. Our mission: make digital payments simple, fast and safe for everyone.'],
   supportBody: ['Ou gen yon kesyon oswa yon pwoblèm ak kont ou? Kontakte nou dirèkteman:', 'Une question ou un problème avec votre compte ? Contactez-nous directement :', 'A question or an issue with your account? Contact us directly:'],
   call: ['Rele nou', 'Appelez-nous', 'Call us'],
   whatsapp: ['Ekri nou sou WhatsApp', 'Écrivez-nous sur WhatsApp', 'Message us on WhatsApp'],
   termsBody: [
-    '1. Akseptasyon\nAn kreye oswa itilize yon kont BLICPay, ou aksepte kondisyon sa yo.\n\n2. Kalifikasyon\nOu dwe gen omwen 18 an epi bay enfòmasyon egzat. Yon verifikasyon idantite (KYC) obligatwa pou sèten operasyon.\n\n3. Kont ou\nOu responsab konfidansyalite modpas ak kòd PIN ou. Kontakte nou imedyatman si ou sispèk yon aksè san otorizasyon.\n\n4. Rechaj, transfè ak retrè\nBalans ou se lajan ou rechaje. Transfè BLICPay → BLICPay yo gratis. Retrè yo gen frè ki toujou afiche anvan konfimasyon, epi yo sijè a plafon.\n\n5. Kat\nKat BLICPay yo ap emèt pa yon bank patnè, sijè a kondisyon pa l, lè yo disponib.\n\n6. Itilizasyon entèdi\nOkenn aktivite ilegal, fwod oswa blanchi lajan.\n\n7. Sispansyon\nBLICPay ka sispann oswa fèmen yon kont ki vyole kondisyon sa yo.\n\n8. Chanjman\nNou ka modifye kondisyon sa yo — n ap enfòme w de chanjman enpòtan.',
-    '1. Acceptation\nEn créant ou en utilisant un compte BLICPay, vous acceptez ces conditions.\n\n2. Éligibilité\nVous devez avoir au moins 18 ans et fournir des informations exactes. Une vérification d’identité (KYC) est obligatoire pour certaines opérations.\n\n3. Votre compte\nVous êtes responsable de la confidentialité de votre mot de passe et de votre PIN. Contactez-nous immédiatement en cas d’accès non autorisé.\n\n4. Recharges, transferts et retraits\nVotre solde correspond à l’argent que vous avez rechargé. Les transferts BLICPay → BLICPay sont gratuits. Les retraits comportent des frais toujours affichés avant confirmation et sont soumis à des plafonds.\n\n5. Cartes\nLes cartes BLICPay seront émises par une banque partenaire, selon ses propres conditions, lorsqu’elles seront disponibles.\n\n6. Usages interdits\nAucune activité illégale, fraude ou blanchiment d’argent.\n\n7. Suspension\nBLICPay peut suspendre ou fermer un compte qui enfreint ces conditions.\n\n8. Modifications\nNous pouvons modifier ces conditions — vous serez informé des changements importants.',
-    '1. Acceptance\nBy creating or using a BLICPay account, you accept these terms.\n\n2. Eligibility\nYou must be at least 18 and provide accurate information. Identity verification (KYC) is required for some operations.\n\n3. Your account\nYou are responsible for keeping your password and PIN confidential. Contact us immediately if you suspect unauthorized access.\n\n4. Top-ups, transfers and withdrawals\nYour balance is the money you have added. BLICPay → BLICPay transfers are free. Withdrawals carry fees always shown before you confirm and are subject to limits.\n\n5. Cards\nBLICPay cards will be issued by a partner bank, under its own terms, once available.\n\n6. Prohibited use\nNo illegal activity, fraud or money laundering.\n\n7. Suspension\nBLICPay may suspend or close an account that breaches these terms.\n\n8. Changes\nWe may update these terms — we will tell you about important changes.',
+    '1. Akseptasyon\nAn kreye oswa itilize yon kont BLICPay, ou aksepte kondisyon sa yo.\n\n2. Kalifikasyon\nOu dwe gen omwen 18 an epi bay enfòmasyon egzat. Yon verifikasyon idantite (KYC) obligatwa pou sèten operasyon.\n\n3. Kont ou\nOu responsab konfidansyalite modpas ak kòd PIN ou. Kontakte nou imedyatman si ou sispèk yon aksè san otorizasyon.\n\n4. Rechaj, transfè ak retrè\nBalans ou se lajan ou rechaje. Transfè BLICPay → BLICPay yo gratis. Retrè yo gen frè ki toujou afiche anvan konfimasyon, epi yo sijè a plafon.\n\n5. Kat\nKat BLICPay yo ap emèt pa yon emetè patnè ki gen otorizasyon, sijè a kondisyon pa l, lè yo disponib.\n\n6. Itilizasyon entèdi\nOkenn aktivite ilegal, fwod oswa blanchi lajan.\n\n7. Sispansyon\nBLICPay ka sispann oswa fèmen yon kont ki vyole kondisyon sa yo.\n\n8. Chanjman\nNou ka modifye kondisyon sa yo — n ap enfòme w de chanjman enpòtan.',
+    '1. Acceptation\nEn créant ou en utilisant un compte BLICPay, vous acceptez ces conditions.\n\n2. Éligibilité\nVous devez avoir au moins 18 ans et fournir des informations exactes. Une vérification d’identité (KYC) est obligatoire pour certaines opérations.\n\n3. Votre compte\nVous êtes responsable de la confidentialité de votre mot de passe et de votre PIN. Contactez-nous immédiatement en cas d’accès non autorisé.\n\n4. Recharges, transferts et retraits\nVotre solde correspond à l’argent que vous avez rechargé. Les transferts BLICPay → BLICPay sont gratuits. Les retraits comportent des frais toujours affichés avant confirmation et sont soumis à des plafonds.\n\n5. Cartes\nLes cartes BLICPay seront émises par un émetteur partenaire agréé, selon ses propres conditions, lorsqu’elles seront disponibles.\n\n6. Usages interdits\nAucune activité illégale, fraude ou blanchiment d’argent.\n\n7. Suspension\nBLICPay peut suspendre ou fermer un compte qui enfreint ces conditions.\n\n8. Modifications\nNous pouvons modifier ces conditions — vous serez informé des changements importants.',
+    '1. Acceptance\nBy creating or using a BLICPay account, you accept these terms.\n\n2. Eligibility\nYou must be at least 18 and provide accurate information. Identity verification (KYC) is required for some operations.\n\n3. Your account\nYou are responsible for keeping your password and PIN confidential. Contact us immediately if you suspect unauthorized access.\n\n4. Top-ups, transfers and withdrawals\nYour balance is the money you have added. BLICPay → BLICPay transfers are free. Withdrawals carry fees always shown before you confirm and are subject to limits.\n\n5. Cards\nBLICPay cards will be issued by a licensed partner issuer, under its own terms, once available.\n\n6. Prohibited use\nNo illegal activity, fraud or money laundering.\n\n7. Suspension\nBLICPay may suspend or close an account that breaches these terms.\n\n8. Changes\nWe may update these terms — we will tell you about important changes.',
   ],
   privacyBody: [
     '1. Enfòmasyon nou kolekte\nNon, telefòn, adrès, dokiman idantite (pou KYC) ak istorik tranzaksyon ou.\n\n2. Poukisa\nPou jere kont ou, verifye idantite ou (obligasyon regilasyon), trete tranzaksyon ak ofri sipò.\n\n3. Pataj\nNou pa vann done ou. Nou ka pataje enfòmasyon ak patnè ki nesesè pou sèvis la (verifikasyon idantite, bank patnè pou kat yo) oswa ak otorite si lalwa mande sa.\n\n4. Sekirite\nModpas ak PIN chifre; aksè entèn limite.\n\n5. Konsèvasyon\nNou kenbe done ou pandan kont ou aktif epi pou peryòd lalwa mande apre fèmti.\n\n6. Dwa ou\nOu ka mande wè, korije oswa efase done ou — kontakte sipò.',
@@ -371,63 +401,28 @@ export default function Landing({ onStart, lang, setLang }) {
     [CreditCard, 'f5', '#F1F2F4', '#111827', true],
     [Store, 'f6', '#FDF3E3', C.amber],
   ];
-  const NAV = [['services', 'navFeatures'], ['card', 'navCard'], ['plans', 'navPlans'], ['business', 'navBusiness'], ['faq', 'navFaq']];
-  const go = (id) => { setMenu(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); };
+  // Paj yo: chak youn gen pwòp adrès li (blicpayht.com/comptes, /carte…)
+  const [page, setPage] = useState(() => PATH_PAGE[window.location.pathname.replace(/\/+$/, '') || '/'] || 'home');
+  useEffect(() => {
+    const onPop = () => setPage(PATH_PAGE[window.location.pathname.replace(/\/+$/, '') || '/'] || 'home');
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+  const nav = (p) => {
+    setMenu(false); setLangOpen(false);
+    const path = PAGE_PATH[p] || '/';
+    if (window.location.pathname !== path) window.history.pushState({}, '', path);
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+  useEffect(() => {
+    const titles = { home: 'BLICPay', plans: t('navPlans'), card: t('navCard'), business: t('navBusiness'), security: t('navSecurity'), help: t('navHelp'), about: t('about'), terms: t('terms'), privacy: t('privacy') };
+    document.title = page === 'home' ? 'BLICPay — ' + t('footDesc') : `${titles[page]} · BLICPay`;
+  }, [page, lang]);
+  const NAV = [['plans', 'navPlans'], ['card', 'navCard'], ['business', 'navBusiness'], ['security', 'navSecurity'], ['help', 'navHelp']];
 
-  return (
-    <div style={{ background: '#fff', color: C.ink, overflowX: 'hidden' }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap');
-        html { scroll-behavior: smooth; }
-        .lp2-btn { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
-        .lp2-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
-        .lp2-card { transition: transform .25s ease, box-shadow .25s ease; }
-        .lp2-plan { transition: transform .25s ease, box-shadow .25s ease; }
-        .lp2-plan:hover { transform: translateY(-6px); }
-        .lp2-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(11,27,51,.25); }
-        @keyframes lp2Float { 0%,100% { transform: translateY(0) rotate(var(--r)); } 50% { transform: translateY(-12px) rotate(var(--r)); } }
-        .lp2-float { animation: lp2Float 7s ease-in-out infinite; }
-        .lp2-grid { background-image: radial-gradient(rgba(20,58,115,.08) 1px, transparent 1px); background-size: 22px 22px; }
-      `}</style>
-
-      {/* NAV */}
-      <header className="sticky top-0 z-40 border-b" style={{ background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(12px)', borderColor: C.border }}>
-        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center gap-6">
-          <a href="#top" className="flex items-center gap-2 shrink-0" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-            <img src="/brand/logo-full.png" alt="BLICPay" style={{ height: 42, width: 'auto' }} />
-          </a>
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium" style={{ color: C.muted }}>
-            {NAV.map(([id, k]) => <button key={id} onClick={() => go(id)} className="hover:text-[#0B1B33]">{t(k)}</button>)}
-          </nav>
-          <div className="ml-auto flex items-center gap-2">
-            <div className="relative">
-              <button onClick={() => setLangOpen((v) => !v)} className="h-10 px-3 rounded-full border flex items-center gap-1.5 text-sm font-semibold" style={{ borderColor: C.border }} aria-label="Language">
-                <Globe size={16} /><span className="uppercase">{lang}</span>
-              </button>
-              {langOpen && (
-                <div className="absolute right-0 mt-2 w-44 rounded-2xl border bg-white shadow-xl p-1.5 z-50" style={{ borderColor: C.border }}>
-                  {LANGS.map(([code, label, flag]) => (
-                    <button key={code} onClick={() => { setLang(code); setLangOpen(false); }} className="w-full text-left px-3 py-2 rounded-xl text-sm flex items-center gap-2" style={lang === code ? { background: '#E6F6FD', color: C.navy, fontWeight: 600 } : {}}>
-                      <span>{flag}</span>{label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <button onClick={() => onStart('login')} className="hidden sm:block h-10 px-4 rounded-full text-sm font-semibold" style={{ color: C.navy }}>{t('login')}</button>
-            <button onClick={() => onStart('register')} className="lp2-btn h-10 px-5 rounded-full text-sm font-bold text-white" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>{t('signup')}</button>
-            <button onClick={() => setMenu((v) => !v)} className="lg:hidden w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: C.border }} aria-label="Menu">
-              {menu ? <X size={18} /> : <Menu size={18} />}
-            </button>
-          </div>
-        </div>
-        {menu && (
-          <div className="lg:hidden border-t px-5 py-3 flex flex-col" style={{ borderColor: C.border }}>
-            {NAV.map(([id, k]) => <button key={id} onClick={() => go(id)} className="text-left py-2.5 font-medium">{t(k)}</button>)}
-          </div>
-        )}
-      </header>
-
+  // ---- Seksyon yo (chak paj itilize sa l bezwen)
+  const heroSec = (<>
       {/* HERO */}
       <section id="top" className="relative">
         <div className="absolute inset-0 lp2-grid" style={{ maskImage: 'linear-gradient(180deg, #000 30%, transparent)' }} />
@@ -482,7 +477,8 @@ export default function Landing({ onStart, lang, setLang }) {
           </Reveal>
         </div>
       </section>
-
+      </>);
+  const servicesSec = (<>
       {/* SÈVIS */}
       <section id="services" className="py-20 lg:py-28" style={{ background: C.bg }}>
         <div className="max-w-6xl mx-auto px-5">
@@ -496,7 +492,7 @@ export default function Landing({ onStart, lang, setLang }) {
               <Reveal key={k} delay={n * 70}>
                 <div className="lp2-card h-full rounded-3xl bg-white border p-6" style={{ borderColor: C.border }}>
                   <div className="flex items-start justify-between">
-                    <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: bg }}><Icon size={22} color={fg} /></span>
+                    <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${bg}, ${fg})`, boxShadow: `0 10px 20px -10px ${fg}` }}><Icon size={22} color="#fff" /></span>
                     {soon && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: '#FDF3E3', color: C.amber }}>{t('soon')}</span>}
                   </div>
                   <h3 className="mt-5 text-lg font-bold" style={display}>{t(`${k}t`)}</h3>
@@ -507,7 +503,8 @@ export default function Landing({ onStart, lang, setLang }) {
           </div>
         </div>
       </section>
-
+      </>);
+  const cardSec = (<>
       {/* KAT */}
       <section id="card" className="py-20 lg:py-28 relative overflow-hidden" style={{ background: `linear-gradient(160deg, ${C.navyDeep} 0%, #0E2E66 60%, #154C9C 100%)`, color: '#fff' }}>
         <div className="absolute -left-40 -bottom-40 w-[480px] h-[480px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(41,182,232,.25), transparent 65%)' }} />
@@ -541,7 +538,8 @@ export default function Landing({ onStart, lang, setLang }) {
           </Reveal>
         </div>
       </section>
-
+      </>);
+  const howSec = (<>
       {/* KIJAN L MACHE */}
       <section id="how" className="py-20 lg:py-28">
         <div className="max-w-6xl mx-auto px-5">
@@ -554,7 +552,7 @@ export default function Landing({ onStart, lang, setLang }) {
               <Reveal key={k} delay={n * 100}>
                 <div className="relative rounded-3xl border p-7 h-full" style={{ borderColor: C.border }}>
                   <span className="absolute -top-4 left-7 w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>{n + 1}</span>
-                  <Icon size={26} color={C.navy} className="mt-2" />
+                  <span className="mt-3 w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: '#EEF5FD' }}><Icon size={24} color={C.navy} /></span>
                   <h3 className="mt-4 text-lg font-bold" style={display}>{t(`${k}t`)}</h3>
                   <p className="mt-2 text-sm leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
                 </div>
@@ -580,7 +578,8 @@ export default function Landing({ onStart, lang, setLang }) {
           </Reveal>
         </div>
       </section>
-
+      </>);
+  const securitySec = (<>
       {/* SEKIRITE */}
       <section className="py-20 lg:py-28" style={{ background: C.bg }}>
         <div className="max-w-6xl mx-auto px-5 grid lg:grid-cols-[1fr_1.4fr] gap-12 items-start">
@@ -595,7 +594,7 @@ export default function Landing({ onStart, lang, setLang }) {
             {[[ScanLine, 'sec1'], [Lock, 'sec2'], [BadgeCheck, 'sec3'], [ShieldCheck, 'sec4']].map(([Icon, k], n) => (
               <Reveal key={k} delay={n * 80}>
                 <div className="lp2-card rounded-3xl bg-white border p-6 h-full" style={{ borderColor: C.border }}>
-                  <Icon size={24} color={C.navy} />
+                  <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, #3CC4F0, ${C.navy})` }}><Icon size={20} color="#fff" /></span>
                   <h3 className="mt-4 font-bold" style={display}>{t(`${k}t`)}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
                 </div>
@@ -604,17 +603,18 @@ export default function Landing({ onStart, lang, setLang }) {
           </div>
         </div>
       </section>
-
+      </>);
+  const plansSec = (<>
       {/* KONT YO — PÈSONÈL / ANTREPRIZ */}
-      <section id="plans" className="py-20 lg:py-28" style={{ background: C.bg }}>
+      <section id="plans" className={page === 'plans' ? 'pt-10 pb-20 lg:pt-14 lg:pb-28' : 'py-20 lg:py-28'} style={{ background: C.bg }}>
         <div className="max-w-6xl mx-auto px-5">
-          <Reveal className="text-center max-w-2xl mx-auto">
+          {page !== 'plans' && <Reveal className="text-center max-w-2xl mx-auto">
             <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t('plEyebrow')}</p>
             <h2 className="mt-3 text-3xl sm:text-5xl leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('plTitle')}</h2>
             <p className="mt-4 text-lg" style={{ color: C.muted }}>{t('plSub')}</p>
-          </Reveal>
+          </Reveal>}
 
-          <div className="mt-14 grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7 max-w-6xl mx-auto items-stretch">
+          <div className={`${page === 'plans' ? 'mt-2' : 'mt-14'} grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7 max-w-6xl mx-auto items-stretch`}>
             {[
               { k: 'personal', tag: 'plTagP', name: 'plPersonal', who: 'plPersonalFor', amount: null, ideal: 'plIdealP', head: 'plIncl', items: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'], cta: 'plOpenPersonal', action: 'register', icon: PLAN_ICON.personal, dark: false },
               { k: 'pro', tag: 'plTagPro', name: 'plPro', who: 'plProFor', amount: '100', ideal: 'plIdealPro', head: 'plPlusP', items: ['pr1', 'pr2', 'pr3', 'pr4', 'pr5', 'pr6'], cta: 'plOpenPro', action: 'register-pro', icon: PLAN_ICON.pro, dark: true },
@@ -704,7 +704,8 @@ export default function Landing({ onStart, lang, setLang }) {
           </Reveal>
         </div>
       </section>
-
+      </>);
+  const bizSec = (<>
       {/* ANTREPRIZ */}
       <section id="business" className="py-20 lg:py-28">
         <div className="max-w-6xl mx-auto px-5">
@@ -721,7 +722,7 @@ export default function Landing({ onStart, lang, setLang }) {
               <div className="space-y-3">
                 {[[QrCode, 'biz1'], [Zap, 'biz2'], [Smartphone, 'biz3']].map(([Icon, k]) => (
                   <div key={k} className="flex items-center gap-4 rounded-2xl bg-white border p-4" style={{ borderColor: C.border }}>
-                    <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#FDF3E3' }}><Icon size={20} color={C.amber} /></span>
+                    <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: PLAN_GRAD.pro }}><Icon size={20} color="#fff" /></span>
                     <span className="font-semibold">{t(k)}</span>
                   </div>
                 ))}
@@ -730,7 +731,8 @@ export default function Landing({ onStart, lang, setLang }) {
           </Reveal>
         </div>
       </section>
-
+      </>);
+  const faqSec = (<>
       {/* FAQ */}
       <section id="faq" className="py-20 lg:py-24" style={{ background: C.bg }}>
         <div className="max-w-3xl mx-auto px-5">
@@ -748,7 +750,8 @@ export default function Landing({ onStart, lang, setLang }) {
           </div>
         </div>
       </section>
-
+      </>);
+  const ctaSec = (<>
       {/* CTA */}
       <section className="py-20">
         <div className="max-w-6xl mx-auto px-5">
@@ -764,33 +767,290 @@ export default function Landing({ onStart, lang, setLang }) {
           </Reveal>
         </div>
       </section>
+      </>);
 
-      {/* FOOTER */}
-      <footer className="border-t" style={{ borderColor: C.border }}>
-        <div className="max-w-6xl mx-auto px-5 py-12 grid sm:grid-cols-3 gap-8">
-          <div>
-            <img src="/brand/logo-full.png" alt="BLICPay" style={{ height: 46, width: 'auto' }} />
-            <p className="mt-3 text-sm" style={{ color: C.muted }}>{t('footDesc')}</p>
+  // ---- Tèt paj (paj entèn yo)
+  const PageHero = ({ title, sub, eyebrow }) => (
+    <section className="relative overflow-hidden" style={{ background: `linear-gradient(160deg, ${C.navyDeep} 0%, #0E2E66 60%, #154C9C 100%)`, color: '#fff' }}>
+      <div className="absolute inset-0 opacity-[.12] lp2-grid" style={{ filter: 'invert(1)' }} />
+      <div className="absolute -right-32 -top-32 w-[420px] h-[420px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(41,182,232,.35), transparent 65%)' }} />
+      <div className="relative max-w-6xl mx-auto px-5 pt-12 pb-14 lg:pt-16 lg:pb-20">
+        <div className="flex items-center gap-2 text-[13px]" style={{ color: 'rgba(255,255,255,.65)' }}>
+          <button onClick={() => nav('home')} className="hover:text-white">{t('navHome')}</button>
+          <ChevronRight size={14} />
+          <span className="text-white font-semibold">{eyebrow || title}</span>
+        </div>
+        <h1 className="mt-4 text-[36px] sm:text-[52px] leading-[1.05] tracking-tight max-w-3xl" style={{ ...display, fontWeight: 800 }}>{title}</h1>
+        {sub && <p className="mt-4 text-lg leading-relaxed max-w-2xl" style={{ color: 'rgba(255,255,255,.78)' }}>{sub}</p>}
+      </div>
+    </section>
+  );
+
+  // ---- Aperçu sou akèy la
+  const SeeMore = ({ to, label, light }) => (
+    <button onClick={() => nav(to)} className="lp2-btn mt-8 h-12 px-6 rounded-full font-bold inline-flex items-center gap-2"
+      style={light ? { background: '#fff', color: C.navy } : { background: C.navy, color: '#fff' }}>{label}<ArrowRight size={18} /></button>
+  );
+  const plansTeaser = (
+    <section className="py-20 lg:py-28" style={{ background: C.bg }}>
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+          <div className="max-w-2xl">
+            <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t('plEyebrow')}</p>
+            <h2 className="mt-3 text-3xl sm:text-[42px] leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('tzPlansT')}</h2>
           </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: C.muted }}>{t('footCompany')}</p>
-            <div className="mt-3 flex flex-col gap-2 text-sm items-start">
-              <button onClick={() => setModal('about')}>{t('about')}</button>
-              <button onClick={() => setModal('support')}>{t('support')}</button>
+          <button onClick={() => nav('plans')} className="text-[15px] font-bold inline-flex items-center gap-1.5 shrink-0" style={{ color: C.navy }}>{t('tzComparePlans')}<ArrowRight size={17} /></button>
+        </Reveal>
+        <div className="mt-10 grid md:grid-cols-3 gap-5">
+          {[['personal', 'plPersonal', 'plPersonalFor', 'plFree'], ['pro', 'plPro', 'plProFor', 'plProPrice'], ['business', 'plBusiness', 'plBusinessFor', 'plBizPrice']].map(([k, name, who, price], n) => (
+            <Reveal key={k} delay={n * 90}>
+              <button onClick={() => nav('plans')} className="lp2-card w-full h-full text-left rounded-3xl p-6 flex flex-col" style={k === 'pro'
+                ? { background: `linear-gradient(160deg, ${C.navyDeep}, #154C9C)`, color: '#fff', outline: '1.5px solid rgba(255,200,90,.55)', outlineOffset: -1.5 }
+                : { background: '#fff', border: `1px solid ${C.border}` }}>
+                <div className="flex items-center justify-between">
+                  <span className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: PLAN_GRAD[k], boxShadow: PLAN_SHADOW[k] }}>{React.createElement(PLAN_ICON[k], { size: 21, color: '#fff', strokeWidth: 1.8 })}</span>
+                  <span className="text-lg" style={{ ...display, fontWeight: 800 }}>{t(price)}</span>
+                </div>
+                <p className="mt-5 text-xl" style={{ ...display, fontWeight: 800 }}>{t(name)}</p>
+                <p className="mt-1.5 text-sm leading-snug flex-1" style={{ color: k === 'pro' ? 'rgba(255,255,255,.72)' : C.muted }}>{t(who)}</p>
+                <span className="mt-5 text-sm font-bold inline-flex items-center gap-1.5" style={{ color: k === 'pro' ? '#FFC85A' : C.navy }}>{t('tzSee')}<ArrowRight size={15} /></span>
+              </button>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+  const cardTeaser = (
+    <section className="relative overflow-hidden" style={{ background: `linear-gradient(160deg, ${C.navyDeep} 0%, #0E2E66 60%, #154C9C 100%)`, color: '#fff' }}>
+      <div className="absolute -left-40 -bottom-40 w-[480px] h-[480px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(41,182,232,.25), transparent 65%)' }} />
+      <div className="relative max-w-6xl mx-auto px-5 py-20 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
+        <Reveal>
+          <p className="text-sm font-bold uppercase tracking-widest" style={{ color: '#7DE3FF' }}>{t('cardEyebrow')}</p>
+          <h2 className="mt-3 text-3xl sm:text-[42px] leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('cardTitle')}</h2>
+          <p className="mt-4 text-lg leading-relaxed" style={{ color: 'rgba(255,255,255,.75)' }}>{t('cardSub')}</p>
+          <SeeMore to="card" label={t('tzCardBtn')} light />
+        </Reveal>
+        <Reveal delay={150} className="relative h-[260px] sm:h-[320px]">
+          <CardImg src="/cards/card-ocean.jpg" className="lp2-float w-[58%] left-[4%] top-[6%]" style={{ '--r': '-8deg', transform: 'rotate(-8deg)' }} />
+          <CardImg src="/cards/card-shield.jpg" className="lp2-float w-[62%] right-[4%] top-[26%]" style={{ '--r': '6deg', transform: 'rotate(6deg)', animationDelay: '.8s' }} />
+        </Reveal>
+      </div>
+    </section>
+  );
+  const securityTeaser = (
+    <section className="py-20 lg:py-24">
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal>
+          <div className="rounded-[32px] p-8 sm:p-12 grid lg:grid-cols-[1fr_1.3fr] gap-10 items-center border" style={{ borderColor: C.border, background: 'linear-gradient(135deg, #FFFFFF 0%, #EEF6FD 100%)' }}>
+            <div>
+              <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t('secEyebrow')}</p>
+              <h2 className="mt-3 text-3xl sm:text-4xl leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('secTitle')}</h2>
+              <SeeMore to="security" label={t('tzSecBtn')} />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {[[ScanLine, 'sec1t'], [Lock, 'sec2t'], [BadgeCheck, 'sec3t'], [ShieldCheck, 'sec4t']].map(([Icon, k]) => (
+                <div key={k} className="flex items-center gap-3 rounded-2xl bg-white border p-4" style={{ borderColor: C.border }}>
+                  <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg, #3CC4F0, ${C.navy})` }}><Icon size={18} color="#fff" /></span>
+                  <span className="font-semibold text-[15px]">{t(k)}</span>
+                </div>
+              ))}
             </div>
           </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: C.muted }}>{t('footLegal')}</p>
-            <div className="mt-3 flex flex-col gap-2 text-sm items-start">
-              <button onClick={() => setModal('terms')}>{t('terms')}</button>
-              <button onClick={() => setModal('privacy')}>{t('privacy')}</button>
+        </Reveal>
+      </div>
+    </section>
+  );
+  const bizTeaser = (
+    <section className="pb-2">
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal>
+          <div className="rounded-[32px] p-8 sm:p-10 flex flex-col md:flex-row md:items-center gap-6 md:justify-between" style={{ background: 'linear-gradient(135deg, #FFF8EC, #FFEFD3)', border: '1px solid #F7DDB0' }}>
+            <div className="flex items-start gap-4">
+              <span className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: PLAN_GRAD.pro, boxShadow: PLAN_SHADOW.pro }}><Store size={22} color="#fff" /></span>
+              <div>
+                <p className="text-sm font-bold uppercase tracking-widest" style={{ color: '#B86E0B' }}>{t('bizEyebrow')}</p>
+                <h3 className="mt-1.5 text-2xl tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('bizTitle')}</h3>
+              </div>
             </div>
+            <button onClick={() => nav('business')} className="lp2-btn h-12 px-6 rounded-full font-bold inline-flex items-center gap-2 shrink-0" style={{ background: C.navyDeep, color: '#fff' }}>{t('tzBizBtn')}<ArrowRight size={18} /></button>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+
+  // ---- Paj Kat: kote w ka itilize l
+  const whereSec = (
+    <section className="py-20 lg:py-24">
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="max-w-2xl">
+          <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t('whereT')}</p>
+          <h2 className="mt-3 text-3xl sm:text-[40px] leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('whereH')}</h2>
+          <p className="mt-3 text-lg" style={{ color: C.muted }}>{t('whereS')}</p>
+        </Reveal>
+        <Reveal delay={120}>
+          <div className="mt-10 flex flex-wrap gap-3">
+            {['Amazon', 'Netflix', 'Shein', 'Temu', 'eBay', 'Spotify', 'AliExpress', 'Google Play', 'App Store', 'YouTube Premium', 'Canva', 'ChatGPT'].map((m) => (
+              <span key={m} className="h-12 px-5 rounded-2xl bg-white border flex items-center text-[15px] font-bold" style={{ borderColor: C.border, ...display }}>{m}</span>
+            ))}
+          </div>
+          <p className="mt-5 text-xs" style={{ color: C.muted }}>{t('whereNote')}</p>
+        </Reveal>
+      </div>
+    </section>
+  );
+
+  // ---- Paj Èd: kontak
+  const contactSec = (
+    <section className="pb-20 lg:pb-24" style={{ background: C.bg }}>
+      <div className="max-w-3xl mx-auto px-5">
+        <Reveal>
+          <div className="rounded-[28px] bg-white border p-7 sm:p-9" style={{ borderColor: C.border }}>
+            <h2 className="text-2xl tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('helpContactT')}</h2>
+            <p className="mt-2 text-[15px]" style={{ color: C.muted }}>{t('supportBody')}</p>
+            <div className="mt-6 grid sm:grid-cols-2 gap-3">
+              <a href="https://wa.me/13073460474" target="_blank" rel="noopener noreferrer" className="lp2-card flex items-center gap-3 rounded-2xl border p-4" style={{ borderColor: C.border }}>
+                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#4ADE80,#16A34A)' }}><Smartphone size={19} color="#fff" /></span>
+                <span><span className="block text-[15px] font-bold">{t('whatsapp')}</span><span className="block text-xs" style={{ color: C.muted }}>+1 307 346 0474</span></span>
+              </a>
+              <a href="tel:+13073460474" className="lp2-card flex items-center gap-3 rounded-2xl border p-4" style={{ borderColor: C.border }}>
+                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, #3CC4F0, ${C.navy})` }}><Phone size={19} color="#fff" /></span>
+                <span><span className="block text-[15px] font-bold">{t('call')}</span><span className="block text-xs" style={{ color: C.muted }}>+1 307 346 0474</span></span>
+              </a>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+
+  // ---- Paj tèks (konsènan nou, kondisyon, konfidansyalite)
+  const DocSec = ({ body }) => (
+    <section className="py-16 lg:py-20">
+      <div className="max-w-3xl mx-auto px-5">
+        <div className="rounded-[28px] bg-white border p-7 sm:p-10" style={{ borderColor: C.border }}>
+          {String(body).split(/\n\n/).map((para, n) => {
+            const [first, ...rest] = para.split('\n');
+            const isHead = rest.length > 0 && /^\d+\./.test(first);
+            return isHead ? (
+              <div key={n} className={n ? 'mt-7' : ''}>
+                <h2 className="text-lg font-bold" style={display}>{first}</h2>
+                <p className="mt-2 text-[15px] leading-relaxed" style={{ color: '#3B4A5E' }}>{rest.join(' ')}</p>
+              </div>
+            ) : <p key={n} className={`${n ? 'mt-5' : ''} text-[15.5px] leading-relaxed`} style={{ color: '#3B4A5E' }}>{para}</p>;
+          })}
+        </div>
+      </div>
+    </section>
+  );
+
+  const PAGE_CONTENT = {
+    home: <>{heroSec}{servicesSec}{howSec}{plansTeaser}{cardTeaser}{securityTeaser}{bizTeaser}{ctaSec}</>,
+    plans: <><PageHero title={t('phPlansT')} sub={t('phPlansS')} eyebrow={t('navPlans')} />{plansSec}{ctaSec}</>,
+    card: <>{cardSec}{whereSec}{ctaSec}</>,
+    business: <><PageHero title={t('phBizT')} sub={t('phBizS')} eyebrow={t('navBusiness')} />{bizSec}{plansSec}</>,
+    security: <><PageHero title={t('phSecT')} sub={t('phSecS')} eyebrow={t('navSecurity')} />{securitySec}{ctaSec}</>,
+    help: <><PageHero title={t('phHelpT')} sub={t('phHelpS')} eyebrow={t('navHelp')} />{faqSec}{contactSec}</>,
+    about: <><PageHero title={t('about')} sub={t('phAboutS')} /><DocSec body={t('aboutBody') + '\n\n' + t('disclaimer')} />{ctaSec}</>,
+    terms: <><PageHero title={t('terms')} sub={t('phLegalS')} /><DocSec body={t('termsBody')} /></>,
+    privacy: <><PageHero title={t('privacy')} sub={t('phLegalS')} /><DocSec body={t('privacyBody')} /></>,
+  };
+
+  return (
+    <div style={{ background: '#fff', color: C.ink, overflowX: 'hidden' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap');
+        html { scroll-behavior: smooth; }
+        .lp2-btn { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
+        .lp2-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        .lp2-card { transition: transform .25s ease, box-shadow .25s ease; }
+        .lp2-plan { transition: transform .25s ease, box-shadow .25s ease; }
+        .lp2-plan:hover { transform: translateY(-6px); }
+        .lp2-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(11,27,51,.25); }
+        @keyframes lp2Float { 0%,100% { transform: translateY(0) rotate(var(--r)); } 50% { transform: translateY(-12px) rotate(var(--r)); } }
+        .lp2-float { animation: lp2Float 7s ease-in-out infinite; }
+        .lp2-grid { background-image: radial-gradient(rgba(20,58,115,.08) 1px, transparent 1px); background-size: 22px 22px; }
+      `}</style>
+
+      {/* NAV */}
+      <header className="sticky top-0 z-40 border-b" style={{ background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(12px)', borderColor: C.border }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-5 h-16 flex items-center gap-3 sm:gap-6">
+          <a href="/" className="flex items-center gap-2 shrink-0" onClick={(e) => { e.preventDefault(); nav('home'); }}>
+            <img src="/brand/logo-full.png" alt="BLICPay" className="h-[34px] sm:h-[42px] w-auto" />
+          </a>
+          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium" style={{ color: C.muted }}>
+            {NAV.map(([id, k]) => (
+              <a key={id} href={PAGE_PATH[id]} onClick={(e) => { e.preventDefault(); nav(id); }} className="relative py-5 hover:text-[#0B1B33] transition-colors" style={page === id ? { color: C.ink, fontWeight: 700 } : undefined}>
+                {t(k)}
+                {page === id && <span className="absolute left-0 right-0 -bottom-px h-[2.5px] rounded-full" style={{ background: `linear-gradient(90deg, ${C.navy}, ${C.sky})` }} />}
+              </a>
+            ))}
+          </nav>
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+            <div className="relative">
+              <button onClick={() => setLangOpen((v) => !v)} className="h-10 w-10 sm:w-auto sm:px-3 rounded-full border flex items-center justify-center gap-1.5 text-sm font-semibold" style={{ borderColor: C.border }} aria-label="Language">
+                <Globe size={16} /><span className="uppercase hidden sm:inline">{lang}</span>
+              </button>
+              {langOpen && (
+                <div className="absolute right-0 mt-2 w-44 rounded-2xl border bg-white shadow-xl p-1.5 z-50" style={{ borderColor: C.border }}>
+                  {LANGS.map(([code, label, flag]) => (
+                    <button key={code} onClick={() => { setLang(code); setLangOpen(false); }} className="w-full text-left px-3 py-2 rounded-xl text-sm flex items-center gap-2" style={lang === code ? { background: '#E6F6FD', color: C.navy, fontWeight: 600 } : {}}>
+                      <span>{flag}</span>{label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button onClick={() => onStart('login')} className="hidden sm:block h-10 px-4 rounded-full text-sm font-semibold" style={{ color: C.navy }}>{t('login')}</button>
+            <button onClick={() => onStart('register')} className="lp2-btn h-10 px-4 sm:px-5 rounded-full text-[13px] sm:text-sm font-bold text-white whitespace-nowrap" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>{t('signup')}</button>
+            <button onClick={() => setMenu((v) => !v)} className="lg:hidden w-10 h-10 shrink-0 rounded-full border flex items-center justify-center" style={{ borderColor: C.border }} aria-label="Menu">
+              {menu ? <X size={18} /> : <Menu size={18} />}
+            </button>
           </div>
         </div>
-        <div className="border-t" style={{ borderColor: C.border }}>
-          <div className="max-w-6xl mx-auto px-5 py-6 text-xs leading-relaxed" style={{ color: C.muted }}>
+        {menu && (
+          <div className="lg:hidden border-t px-5 py-3 flex flex-col" style={{ borderColor: C.border }}>
+            {[['home', 'navHome'], ...NAV].map(([id, k]) => (
+              <a key={id} href={PAGE_PATH[id]} onClick={(e) => { e.preventDefault(); nav(id); }} className="flex items-center justify-between py-3 font-semibold border-b last:border-0" style={{ borderColor: C.border, color: page === id ? C.navy : C.ink }}>
+                {t(k)}<ChevronRight size={16} color={page === id ? C.sky : '#B8C1CF'} />
+              </a>
+            ))}
+            <button onClick={() => onStart('login')} className="sm:hidden mt-3 h-11 rounded-full border font-semibold" style={{ borderColor: C.border, color: C.navy }}>{t('login')}</button>
+          </div>
+        )}
+      </header>
+
+      <main key={page}>{PAGE_CONTENT[page] || PAGE_CONTENT.home}</main>
+
+      {/* FOOTER */}
+      <footer style={{ background: C.navyDeep, color: '#fff' }}>
+        <div className="max-w-6xl mx-auto px-5 pt-14 pb-10 grid sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] gap-10">
+          <div>
+            <span className="inline-flex rounded-2xl bg-white px-3 py-2"><img src="/brand/logo-full.png" alt="BLICPay" style={{ height: 40, width: 'auto' }} /></span>
+            <p className="mt-4 text-sm leading-relaxed max-w-xs" style={{ color: 'rgba(255,255,255,.7)' }}>{t('footDesc')}</p>
+            <div className="mt-5 flex gap-2">
+              <a href="https://wa.me/13073460474" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,.08)' }}><Smartphone size={17} /></a>
+              <a href="tel:+13073460474" aria-label={t('call')} className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,.08)' }}><Phone size={17} /></a>
+            </div>
+          </div>
+          {[
+            ['footProducts', [['plans', 'navPlans'], ['card', 'navCard'], ['business', 'navBusiness'], ['security', 'navSecurity']]],
+            ['footCompany', [['about', 'about'], ['help', 'navHelp']]],
+            ['footLegal', [['terms', 'terms'], ['privacy', 'privacy']]],
+          ].map(([h, links]) => (
+            <div key={h}>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#7DE3FF' }}>{t(h)}</p>
+              <div className="mt-4 flex flex-col gap-2.5 text-sm items-start">
+                {links.map(([id, k]) => <a key={id} href={PAGE_PATH[id]} onClick={(e) => { e.preventDefault(); nav(id); }} style={{ color: 'rgba(255,255,255,.82)' }} className="hover:text-white">{t(k)}</a>)}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="border-t" style={{ borderColor: 'rgba(255,255,255,.1)' }}>
+          <div className="max-w-6xl mx-auto px-5 py-6 text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,.55)' }}>
             <p>{t('disclaimer')}</p>
-            <p className="mt-2">© {new Date().getFullYear()} BLICPay LLC. {t('rights')}</p>
+            <p className="mt-2">© {new Date().getFullYear()} BLICPAY LLC. {t('rights')}</p>
           </div>
         </div>
       </footer>
