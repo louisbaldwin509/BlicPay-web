@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ArrowRight, ArrowLeftRight, BadgeCheck, Building2, Check, ChevronDown, CreditCard, Globe, Lock, Menu,
   Phone, QrCode, ShieldCheck, Smartphone, Sparkles, Wallet, X, Fingerprint, Zap, ScanLine, Store,
-  Briefcase, UserRound, ChevronRight } from 'lucide-react';
+  Briefcase, UserRound, ChevronRight, ArrowDownLeft, ArrowUpRight, Bell, Home, Clock } from 'lucide-react';
 // Paj sit la ak adrès yo
 const PAGE_PATH = { home: '/', plans: '/comptes', card: '/carte', business: '/entreprises', security: '/securite', help: '/aide', about: '/a-propos', terms: '/conditions', privacy: '/confidentialite' };
 const PATH_PAGE = Object.fromEntries(Object.entries(PAGE_PATH).map(([k, v]) => [v, k]));
@@ -29,6 +29,21 @@ const display = { fontFamily: "'Manrope', sans-serif" };
 
 // [kreyòl, français, english]
 const D = {
+  hpHello: ['Bonjou 👋', 'Bonjour 👋', 'Hello 👋'],
+  hpDeposit: ['Depoze', 'Déposer', 'Top up'],
+  hpSend: ['Voye', 'Envoyer', 'Send'],
+  hpPay: ['Peye', 'Payer', 'Pay'],
+  hpReceive: ['Resevwa', 'Recevoir', 'Receive'],
+  hpRecent: ['Aktivite resan', 'Activité récente', 'Recent activity'],
+  hpAll: ['Wè tout', 'Tout voir', 'See all'],
+  hpTx1: ['Rechaj MonCash', 'Recharge MonCash', 'MonCash top-up'],
+  hpTx1s: ['Jodi a · 10:24', 'Aujourd’hui · 10:24', 'Today · 10:24'],
+  hpTx2: ['Voye bay Jean', 'Envoyé à Jean', 'Sent to Jean'],
+  hpTx2s: ['Jodi a · 09:02', 'Aujourd’hui · 09:02', 'Today · 09:02'],
+  hpTx3: ['Peman QR · Boutik Lakay', 'Paiement QR · Boutik Lakay', 'QR payment · Boutik Lakay'],
+  hpTx3s: ['Yè · 17:40', 'Hier · 17:40', 'Yesterday · 17:40'],
+  hpPaid: ['Peman QR', 'Paiement QR', 'QR payment'],
+  hpPaidSub: ['Reyisi an 2 segonn', 'Réussi en 2 secondes', 'Done in 2 seconds'],
   navHome: ['Akèy', 'Accueil', 'Home'],
   navSecurity: ['Sekirite', 'Sécurité', 'Security'],
   navHelp: ['Èd', 'Aide', 'Help'],
@@ -378,6 +393,101 @@ function Reveal({ children, delay = 0, className = '' }) {
   );
 }
 
+// Telefòn ak ekran aplikasyon BLICPay la (desine an kòd, pa yon imaj)
+function HeroPhone({ t }) {
+  const acts = [[ArrowDownLeft, 'hpDeposit'], [ArrowUpRight, 'hpSend'], [ScanLine, 'hpPay'], [QrCode, 'hpReceive']];
+  const tx = [
+    ['hpTx1', 'hpTx1s', '+ 2 500', true, '/logos/moncash-wide.png'],
+    ['hpTx2', 'hpTx2s', '− 1 200', false, null],
+    ['hpTx3', 'hpTx3s', '− 850', false, null],
+  ];
+  return (
+    <div className="relative w-[290px] sm:w-[310px] mx-auto lg:mr-10 lg:ml-0 my-4">
+      {/* glow */}
+      <div className="absolute -inset-16 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.28), transparent 62%)' }} />
+      {/* telefòn */}
+      <div className="lp2-phone relative rounded-[46px] p-[10px]" style={{ background: 'linear-gradient(145deg, #2A3446, #0B111C)', boxShadow: '0 50px 90px -30px rgba(0,0,0,.75), inset 0 0 0 1.5px rgba(255,255,255,.12)' }}>
+        <div className="relative rounded-[37px] overflow-hidden" style={{ background: '#F2F4F8', height: 600 }}>
+          {/* tèt ble */}
+          <div className="relative px-5 pt-3 pb-16" style={{ background: `linear-gradient(160deg, ${C.night}, ${C.navyDeep} 55%, #134A92)` }}>
+            <div className="flex items-center justify-between text-[11px] font-semibold text-white/90">
+              <span>9:41</span>
+              <span className="w-[86px] h-[24px] rounded-full bg-black" />
+              <span className="flex items-center gap-1"><span className="w-4 h-2.5 rounded-[3px] border border-white/80 relative"><span className="absolute inset-[1px] right-[4px] rounded-[1px] bg-white/90" /></span></span>
+            </div>
+            <div className="mt-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold" style={{ background: C.cyan, color: C.night }}>IP</span>
+                <div>
+                  <p className="text-[10.5px] text-white/60">{t('hpHello')}</p>
+                  <p className="text-[13px] font-bold text-white -mt-0.5">Isabelle</p>
+                </div>
+              </div>
+              <span className="w-9 h-9 rounded-full flex items-center justify-center relative" style={{ background: 'rgba(255,255,255,.1)' }}><Bell size={16} color="#fff" /><span className="absolute top-2 right-2.5 w-1.5 h-1.5 rounded-full" style={{ background: C.cyan }} /></span>
+            </div>
+            <p className="mt-5 text-[11px] text-white/60">{t('heroBalance')}</p>
+            <p className="mt-0.5 text-white" style={{ ...display, fontWeight: 800, fontSize: 30, letterSpacing: '-.02em' }}>48 750<span className="text-[15px] font-bold text-white/70 ml-1.5">HTG</span></p>
+            <p className="text-[11.5px] font-semibold" style={{ color: '#A5F3FC' }}>≈ 371,85 $ US</p>
+          </div>
+          {/* aksyon yo */}
+          <div className="relative -mt-11 mx-4 rounded-[22px] bg-white p-3.5 grid grid-cols-4 gap-1" style={{ boxShadow: '0 14px 30px -16px rgba(11,27,51,.35)' }}>
+            {acts.map(([Ic, k]) => (
+              <div key={k} className="flex flex-col items-center gap-1.5">
+                <span className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Ic size={18} color="#fff" /></span>
+                <span className="text-[10px] font-semibold" style={{ color: C.ink }}>{t(k)}</span>
+              </div>
+            ))}
+          </div>
+          {/* aktivite */}
+          <div className="mx-4 mt-4">
+            <div className="flex items-center justify-between">
+              <p className="text-[12.5px] font-bold" style={{ color: C.ink }}>{t('hpRecent')}</p>
+              <p className="text-[10.5px] font-semibold" style={{ color: C.sky }}>{t('hpAll')}</p>
+            </div>
+            <div className="mt-2.5 space-y-2">
+              {tx.map(([k, sub, amt, inc, logo]) => (
+                <div key={k} className="flex items-center gap-2.5 rounded-2xl bg-white px-3 py-2.5">
+                  <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 overflow-hidden" style={{ background: inc ? '#E0F7FB' : '#EEF2F8' }}>
+                    {logo ? <img src={logo} alt="" className="w-7 h-auto" /> : k === 'hpTx2' ? <ArrowUpRight size={16} color={C.navy} /> : <Store size={16} color={C.navy} />}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11.5px] font-bold truncate" style={{ color: C.ink }}>{t(k)}</p>
+                    <p className="text-[10px] truncate" style={{ color: C.muted }}>{t(sub)}</p>
+                  </div>
+                  <p className="text-[11.5px] font-bold whitespace-nowrap" style={{ color: inc ? '#0E9F8A' : C.ink }}>{amt}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* ba navigasyon glass */}
+          <div className="absolute left-4 right-4 bottom-4 h-14 rounded-[28px] flex items-center justify-between px-2" style={{ background: 'rgba(9,32,74,.88)', backdropFilter: 'blur(14px)', boxShadow: '0 12px 24px -10px rgba(9,32,74,.6)' }}>
+            <span className="h-10 px-3.5 rounded-full bg-white flex items-center gap-1.5 text-[11px] font-bold" style={{ color: C.navyDeep }}><Home size={14} />{t('navHome')}</span>
+            <span className="w-10 h-10 rounded-full flex items-center justify-center"><CreditCard size={17} color="rgba(255,255,255,.85)" /></span>
+            <span className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, #29D3F5, #00A3D9)` }}><QrCode size={17} color="#fff" /></span>
+            <span className="w-10 h-10 rounded-full flex items-center justify-center"><Clock size={17} color="rgba(255,255,255,.85)" /></span>
+            <span className="w-10 h-10 rounded-full flex items-center justify-center"><UserRound size={17} color="rgba(255,255,255,.85)" /></span>
+          </div>
+        </div>
+      </div>
+      {/* notifikasyon k ap flote */}
+      <div className="lp2-bob absolute hidden sm:flex -left-24 top-[66%] rounded-2xl bg-white px-3.5 py-3 items-center gap-3" style={{ boxShadow: '0 20px 40px -16px rgba(0,0,0,.45)' }}>
+        <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#E0F7FB' }}><ArrowLeftRight size={16} color="#0E7490" /></span>
+        <div>
+          <p className="text-[10.5px]" style={{ color: C.muted }}>{t('heroReceived')}</p>
+          <p className="text-[13px] font-bold" style={{ color: '#0E9F8A' }}>+ 2 500 HTG</p>
+        </div>
+      </div>
+      <div className="lp2-bob absolute hidden sm:flex -right-20 top-[20%] rounded-2xl px-3.5 py-3 items-center gap-3 text-white" style={{ background: 'rgba(6,18,43,.9)', border: '1px solid rgba(34,211,238,.35)', backdropFilter: 'blur(8px)', boxShadow: '0 20px 40px -16px rgba(0,0,0,.6)', animationDelay: '1.6s' }}>
+        <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: C.cyan }}><Check size={17} color={C.night} strokeWidth={3} /></span>
+        <div>
+          <p className="text-[10.5px] text-white/60">{t('hpPaid')}</p>
+          <p className="text-[13px] font-bold">{t('hpPaidSub')}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CardImg({ src, style, className = '' }) {
   return (
     <div className={`absolute rounded-2xl overflow-hidden ${className}`} style={{ aspectRatio: '1.586', backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center', boxShadow: '0 30px 60px -20px rgba(10,31,69,.55)', ...style }}>
@@ -458,22 +568,9 @@ export default function Landing({ onStart, lang, setLang }) {
             </Reveal>
           </div>
 
-          {/* Vizyèl kat */}
-          <Reveal delay={200} className="relative h-[360px] sm:h-[420px]">
-            <CardImg src="/cards/card-world.jpg" name="Standard" className="lp2-float w-[62%] left-[2%] top-[8%]" style={{ '--r': '-12deg', transform: 'rotate(-12deg)' }} />
-            <CardImg src="/cards/card-ocean.jpg" name="Basic" className="lp2-float w-[62%] right-[2%] top-[2%]" style={{ '--r': '9deg', transform: 'rotate(9deg)', animationDelay: '1.2s' }} />
-            <CardImg src="/cards/card-shield.jpg" name="Premium" className="lp2-float w-[70%] left-[15%] top-[30%]" style={{ '--r': '-2deg', transform: 'rotate(-2deg)', animationDelay: '.6s' }} />
-            <div className="absolute left-0 bottom-2 sm:bottom-6 rounded-2xl bg-white border px-4 py-3 shadow-xl flex items-center gap-3" style={{ borderColor: C.border }}>
-              <span className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#E4F5EF' }}><ArrowLeftRight size={18} color={C.mint} /></span>
-              <div>
-                <p className="text-[11px]" style={{ color: C.muted }}>{t('heroReceived')}</p>
-                <p className="text-sm font-bold" style={{ color: C.mint }}>+ 2 500 HTG</p>
-              </div>
-            </div>
-            <div className="absolute right-0 bottom-10 sm:bottom-16 rounded-2xl px-4 py-3 shadow-xl text-white" style={{ background: 'rgba(6,18,43,.85)', border: '1px solid rgba(34,211,238,.3)', backdropFilter: 'blur(8px)' }}>
-              <p className="text-[11px] opacity-70">{t('heroBalance')}</p>
-              <p className="text-lg font-bold" style={display}>48 750 <span className="text-xs opacity-70">HTG</span></p>
-            </div>
+          {/* Vizyèl: telefòn ak aplikasyon BLICPay la */}
+          <Reveal delay={200} className="relative flex justify-center lg:justify-end">
+            <HeroPhone t={t} />
           </Reveal>
         </div>
       </section>
@@ -970,6 +1067,8 @@ export default function Landing({ onStart, lang, setLang }) {
         .lp2-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(11,27,51,.25); }
         @keyframes lp2Float { 0%,100% { transform: translateY(0) rotate(var(--r)); } 50% { transform: translateY(-12px) rotate(var(--r)); } }
         .lp2-float { animation: lp2Float 7s ease-in-out infinite; }
+        @keyframes lp2Bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .lp2-bob { animation: lp2Bob 5.5s ease-in-out infinite; }
         .lp2-grid { background-image: radial-gradient(rgba(20,58,115,.08) 1px, transparent 1px); background-size: 22px 22px; }
       `}</style>
 
