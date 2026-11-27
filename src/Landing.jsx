@@ -405,8 +405,8 @@ function Reveal({ children, delay = 0, className = '' }) {
 function HeroPhone({ t }) {
   const A = { canvas: '#F2F4F8', alt: '#F1F5F9', ink: '#0B1B33', muted: '#64748B', navy: '#0B1B33', cyan: '#00B4D8' };
   const jak = { fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif" };
-  const W = 272, H = Math.round(W / (1438 / 905)), R = 14;
-  const SW = 304, SH = Math.round(SW * 852 / 393); // ekran iPhone 15 Pro (393 × 852)
+  const W = 278, H = Math.round(W / (1438 / 905)), R = 14;
+  const SW = 310, SH = Math.round(SW * 852 / 393); // ekran iPhone 15 Pro (393 × 852)
   const emboss = { color: '#F4F6F9', textShadow: '1px 1.5px 2px rgba(0,0,0,.45)' };
   const acts = [[ArrowUpRight, 'hpSend'], [ArrowDownLeft, 'hpReceive'], [Banknote, 'hpWithdraw'], [LayoutGrid, 'hpMore']];
   const tx = [
@@ -424,15 +424,15 @@ function HeroPhone({ t }) {
     <div className="relative w-[330px] mx-auto lg:mr-28 lg:ml-0 my-4" style={jak}>
       <div className="absolute -inset-16 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.28), transparent 62%)' }} />
       {/* bouton akote (aksyon, volim, kouran) */}
-      <span className="absolute -left-[3px] top-[118px] w-[4px] h-[30px] rounded-l-[3px]" style={{ background: 'linear-gradient(90deg, #5F646B, #A9ADB3)' }} />
-      <span className="absolute -left-[3px] top-[172px] w-[4px] h-[56px] rounded-l-[3px]" style={{ background: 'linear-gradient(90deg, #5F646B, #A9ADB3)' }} />
-      <span className="absolute -left-[3px] top-[240px] w-[4px] h-[56px] rounded-l-[3px]" style={{ background: 'linear-gradient(90deg, #5F646B, #A9ADB3)' }} />
-      <span className="absolute -right-[3px] top-[196px] w-[4px] h-[88px] rounded-r-[3px]" style={{ background: 'linear-gradient(270deg, #5F646B, #A9ADB3)' }} />
+      <span className="absolute -left-[3px] top-[118px] w-[4px] h-[30px] rounded-l-[3px]" style={{ background: 'linear-gradient(90deg, #9EA2A8, #E6E8EB 60%, #C4C7CB)', boxShadow: '0 0 0 .5px rgba(0,0,0,.25)' }} />
+      <span className="absolute -left-[3px] top-[172px] w-[4px] h-[56px] rounded-l-[3px]" style={{ background: 'linear-gradient(90deg, #9EA2A8, #E6E8EB 60%, #C4C7CB)', boxShadow: '0 0 0 .5px rgba(0,0,0,.25)' }} />
+      <span className="absolute -left-[3px] top-[240px] w-[4px] h-[56px] rounded-l-[3px]" style={{ background: 'linear-gradient(90deg, #9EA2A8, #E6E8EB 60%, #C4C7CB)', boxShadow: '0 0 0 .5px rgba(0,0,0,.25)' }} />
+      <span className="absolute -right-[3px] top-[196px] w-[4px] h-[88px] rounded-r-[3px]" style={{ background: 'linear-gradient(270deg, #9EA2A8, #E6E8EB 60%, #C4C7CB)', boxShadow: '0 0 0 .5px rgba(0,0,0,.25)' }} />
       {/* kad titàn */}
-      <div className="relative rounded-[56px] p-[4px]" style={{ background: 'linear-gradient(145deg, #C9CCD1 0%, #7D8187 22%, #E3E5E8 48%, #6E7278 74%, #B7BBC0 100%)', boxShadow: '0 60px 100px -36px rgba(0,0,0,.8), 0 0 0 1px rgba(0,0,0,.35)' }}>
-        {/* bezèl nwa */}
-        <div className="rounded-[52px] p-[9px]" style={{ background: '#050608', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.06)' }}>
-        <div className="relative rounded-[43px] overflow-hidden" style={{ background: A.canvas, width: SW, height: SH }}>
+      <div className="relative rounded-[58px] p-[5px]" style={{ background: 'linear-gradient(150deg, #FFFFFF 0%, #D9DBDF 18%, #A7ABB1 38%, #F4F5F6 55%, #B9BCC1 76%, #EEF0F2 100%)', boxShadow: '0 60px 100px -36px rgba(0,0,0,.75), 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.7)' }}>
+        {/* bezèl nwa fen */}
+        <div className="rounded-[53px] p-[6px]" style={{ background: '#0A0B0D', boxShadow: '0 0 0 1px rgba(0,0,0,.5)' }}>
+        <div className="relative rounded-[47px] overflow-hidden" style={{ background: A.canvas, width: SW, height: SH }}>
           {/* Dynamic Island */}
           <div className="absolute left-1/2 -translate-x-1/2 top-[11px] w-[104px] h-[30px] rounded-full bg-black z-20 flex items-center justify-end pr-3">
             <span className="w-[9px] h-[9px] rounded-full" style={{ background: 'radial-gradient(circle at 35% 35%, #2B3A55, #0A0F18 70%)' }} />
