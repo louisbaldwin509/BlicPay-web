@@ -112,6 +112,22 @@ const D = {
   dbNow: ['Kounye a', 'À l’instant', 'Just now'],
   dbLive: ['An dirèk', 'En direct', 'Live'],
   dbChip: ['Nouvo peman kliyan', 'Nouveau paiement client', 'New customer payment'],
+  svAmount: ['Montan', 'Montant', 'Amount'],
+  svTopUp: ['Rechaje', 'Recharger', 'Top up'],
+  svCredited: ['Kont ou kredite', 'Compte crédité', 'Account credited'],
+  svSpeed: ['pou yon transfè', 'par transfert', 'per transfer'],
+  svFee: ['frè ant kliyan', 'de frais entre clients', 'fees between users'],
+  svMerchant: ['Komèsan', 'Commerçant', 'Merchant'],
+  svPaid: ['Peman reyisi', 'Paiement réussi', 'Payment successful'],
+  svCards: ['Kat BLICPay', 'Cartes BLICPay', 'BLICPay cards'],
+  svCardsD: ['Vityèl pou achte sou entènèt, fizik pou magazen — ak menm balans lan.', 'Virtuelle pour vos achats en ligne, physique en magasin — avec le même solde.', 'Virtual for online shopping, physical in stores — same balance.'],
+  svSalesToday: ['Lavant semèn sa a', 'Ventes de la semaine', 'This week’s sales'],
+  svThisMonth: ['mwa sa a', 'ce mois-ci', 'this month'],
+  stA: ['pou voye lajan bay yon lòt kliyan', 'pour envoyer de l’argent à un client', 'to send money to another user'],
+  stB: ['frè sou transfè BLICPay → BLICPay', 'de frais entre clients BLICPay', 'fees between BLICPay users'],
+  stC: ['lang: Kreyòl, Franse, Angle', 'langues : créole, français, anglais', 'languages: Creole, French, English'],
+  stD: ['aksè ak kont ou, sou telefòn ak òdinatè', 'accès à votre compte, mobile et web', 'access to your account, mobile and web'],
+  secLead: ['Chak kont verifye, chak operasyon pwoteje pa PIN ou, epi ekip nou siveye retrè yo.', 'Chaque compte est vérifié, chaque opération est protégée par votre PIN, et notre équipe contrôle les retraits.', 'Every account is verified, every operation is protected by your PIN, and our team reviews withdrawals.'],
   navHome: ['Akèy', 'Accueil', 'Home'],
   navSecurity: ['Sekirite', 'Sécurité', 'Security'],
   navHelp: ['Èd', 'Aide', 'Help'],
@@ -292,7 +308,7 @@ const D = {
   sec2t: ['PIN sou chak operasyon', 'PIN à chaque opération', 'PIN on every operation'],
   sec2d: ['Okenn transfè ni retrè san kòd PIN 4 chif ou.', 'Aucun transfert ni retrait sans votre code PIN à 4 chiffres.', 'No transfer or withdrawal without your 4-digit PIN.'],
   sec3t: ['Plafon ak siveyans', 'Plafonds et surveillance', 'Limits and monitoring'],
-  sec3d: ['Plafon jounen/semèn/mwa ak verifikasyon manyèl sou retrè yo.', 'Plafonds journaliers/hebdomadaires/mensuels et contrôle manuel des retraits.', 'Daily/weekly/monthly limits and manual review of withdrawals.'],
+  sec3d: ['Plafon jounen/semèn/mwa ak verifikasyon manyèl sou retrè yo.', 'Plafonds par jour, semaine et mois, et contrôle manuel des retraits.', 'Daily/weekly/monthly limits and manual review of withdrawals.'],
   sec4t: ['Done chifre', 'Données chiffrées', 'Encrypted data'],
   sec4d: ['Modpas ak PIN chifre; nou pa janm vann done ou.', 'Mots de passe et PIN chiffrés ; nous ne vendons jamais vos données.', 'Passwords and PINs are encrypted; we never sell your data.'],
 
@@ -1011,32 +1027,181 @@ export default function Landing({ onStart, lang, setLang }) {
         </div>
       </section>
       </>);
-  const servicesSec = (<>
-      {/* SÈVIS */}
-      <section id="services" className="py-20 lg:py-28" style={{ background: C.bg }}>
-        <div className="max-w-6xl mx-auto px-5">
-          <Reveal>
-            <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t('featEyebrow')}</p>
-            <h2 className="mt-3 text-3xl sm:text-[42px] leading-tight max-w-2xl tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('featTitle')}</h2>
-            <p className="mt-3 text-lg" style={{ color: C.muted }}>{t('featSub')}</p>
-          </Reveal>
-          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map(([Icon, k, bg, fg, soon], n) => (
-              <Reveal key={k} delay={n * 70}>
-                <div className="lp2-card h-full rounded-3xl bg-white border p-6" style={{ borderColor: C.border }}>
-                  <div className="flex items-start justify-between">
-                    <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})`, boxShadow: '0 10px 22px -10px rgba(20,58,115,.55)' }}><Icon size={22} color="#fff" /></span>
-                    {soon && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: '#E0F7FB', color: '#0E7490' }}>{t('soon')}</span>}
+
+  // ================= AKÈY: SEKSYON PRO =================
+  const Eyebrow = ({ k, light }) => <p className="text-[13px] font-bold uppercase tracking-[.18em]" style={{ color: light ? C.cyan : C.sky }}>{t(k)}</p>;
+  const H2 = ({ k, light, className = '' }) => <h2 className={`mt-3 text-[34px] sm:text-[46px] leading-[1.06] tracking-tight ${className}`} style={{ ...display, fontWeight: 800, color: light ? '#fff' : C.ink }}>{t(k)}</h2>;
+  const QN = 21;
+  const qrCells = Array.from({ length: QN * QN }, (_, i) => {
+    const x = i % QN, y = Math.floor(i / QN);
+    const inF = (fx, fy) => x >= fx && x < fx + 7 && y >= fy && y < fy + 7;
+    for (const [fx, fy] of [[0, 0], [14, 0], [0, 14]]) if (inF(fx, fy)) { const dx = x - fx, dy = y - fy; return dx === 0 || dx === 6 || dy === 0 || dy === 6 || (dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4); }
+    if ((x === 7 || y === 7) && (x < 8 && y < 8)) return false;
+    if ((x === 13 || y === 7) && x > 12 && y < 8) return false;
+    if ((x === 7 || y === 13) && x < 8 && y > 12) return false;
+    return ((x * 31 + y * 17 + x * y * 7) % 11) < 5;
+  });
+
+  const servicesSec = (
+    <section id="services" className="py-24 lg:py-32" style={{ background: C.bg }}>
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+          <div className="max-w-2xl"><Eyebrow k="featEyebrow" /><H2 k="featTitle" /></div>
+          <p className="text-lg max-w-sm" style={{ color: C.muted }}>{t('featSub')}</p>
+        </Reveal>
+
+        <div className="mt-14 grid grid-cols-1 md:grid-cols-6 gap-5">
+          {/* Rechaj */}
+          <Reveal className="md:col-span-4">
+            <div className="lp2-card h-full rounded-[28px] bg-white p-7 sm:p-9 overflow-hidden relative" style={{ border: `1px solid ${C.border}` }}>
+              <div className="h-full grid sm:grid-cols-2 gap-8 items-center">
+                <div>
+                  <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Wallet size={22} color="#fff" /></span>
+                  <h3 className="mt-5 text-[24px] leading-tight" style={{ ...display, fontWeight: 800 }}>{t('f1t')}</h3>
+                  <p className="mt-2 text-[15px] leading-relaxed" style={{ color: C.muted }}>{t('f1d')}</p>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {[['/logos/moncash-wide.png', 'MonCash'], ['/logos/natcash-wide.png', 'NatCash']].map(([src, n]) => <span key={n} className="h-9 px-3 rounded-xl border flex items-center" style={{ borderColor: C.border }}><img src={src} alt={n} className="h-5 w-auto" /></span>)}
+                    <span className="h-9 px-3 rounded-xl border flex items-center gap-1.5 text-[13px] font-semibold" style={{ borderColor: C.border }}><Building2 size={15} color={C.navy} />{t('branch')}</span>
                   </div>
-                  <h3 className="mt-5 text-lg font-bold" style={display}>{t(`${k}t`)}</h3>
-                  <p className="mt-2 text-sm leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
                 </div>
-              </Reveal>
-            ))}
-          </div>
+                {/* mini UI */}
+                <div className="relative">
+                  <div className="rounded-[22px] p-5" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
+                    <p className="text-[12px] font-semibold" style={{ color: C.muted }}>{t('svAmount')}</p>
+                    <p className="mt-1 text-[32px] tracking-tight" style={{ ...display, fontWeight: 800 }}>5 000 <span className="text-[15px]" style={{ color: C.muted }}>HTG</span></p>
+                    <div className="mt-3 flex gap-1.5">{['1 000', '2 500', '5 000'].map((v, n) => <span key={v} className="flex-1 h-8 rounded-lg text-[12px] font-bold flex items-center justify-center" style={n === 2 ? { background: C.navyDeep, color: '#fff' } : { background: '#fff', border: `1px solid ${C.border}` }}>{v}</span>)}</div>
+                    <div className="mt-3 h-11 rounded-xl flex items-center justify-center gap-2 text-[14px] font-bold" style={{ background: C.cyan, color: C.night }}>{t('svTopUp')}<ArrowRight size={16} /></div>
+                  </div>
+                  <div className="lp2-bob absolute -right-3 -top-7 rounded-2xl bg-white px-3.5 py-2.5 flex items-center gap-2.5" style={{ boxShadow: '0 18px 36px -16px rgba(11,27,51,.35)', border: `1px solid ${C.border}` }}>
+                    <span className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#E3F5EE' }}><Check size={15} color={C.mint} strokeWidth={3} /></span>
+                    <div><p className="text-[11px]" style={{ color: C.muted }}>{t('svCredited')}</p><p className="text-[13px] font-bold" style={{ color: C.mint }}>+ 5 000 HTG</p></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Transfè */}
+          <Reveal delay={80} className="md:col-span-2">
+            <div className="lp2-card h-full rounded-[28px] p-7 relative overflow-hidden text-white" style={{ background: `radial-gradient(400px 260px at 100% 0%, rgba(34,211,238,.28), transparent 60%), linear-gradient(160deg, ${C.night}, ${C.navyDeep} 60%, #0E2E66)` }}>
+              <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: C.cyan }}><ArrowLeftRight size={22} color={C.night} /></span>
+              <h3 className="mt-5 text-[22px] leading-tight" style={{ ...display, fontWeight: 800 }}>{t('f2t')}</h3>
+              <p className="mt-2 text-[14.5px] leading-relaxed text-white/70">{t('f2d')}</p>
+              <div className="mt-7 flex items-center justify-between">
+                {[['IP', 'linear-gradient(135deg,#1B78D6,#0A3D7A)'], ['JP', 'linear-gradient(135deg,#22D3EE,#0E7490)']].map(([n, g], i) => (
+                  <React.Fragment key={n}>
+                    <span className="w-12 h-12 rounded-full flex items-center justify-center text-[14px] font-bold ring-4 ring-white/10" style={{ background: g }}>{n}</span>
+                    {i === 0 && <div className="flex-1 mx-3 relative h-[2px] rounded" style={{ background: 'rgba(255,255,255,.15)' }}><span className="lp2-dash absolute -top-[5px] w-3 h-3 rounded-full" style={{ background: C.cyan, boxShadow: `0 0 12px ${C.cyan}` }} /></div>}
+                  </React.Fragment>
+                ))}
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-2 text-center">
+                <div className="rounded-xl py-2.5" style={{ background: 'rgba(255,255,255,.06)' }}><p className="text-[20px]" style={{ ...display, fontWeight: 800 }}>2 s</p><p className="text-[11px] text-white/60">{t('svSpeed')}</p></div>
+                <div className="rounded-xl py-2.5" style={{ background: 'rgba(255,255,255,.06)' }}><p className="text-[20px]" style={{ ...display, fontWeight: 800 }}>0 HTG</p><p className="text-[11px] text-white/60">{t('svFee')}</p></div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* QR */}
+          <Reveal delay={60} className="md:col-span-2">
+            <div className="lp2-card h-full rounded-[28px] bg-white p-7" style={{ border: `1px solid ${C.border}` }}>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-[22px] leading-tight" style={{ ...display, fontWeight: 800 }}>{t('f3t')}</h3>
+                  <p className="mt-2 text-[14.5px] leading-relaxed" style={{ color: C.muted }}>{t('f3d')}</p>
+                </div>
+              </div>
+              <div className="mt-6 flex items-center gap-4">
+                <div className="relative p-3 rounded-2xl bg-white shrink-0" style={{ border: `1px solid ${C.border}`, boxShadow: '0 14px 30px -18px rgba(11,27,51,.4)' }}>
+                  <div className="grid w-[110px] h-[110px]" style={{ gridTemplateColumns: `repeat(${QN}, 1fr)` }}>{qrCells.map((on, i) => <span key={i} style={{ background: on ? C.navyDeep : 'transparent' }} />)}</div>
+                  <span className="lp2-scan absolute left-3 right-3 h-[2px] rounded" style={{ background: C.cyan, boxShadow: `0 0 10px ${C.cyan}` }} />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <div className="rounded-xl px-3 py-2.5" style={{ background: C.bg }}><p className="text-[11px]" style={{ color: C.muted }}>{t('svMerchant')}</p><p className="text-[13.5px] font-bold">Boutik Lakay</p></div>
+                  <div className="rounded-xl px-3 py-2.5 flex items-center gap-2" style={{ background: '#E3F5EE' }}><Check size={14} color={C.mint} strokeWidth={3} /><p className="text-[13px] font-bold" style={{ color: C.mint }}>{t('svPaid')}</p></div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Kat */}
+          <Reveal delay={120} className="md:col-span-2">
+            <div className="lp2-card h-full rounded-[28px] bg-white p-7 overflow-hidden relative" style={{ border: `1px solid ${C.border}` }}>
+              <div className="flex items-center gap-2"><h3 className="text-[22px] leading-tight" style={{ ...display, fontWeight: 800 }}>{t('svCards')}</h3><span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: '#E0F7FB', color: '#0E7490' }}>{t('soon')}</span></div>
+              <p className="mt-2 text-[14.5px] leading-relaxed" style={{ color: C.muted }}>{t('svCardsD')}</p>
+              <div className="relative mt-6 h-[130px]">
+                <img src="/cards/card-world.jpg" alt="" className="absolute left-[6%] top-[14px] w-[62%] rounded-[12px] rotate-[-8deg]" style={{ boxShadow: '0 16px 30px -14px rgba(11,27,51,.55)' }} />
+                <img src="/cards/card-shield.jpg" alt="" className="absolute right-[4%] top-0 w-[62%] rounded-[12px] rotate-[6deg]" style={{ boxShadow: '0 18px 34px -14px rgba(11,27,51,.6)' }} />
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Pro */}
+          <Reveal delay={180} className="md:col-span-2">
+            <div className="lp2-card h-full rounded-[28px] p-7 relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #FFF8EC, #FFEBC7)', border: '1px solid #F7DDB0' }}>
+              <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: PLAN_GRAD.pro }}><Store size={22} color="#fff" /></span>
+              <h3 className="mt-5 text-[22px] leading-tight" style={{ ...display, fontWeight: 800 }}>{t('f6t')}</h3>
+              <p className="mt-2 text-[14.5px] leading-relaxed" style={{ color: '#6B5A3E' }}>{t('f6d')}</p>
+              <div className="mt-5 rounded-2xl bg-white/80 p-3.5" style={{ border: '1px solid #F2D9A8' }}>
+                <div className="flex items-center justify-between"><p className="text-[11.5px] font-semibold" style={{ color: '#8A6A2E' }}>{t('svSalesToday')}</p><p className="text-[11px] font-bold" style={{ color: C.mint }}>+18 %</p></div>
+                <div className="mt-2 flex items-end gap-1.5 h-[46px]">{[30, 42, 36, 55, 48, 64, 80].map((h, i) => <span key={i} className="flex-1 rounded-t-[4px]" style={{ height: `${h}%`, background: i === 6 ? PLAN_GRAD.pro : '#F3D9A8' }} />)}</div>
+              </div>
+            </div>
+          </Reveal>
         </div>
-      </section>
-      </>);
+      </div>
+    </section>
+  );
+
+  const howSec = (
+    <section id="how" className="py-24 lg:py-32 bg-white">
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="text-center max-w-2xl mx-auto"><Eyebrow k="howEyebrow" /><H2 k="howTitle" /></Reveal>
+        <div className="relative mt-16 grid md:grid-cols-3 gap-10 md:gap-6">
+          <div className="hidden md:block absolute left-[16%] right-[16%] top-[34px] h-[2px]" style={{ background: `repeating-linear-gradient(90deg, ${C.border} 0 10px, transparent 10px 18px)` }} />
+          {[[Fingerprint, 's1'], [Wallet, 's2'], [Zap, 's3']].map(([Icon, k], n) => (
+            <Reveal key={k} delay={n * 120} className="relative text-center">
+              <div className="relative mx-auto w-[70px] h-[70px] rounded-[22px] flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})`, boxShadow: '0 18px 34px -16px rgba(20,58,115,.7)' }}>
+                <Icon size={28} color="#fff" />
+                <span className="absolute -top-2.5 -right-2.5 w-7 h-7 rounded-full bg-white flex items-center justify-center text-[13px] font-extrabold" style={{ color: C.navyDeep, boxShadow: '0 4px 10px rgba(11,27,51,.15)' }}>{n + 1}</span>
+              </div>
+              <h3 className="mt-6 text-[20px]" style={{ ...display, fontWeight: 800 }}>{t(`${k}t`)}</h3>
+              <p className="mt-2 text-[15px] leading-relaxed max-w-xs mx-auto" style={{ color: C.muted }}>{t(`${k}d`)}</p>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal delay={200}>
+          <div className="mt-16 rounded-[24px] px-6 py-5 flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
+            <p className="text-[12px] font-bold uppercase tracking-[.18em] shrink-0" style={{ color: C.muted }}>{t('methods')}</p>
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+              {[['/logos/moncash-wide.png', 'MonCash'], ['/logos/natcash-wide.png', 'NatCash']].map(([src, name]) => <img key={name} src={src} alt={name} className="h-7 w-auto" />)}
+              <span className="flex items-center gap-2 text-[15px] font-bold" style={{ color: C.ink }}><Building2 size={19} color={C.navy} />{t('branch')}</span>
+              {[['Unibank', '/logos/unibank-icon.png'], ['Sogebank', '/logos/sogebank-icon.png']].map(([bank, logo]) => (
+                <span key={bank} className="flex items-center gap-2 text-[15px] font-bold" style={{ color: C.ink }}><img src={logo} alt={bank} className="h-7 w-7 rounded-lg" />{bank}<span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#E0F7FB', color: '#0E7490' }}>{t('soon')}</span></span>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+
+  // Bann chif (sèlman bagay ki vre sou sèvis la)
+  const statsBand = (
+    <section className="py-14" style={{ background: `linear-gradient(165deg, ${C.night}, ${C.navyDeep})` }}>
+      <div className="max-w-6xl mx-auto px-5 grid grid-cols-2 lg:grid-cols-4 gap-6">
+        {[['2 s', 'stA'], ['0 HTG', 'stB'], ['3', 'stC'], ['24/7', 'stD']].map(([v, k], n) => (
+          <Reveal key={k} delay={n * 80} className="text-center lg:text-left lg:pl-6" >
+            <div className={n ? 'lg:border-l lg:pl-6' : ''} style={{ borderColor: 'rgba(255,255,255,.12)' }}>
+              <p className="text-[40px] sm:text-[48px] leading-none tracking-tight text-white" style={{ ...display, fontWeight: 800 }}>{v}</p>
+              <p className="mt-2 text-[14px] text-white/65">{t(k)}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+
   const cardSec = (<>
       {/* KAT */}
       <section id="card" className="py-20 lg:py-28 relative overflow-hidden" style={{ background: `radial-gradient(900px 420px at 90% -20%, rgba(34,211,238,.2), transparent 60%), linear-gradient(165deg, ${C.night} 0%, ${C.navyDeep} 55%, #0E2E66 100%)`, color: '#fff' }}>
@@ -1067,46 +1232,6 @@ export default function Landing({ onStart, lang, setLang }) {
                   </div>
                 </div>
               ))}
-            </div>
-          </Reveal>
-        </div>
-      </section>
-      </>);
-  const howSec = (<>
-      {/* KIJAN L MACHE */}
-      <section id="how" className="py-20 lg:py-28">
-        <div className="max-w-6xl mx-auto px-5">
-          <Reveal className="text-center">
-            <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t('howEyebrow')}</p>
-            <h2 className="mt-3 text-3xl sm:text-[42px] tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('howTitle')}</h2>
-          </Reveal>
-          <div className="mt-14 grid md:grid-cols-3 gap-6">
-            {[[Fingerprint, 's1'], [Wallet, 's2'], [Zap, 's3']].map(([Icon, k], n) => (
-              <Reveal key={k} delay={n * 100}>
-                <div className="relative rounded-3xl border p-7 h-full" style={{ borderColor: C.border }}>
-                  <span className="absolute -top-4 left-7 w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: C.cyan, color: C.night }}>{n + 1}</span>
-                  <span className="mt-3 w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: '#EEF5FD' }}><Icon size={24} color={C.navy} /></span>
-                  <h3 className="mt-4 text-lg font-bold" style={display}>{t(`${k}t`)}</h3>
-                  <p className="mt-2 text-sm leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-          <Reveal delay={200}>
-            <div className="mt-12 rounded-3xl border p-6 flex flex-col md:flex-row md:items-center gap-5" style={{ borderColor: C.border, background: C.bg }}>
-              <p className="text-sm font-bold uppercase tracking-widest shrink-0" style={{ color: C.muted }}>{t('methods')}</p>
-              <div className="flex flex-wrap gap-3">
-                {[['/logos/moncash-wide.png', 'MonCash'], ['/logos/natcash-wide.png', 'NatCash']].map(([src, name]) => (
-                  <span key={name} className="h-11 px-4 rounded-xl bg-white border flex items-center" style={{ borderColor: C.border }}><img src={src} alt={name} className="h-6 w-auto" /></span>
-                ))}
-                <span className="h-11 px-4 rounded-xl bg-white border flex items-center gap-2 text-sm font-semibold" style={{ borderColor: C.border }}><Building2 size={18} color={C.navy} />{t('branch')}</span>
-                {[['Unibank', '/logos/unibank-icon.png'], ['Sogebank', '/logos/sogebank-icon.png']].map(([bank, logo]) => (
-                  <span key={bank} className="h-11 pl-1.5 pr-3 rounded-xl bg-white border flex items-center gap-2 text-sm" style={{ borderColor: C.border }}>
-                    <img src={logo} alt={bank} className="h-8 w-8 rounded-lg" /><span className="font-semibold">{bank}</span>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#E0F7FB', color: '#0E7490' }}>{t('soon')}</span>
-                  </span>
-                ))}
-              </div>
             </div>
           </Reveal>
         </div>
@@ -1372,20 +1497,22 @@ export default function Landing({ onStart, lang, setLang }) {
     </section>
   );
   const securityTeaser = (
-    <section className="py-20 lg:py-24">
-      <div className="max-w-6xl mx-auto px-5">
+    <section className="py-24 lg:py-32 bg-white">
+      <div className="max-w-6xl mx-auto px-5 grid lg:grid-cols-[1fr_1.15fr] gap-14 items-center">
         <Reveal>
-          <div className="rounded-[32px] p-8 sm:p-12 grid lg:grid-cols-[1fr_1.3fr] gap-10 items-center border" style={{ borderColor: C.border, background: 'linear-gradient(135deg, #FFFFFF 0%, #EEF6FD 100%)' }}>
-            <div>
-              <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t('secEyebrow')}</p>
-              <h2 className="mt-3 text-3xl sm:text-4xl leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('secTitle')}</h2>
-              <SeeMore to="security" label={t('tzSecBtn')} />
-            </div>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {[[ScanLine, 'sec1t'], [Lock, 'sec2t'], [BadgeCheck, 'sec3t'], [ShieldCheck, 'sec4t']].map(([Icon, k]) => (
-                <div key={k} className="flex items-center gap-3 rounded-2xl bg-white border p-4" style={{ borderColor: C.border }}>
-                  <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Icon size={18} color="#fff" /></span>
-                  <span className="font-semibold text-[15px]">{t(k)}</span>
+          <Eyebrow k="secEyebrow" /><H2 k="secTitle" />
+          <p className="mt-5 text-lg leading-relaxed max-w-md" style={{ color: C.muted }}>{t('secLead')}</p>
+          <SeeMore to="security" label={t('tzSecBtn')} />
+        </Reveal>
+        <Reveal delay={120}>
+          <div className="relative rounded-[32px] p-6 sm:p-8 overflow-hidden" style={{ background: `radial-gradient(500px 300px at 85% 0%, rgba(34,211,238,.22), transparent 60%), linear-gradient(160deg, ${C.night}, ${C.navyDeep} 60%, #0E2E66)` }}>
+            <div className="absolute -right-10 -bottom-12 opacity-[.07]"><ShieldCheck size={260} color="#fff" strokeWidth={1} /></div>
+            <div className="relative grid sm:grid-cols-2 gap-3">
+              {[[ScanLine, 'sec1'], [Lock, 'sec2'], [BadgeCheck, 'sec3'], [ShieldCheck, 'sec4']].map(([Icon, k]) => (
+                <div key={k} className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.08)' }}>
+                  <span className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(34,211,238,.16)' }}><Icon size={19} color={C.cyan} /></span>
+                  <p className="mt-3 text-[15px] font-bold text-white" style={display}>{t(`${k}t`)}</p>
+                  <p className="mt-1 text-[13px] leading-relaxed text-white/60 break-words" style={{ overflowWrap: 'anywhere' }}>{t(`${k}d`)}</p>
                 </div>
               ))}
             </div>
@@ -1395,18 +1522,36 @@ export default function Landing({ onStart, lang, setLang }) {
     </section>
   );
   const bizTeaser = (
-    <section className="pb-2">
+    <section className="pb-24 lg:pb-32 bg-white">
       <div className="max-w-6xl mx-auto px-5">
         <Reveal>
-          <div className="rounded-[32px] p-8 sm:p-10 flex flex-col md:flex-row md:items-center gap-6 md:justify-between" style={{ background: 'linear-gradient(135deg, #FFF8EC, #FFEFD3)', border: '1px solid #F7DDB0' }}>
-            <div className="flex items-start gap-4">
-              <span className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: PLAN_GRAD.pro, boxShadow: PLAN_SHADOW.pro }}><Store size={22} color="#fff" /></span>
-              <div>
-                <p className="text-sm font-bold uppercase tracking-widest" style={{ color: '#B86E0B' }}>{t('bizEyebrow')}</p>
-                <h3 className="mt-1.5 text-2xl tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('bizTitle')}</h3>
+          <div className="rounded-[32px] overflow-hidden grid lg:grid-cols-2" style={{ background: 'linear-gradient(135deg, #FFF8EC, #FFEBC7)', border: '1px solid #F7DDB0' }}>
+            <div className="p-8 sm:p-12">
+              <p className="text-[13px] font-bold uppercase tracking-[.18em]" style={{ color: '#B86E0B' }}>{t('bizEyebrow')}</p>
+              <h2 className="mt-3 text-[30px] sm:text-[40px] leading-[1.08] tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('bizTitle')}</h2>
+              <p className="mt-4 text-[16px] leading-relaxed" style={{ color: '#6B5A3E' }}>{t('bizSub')}</p>
+              <ul className="mt-6 space-y-2.5">
+                {['biz1', 'biz2', 'biz3'].map((k) => <li key={k} className="flex items-center gap-2.5 text-[15px] font-semibold"><span className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: PLAN_GRAD.pro }}><Check size={13} color="#fff" strokeWidth={3} /></span>{t(k)}</li>)}
+              </ul>
+              <button onClick={() => nav('business')} className="lp2-btn mt-8 h-12 px-6 rounded-full font-bold inline-flex items-center gap-2" style={{ background: C.navyDeep, color: '#fff' }}>{t('tzBizBtn')}<ArrowRight size={18} /></button>
+            </div>
+            <div className="relative p-8 sm:p-12 flex items-center justify-center" style={{ background: 'linear-gradient(160deg, #23272E, #14171C)' }}>
+              <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,200,90,.22), transparent 65%)' }} />
+              <div className="relative w-full max-w-[340px] rounded-[22px] p-5 text-white" style={{ background: 'linear-gradient(160deg, #2A2F37, #1F2329)', border: '1px solid rgba(255,255,255,.08)' }}>
+                <div className="flex items-center justify-between"><p className="text-[13px] font-bold">{t('dbWallet')}</p><span className="h-6 px-2 rounded-full flex items-center gap-1 text-[10.5px] font-bold" style={{ background: 'rgba(255,200,90,.16)', color: '#FFC85A' }}><Store size={11} />Pro</span></div>
+                <p className="mt-4 text-[34px] leading-none tracking-tight" style={{ ...display, fontWeight: 800 }}>56 782<span className="text-[14px] text-white/60 ml-1.5">HTG</span></p>
+                <p className="mt-1 text-[12px] font-semibold" style={{ color: '#6EE7B7' }}>+21 370 HTG · {t('svThisMonth')}</p>
+                <div className="mt-5 flex items-end gap-1.5 h-[70px]">{[34, 46, 40, 58, 52, 66, 61, 74, 70, 86, 80, 100].map((h, i) => <span key={i} className="flex-1 rounded-t-[4px]" style={{ height: `${h}%`, background: i === 11 ? PLAN_GRAD.pro : 'rgba(243,217,168,.35)' }} />)}</div>
+                <div className="mt-5 space-y-2">
+                  {[['Marie J.', '+1 250'], ['Jean-Robert', '+3 400']].map(([n, v]) => (
+                    <div key={n} className="flex items-center gap-2.5 rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,.05)' }}>
+                      <span className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'rgba(16,185,129,.16)' }}><QrCode size={13} color="#6EE7B7" /></span>
+                      <p className="flex-1 text-[12.5px] font-semibold">{t('dbPayQr')} · {n}</p><p className="text-[12.5px] font-bold" style={{ color: '#6EE7B7' }}>{v}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-            <button onClick={() => nav('business')} className="lp2-btn h-12 px-6 rounded-full font-bold inline-flex items-center gap-2 shrink-0" style={{ background: C.navyDeep, color: '#fff' }}>{t('tzBizBtn')}<ArrowRight size={18} /></button>
           </div>
         </Reveal>
       </div>
@@ -1479,7 +1624,7 @@ export default function Landing({ onStart, lang, setLang }) {
   );
 
   const PAGE_CONTENT = {
-    home: <>{heroSec}{servicesSec}{howSec}{plansTeaser}{cardTeaser}{securityTeaser}{bizTeaser}{ctaSec}</>,
+    home: <>{heroSec}{statsBand}{servicesSec}{howSec}{plansTeaser}{cardTeaser}{securityTeaser}{bizTeaser}{ctaSec}</>,
     plans: <><PageHero title={t('phPlansT')} sub={t('phPlansS')} eyebrow={t('navPlans')} />{plansSec}{ctaSec}</>,
     card: <>{cardSec}{whereSec}{ctaSec}</>,
     business: <><PageHero title={t('phBizT')} sub={t('phBizS')} eyebrow={t('navBusiness')} />{bizSec}{plansSec}</>,
@@ -1513,6 +1658,10 @@ export default function Landing({ onStart, lang, setLang }) {
         .lp2-tick { animation: lp2TickK 1.2s ease-out; }
         @keyframes lp2PulseK { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,.55); } 70% { box-shadow: 0 0 0 5px rgba(16,185,129,0); } }
         .lp2-pulse { animation: lp2PulseK 1.8s infinite; }
+        @keyframes lp2DashK { 0% { left: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: calc(100% - 12px); opacity: 0; } }
+        .lp2-dash { animation: lp2DashK 2.2s cubic-bezier(.65,0,.35,1) infinite; }
+        @keyframes lp2ScanK { 0%,100% { top: 14px; } 50% { top: calc(100% - 16px); } }
+        .lp2-scan { animation: lp2ScanK 2.6s ease-in-out infinite; }
         @keyframes lp2SpinK { to { transform: rotate(360deg); } }
         .lp2-spin { animation: lp2SpinK .8s linear infinite; }
         @keyframes lp2DrawK { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
