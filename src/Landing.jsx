@@ -37,6 +37,9 @@ const D = {
   fxConfirm: ['Konfime', 'Confirmer', 'Confirm'],
   fxConfirmSub: ['Verifye nouvo kat ou anvan w kontinye.', 'Vérifiez votre nouvelle carte avant de continuer.', 'Review your new card before continuing.'],
   fxRowCard: ['Kat', 'Carte', 'Card'],
+  fxRowNum: ['Nimewo', 'Numéro', 'Number'],
+  fxRowExp: ['Ekspirasyon', 'Expiration', 'Expiry'],
+  fxRowCvv: ['CVV', 'CVV', 'CVV'],
   fxRowHolder: ['Titilè', 'Titulaire', 'Holder'],
   fxRowType: ['Tip', 'Type', 'Type'],
   fxRowFrom: ['Rechaje ak', 'Rechargée par', 'Funded by'],
@@ -573,7 +576,7 @@ function HeroPhone({ t, bare = false }) {
                         </div>
                         <p style={{ ...emboss, fontWeight: 700, fontSize: Math.round(W * 0.036), marginTop: 1 }}>≈ 371,85 $ US</p>
                       </div>
-                      <span className="absolute" style={{ ...emboss, left: r(W * 0.506), top: r(H * 0.695), fontWeight: 800, fontSize: Math.round(W * 0.05), letterSpacing: 1 }}>••/••</span>
+                      <span className="absolute" style={{ ...emboss, left: r(W * 0.506), top: r(H * 0.695), fontWeight: 800, fontSize: Math.round(W * 0.05), letterSpacing: 1 }}>12/29</span>
                       <span className="absolute truncate" style={{ ...emboss, left: r(W * 0.075), right: r(W * 0.42), bottom: r(H * 0.09), fontWeight: 500, fontSize: Math.round(W * 0.042), letterSpacing: '.05em' }}>ISABELLE PIERRE</span>
                     </div>
                   </div>
@@ -649,6 +652,9 @@ function HeroPhone({ t, bare = false }) {
                 {CARDS3.map(([src], i) => (
                   <div key={src} className="relative w-[236px] h-[149px] rounded-[14px] overflow-hidden shrink-0" style={{ transform: `scale(${i === pick ? 1.06 : 0.9})`, opacity: i === pick ? 1 : 0.5, transition: 'transform .6s, opacity .6s', boxShadow: i === pick ? '0 20px 34px -14px rgba(11,27,51,.6)' : 'none', background: '#0B1B33', marginTop: 10 }}>
                     <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <span className="absolute left-[16px] top-[92px] text-[13px] font-bold text-white tracking-[.12em]" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>4821 •••• •••• {['9010', '3374', '7702'][i]}</span>
+                    <span className="absolute left-[16px] bottom-[12px] text-[8.5px] font-semibold text-white/85 tracking-wider" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>ISABELLE PIERRE</span>
+                    <span className="absolute left-[150px] bottom-[12px] text-[8.5px] font-bold text-white/90" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>12/29</span>
                   </div>
                 ))}
               </div>
@@ -676,11 +682,13 @@ function HeroPhone({ t, bare = false }) {
               <p className="text-[11px] mt-0.5" style={{ color: A.muted }}>{t('fxConfirmSub')}</p>
               <div className="relative mt-4 rounded-[14px] overflow-hidden" style={{ height: Math.round(278 / (1438 / 905)), boxShadow: '0 14px 26px -12px rgba(11,27,51,.5)' }}>
                 <img src="/cards/card-shield.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <span className="absolute left-4 top-[98px] text-[15px] font-bold text-white tracking-[.14em]" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>4821 •••• •••• 7702</span>
                 <span className="absolute left-4 bottom-3 text-[11px] font-semibold tracking-wider text-white" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>ISABELLE PIERRE</span>
+                <span className="absolute left-[150px] bottom-3 text-[11px] font-bold text-white" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}><span className="text-[7px] opacity-70 mr-1 align-middle">EXP</span>12/29</span>
               </div>
               <div className="mt-4 rounded-[16px] px-3.5" style={{ border: '1px solid #E8ECF2' }}>
-                {[['fxRowCard', 'Premium'], ['fxRowHolder', 'Isabelle Pierre'], ['fxRowType', t('fxVirtual')], ['fxRowFrom', t('fxBalance')]].map(([k, v], n) => (
-                  <div key={k} className="flex items-center justify-between py-2.5 text-[11.5px]" style={{ borderTop: n ? '1px solid #EEF1F5' : 'none' }}>
+                {[['fxRowCard', 'Premium · ' + t('fxVirtual')], ['fxRowNum', '4821 •••• •••• 7702'], ['fxRowExp', '12/29'], ['fxRowCvv', '•••'], ['fxRowFrom', t('fxBalance')]].map(([k, v], n) => (
+                  <div key={k} className="flex items-center justify-between py-2 text-[11.5px]" style={{ borderTop: n ? '1px solid #EEF1F5' : 'none' }}>
                     <span style={{ color: A.muted }}>{t(k)}</span><span className="font-bold" style={{ color: A.ink }}>{v}</span>
                   </div>
                 ))}
@@ -842,7 +850,9 @@ function HeroLaptop({ t }) {
                   </div>
                   <div className="relative mt-2 rounded-[10px] overflow-hidden" style={{ height: Math.round(214 / (1438 / 905)) }}>
                     <img src="/cards/card-world.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <span className="absolute left-3 top-[74px] text-[12px] font-bold text-white tracking-[.12em]" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>4821 •••• •••• 5530</span>
                     <span className="absolute left-3 bottom-2 text-[9.5px] font-semibold tracking-wider text-white" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>BELLA COSMÉTIQUES</span>
+                    <span className="absolute left-[150px] bottom-2 text-[9.5px] font-bold text-white" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>12/29</span>
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-1.5">
                     <span className="h-[26px] rounded-[8px] flex items-center justify-center gap-1 text-[9.5px] font-bold text-white" style={{ background: P.char }}><Plus size={10} strokeWidth={3} />{t('dbDeposit')}</span>
