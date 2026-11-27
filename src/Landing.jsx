@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ArrowRight, ArrowLeftRight, BadgeCheck, Building2, Check, ChevronDown, CreditCard, Globe, Lock, Menu,
   Phone, QrCode, ShieldCheck, Smartphone, Sparkles, Wallet, X, Fingerprint, Zap, ScanLine, Store,
-  Briefcase, UserRound, ChevronRight, ArrowDownLeft, ArrowUpRight, Bell, Home, Clock, Banknote, LayoutGrid, Plus, Eye, Settings, Search, BarChart3, List } from 'lucide-react';
+  Briefcase, UserRound, ChevronRight, ArrowDownLeft, ArrowUpRight, Bell, Home, Clock, Banknote, LayoutGrid, Plus, Eye, Settings, Search, BarChart3, List, ChevronLeft } from 'lucide-react';
 // Paj sit la ak adrès yo
 const PAGE_PATH = { home: '/', plans: '/comptes', card: '/carte', business: '/entreprises', security: '/securite', help: '/aide', about: '/a-propos', terms: '/conditions', privacy: '/confidentialite' };
 const PATH_PAGE = Object.fromEntries(Object.entries(PAGE_PATH).map(([k, v]) => [v, k]));
@@ -29,6 +29,23 @@ const display = { fontFamily: "'Manrope', sans-serif" };
 
 // [kreyòl, français, english]
 const D = {
+  fxNewCard: ['Nouvo kat', 'Nouvelle carte', 'New card'],
+  fxBasic: ['Esansyèl la', 'L’essentielle', 'The essential'],
+  fxStandard: ['Pou chak jou', 'Pour tous les jours', 'For every day'],
+  fxPremium: ['Eksklizif la', 'L’exclusive', 'The exclusive'],
+  fxChoose: ['Chwazi', 'Choisir', 'Choose'],
+  fxConfirm: ['Konfime', 'Confirmer', 'Confirm'],
+  fxConfirmSub: ['Verifye nouvo kat ou anvan w kontinye.', 'Vérifiez votre nouvelle carte avant de continuer.', 'Review your new card before continuing.'],
+  fxRowCard: ['Kat', 'Carte', 'Card'],
+  fxRowHolder: ['Titilè', 'Titulaire', 'Holder'],
+  fxRowType: ['Tip', 'Type', 'Type'],
+  fxRowFrom: ['Rechaje ak', 'Rechargée par', 'Funded by'],
+  fxVirtual: ['Vityèl', 'Virtuelle', 'Virtual'],
+  fxBalance: ['Balans BLICPay', 'Solde BLICPay', 'BLICPay balance'],
+  fxConfirmBtn: ['Konfime', 'Confirmer', 'Confirm'],
+  fxDone: ['Kat ou pare!', 'Carte créée !', 'Card created!'],
+  fxDoneSub: ['Kat Premium ou pare pou w peye an liy.', 'Votre carte Premium est prête pour vos paiements en ligne.', 'Your Premium card is ready for online payments.'],
+  fxSeeCard: ['Wè kat mwen', 'Voir ma carte', 'See my card'],
   hpHi: ['Bonjou Isabelle', 'Bonjour Isabelle', 'Hello Isabelle'],
   hpTagline: ['Lajan w, an sekirite, toupatou.', 'Votre argent, en sécurité, partout.', 'Your money, safe, everywhere.'],
   hpWithdraw: ['Retrè', 'Retrait', 'Withdraw'],
@@ -456,6 +473,29 @@ function HeroPhone({ t, bare = false }) {
   ];
   const CARDS3 = [['/cards/card-ocean.jpg', 'Basic'], ['/cards/card-world.jpg', 'Standard'], ['/cards/card-shield.jpg', 'Premium']];
   const [front, setFront] = useState(0);
+  // Senaryo telefòn lan: 0 akèy, 1 chwazi kat, 2 konfime, 3 siksè
+  const [scene, setScene] = useState(0);
+  const [pick, setPick] = useState(0);
+  const [press, setPress] = useState(false);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const T = [];
+    const at = (ms, fn) => T.push(setTimeout(fn, ms));
+    const run = () => {
+      setScene(0); setPick(0); setPress(false); setLoading(false);
+      at(4200, () => setScene(1));
+      at(5800, () => setPick(1));
+      at(7200, () => setPick(2));
+      at(8400, () => setPress(true));
+      at(8600, () => { setPress(false); setScene(2); });
+      at(10200, () => setLoading(true));
+      at(11600, () => { setLoading(false); setScene(3); });
+      at(15200, run);
+    };
+    run();
+    return () => T.forEach(clearTimeout);
+  }, []);
   const [leaving, setLeaving] = useState(-1); // kat ki sot devan an: li disparèt pandan l ap pase dèyè
   useEffect(() => {
     if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined;
@@ -478,7 +518,7 @@ function HeroPhone({ t, bare = false }) {
       <div className="relative rounded-[58px] p-[5px]" style={{ background: 'linear-gradient(150deg, #FFFFFF 0%, #D9DBDF 18%, #A7ABB1 38%, #F4F5F6 55%, #B9BCC1 76%, #EEF0F2 100%)', boxShadow: '0 60px 100px -36px rgba(0,0,0,.75), 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.7)' }}>
         {/* bezèl nwa fen */}
         <div className="rounded-[53px] p-[6px]" style={{ background: '#0A0B0D', boxShadow: '0 0 0 1px rgba(0,0,0,.5)' }}>
-        <div className="relative rounded-[47px] overflow-hidden" style={{ background: A.canvas, width: SW, height: SH }}>
+        <div className="relative rounded-[47px] overflow-hidden" style={{ background: scene === 0 ? A.canvas : '#fff', transition: 'background .5s', width: SW, height: SH }}>
           {/* Dynamic Island */}
           <div className="absolute left-1/2 -translate-x-1/2 top-[11px] w-[104px] h-[30px] rounded-full bg-black z-20 flex items-center justify-end pr-3">
             <span className="w-[9px] h-[9px] rounded-full" style={{ background: 'radial-gradient(circle at 35% 35%, #2B3A55, #0A0F18 70%)' }} />
@@ -495,7 +535,10 @@ function HeroPhone({ t, bare = false }) {
               </span>
             </span>
           </div>
-          <div className="px-4 pt-1">
+          {/* Senaryo k ap jwe otomatikman: akèy → chwazi kat → konfime → siksè */}
+          <div className="absolute inset-x-0 bottom-0 overflow-hidden" style={{ top: 50 }}>
+          <div className="absolute inset-0" style={{ transform: `translateX(${scene === 0 ? 0 : -100}%)`, opacity: scene === 0 ? 1 : 0, transition: 'transform .6s cubic-bezier(.22,1,.36,1), opacity .6s' }}>
+          <div className="px-4 pt-0">
             {/* antèt */}
             <div className="flex items-center gap-2">
               <div className="flex-1 min-w-0">
@@ -590,6 +633,81 @@ function HeroPhone({ t, bare = false }) {
                 ? <span key={n} className="w-[38px] h-[38px] rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,.08)' }}><Ic size={15} color="rgba(255,255,255,.88)" /></span>
                 : <span key={n} className="w-[38px] h-[38px] rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #29D3F5, #00A3D9)' }}><QrCode size={16} color="#fff" /></span>)}
             </div>
+          </div>
+          </div>
+
+          {/* 2 — chwazi kat */}
+          <div className="absolute inset-0" style={{ background: '#fff', transform: `translateX(${scene === 1 ? 0 : scene < 1 ? 100 : -100}%)`, transition: 'transform .6s cubic-bezier(.22,1,.36,1)' }}>
+            <div className="flex items-center px-4 pt-1">
+              <span className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: A.alt }}><ChevronLeft size={16} color={A.ink} /></span>
+              <p className="flex-1 text-center text-[12.5px] font-bold pr-8" style={{ color: A.ink }}>{t('fxNewCard')}</p>
+            </div>
+            <p className="mt-4 text-center text-[21px] font-extrabold tracking-tight" style={{ color: A.ink }}>{CARDS3[pick][1]}</p>
+            <p className="text-center text-[11px] mt-0.5" style={{ color: A.muted }}>{t(['fxBasic', 'fxStandard', 'fxPremium'][pick])}</p>
+            <div className="relative mt-5 h-[262px]">
+              <div className="absolute top-0 flex gap-4" style={{ left: '50%', transform: `translateX(${-82 - pick * 180}px)`, transition: 'transform .6s cubic-bezier(.22,1,.36,1)' }}>
+                {CARDS3.map(([src], i) => (
+                  <div key={src} className="relative w-[164px] h-[260px] rounded-[16px] overflow-hidden shrink-0" style={{ transform: `scale(${i === pick ? 1 : 0.9})`, opacity: i === pick ? 1 : 0.55, transition: 'transform .6s, opacity .6s', boxShadow: i === pick ? '0 18px 30px -14px rgba(11,27,51,.55)' : 'none', background: '#0B1B33' }}>
+                    <img src={src} alt="" className="absolute left-1/2 top-1/2 max-w-none" style={{ width: 260, height: 164, transform: 'translate(-50%,-50%) rotate(90deg)' }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="mt-3 flex justify-center gap-1.5">{[0, 1, 2].map((i) => <span key={i} className="h-[5px] rounded-full" style={{ width: i === pick ? 16 : 5, background: i === pick ? A.ink : '#CBD5E1', transition: 'width .4s' }} />)}</div>
+            <div className="mx-4 mt-4 space-y-2">
+              {['card1', 'card2', 'card3'].map((k) => (
+                <div key={k} className="flex items-center gap-2.5 text-[10.5px] leading-snug" style={{ color: A.ink }}>
+                  <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(0,180,216,.12)' }}><Check size={10} color="#0891B2" strokeWidth={3} /></span>{t(k)}
+                </div>
+              ))}
+            </div>
+            <div className="absolute left-4 right-4 bottom-[30px]">
+              <span className="h-[46px] rounded-full flex items-center justify-center text-[13px] font-bold text-white" style={{ background: A.navy, transform: press ? 'scale(.96)' : 'none', transition: 'transform .15s' }}>{t('fxChoose')} {CARDS3[pick][1]}</span>
+            </div>
+          </div>
+
+          {/* 3 — konfime */}
+          <div className="absolute inset-0" style={{ background: '#fff', transform: `translateX(${scene === 2 ? 0 : scene < 2 ? 100 : -100}%)`, transition: 'transform .6s cubic-bezier(.22,1,.36,1)' }}>
+            <div className="flex items-center px-4 pt-1">
+              <span className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: A.alt }}><ChevronLeft size={16} color={A.ink} /></span>
+            </div>
+            <div className="px-4">
+              <p className="mt-3 text-[20px] font-extrabold tracking-tight" style={{ color: A.ink }}>{t('fxConfirm')}</p>
+              <p className="text-[11px] mt-0.5" style={{ color: A.muted }}>{t('fxConfirmSub')}</p>
+              <div className="relative mt-4 rounded-[14px] overflow-hidden" style={{ height: Math.round(278 / (1438 / 905)), boxShadow: '0 14px 26px -12px rgba(11,27,51,.5)' }}>
+                <img src="/cards/card-shield.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <span className="absolute left-4 bottom-3 text-[11px] font-semibold tracking-wider text-white" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>ISABELLE PIERRE</span>
+              </div>
+              <div className="mt-4 rounded-[16px] px-3.5" style={{ border: '1px solid #E8ECF2' }}>
+                {[['fxRowCard', 'Premium'], ['fxRowHolder', 'Isabelle Pierre'], ['fxRowType', t('fxVirtual')], ['fxRowFrom', t('fxBalance')]].map(([k, v], n) => (
+                  <div key={k} className="flex items-center justify-between py-2.5 text-[11.5px]" style={{ borderTop: n ? '1px solid #EEF1F5' : 'none' }}>
+                    <span style={{ color: A.muted }}>{t(k)}</span><span className="font-bold" style={{ color: A.ink }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="absolute left-4 right-4 bottom-[30px]">
+              <span className="h-[46px] rounded-full flex items-center justify-center gap-2 text-[13px] font-bold text-white" style={{ background: A.navy }}>
+                {loading ? <span className="lp2-spin w-[18px] h-[18px] rounded-full border-2" style={{ borderColor: 'rgba(255,255,255,.3)', borderTopColor: '#fff' }} /> : t('fxConfirmBtn')}
+              </span>
+            </div>
+          </div>
+
+          {/* 4 — siksè */}
+          <div className="absolute inset-0 flex flex-col items-center" style={{ background: '#fff', transform: `translateX(${scene === 3 ? 0 : 100}%)`, transition: scene === 0 ? 'none' : 'transform .6s cubic-bezier(.22,1,.36,1)' }}>
+            <div className="mt-[70px] relative w-[96px] h-[96px] rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #22D3EE, #0E9F8A)', boxShadow: '0 18px 36px -14px rgba(14,159,138,.7)' }}>
+              {scene === 3 && <span className="lp2-ring absolute inset-0 rounded-full" />}
+              <svg width="46" height="46" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className={scene === 3 ? 'lp2-draw' : ''} style={{ strokeDasharray: 24, strokeDashoffset: scene === 3 ? 0 : 24 }} /></svg>
+            </div>
+            <p className="mt-6 text-[20px] font-extrabold tracking-tight" style={{ color: A.ink }}>{t('fxDone')}</p>
+            <p className="mt-1 px-8 text-center text-[11.5px] leading-snug" style={{ color: A.muted }}>{t('fxDoneSub')}</p>
+            <div className="mt-6 rounded-[12px] overflow-hidden" style={{ width: 200, height: Math.round(200 / (1438 / 905)), boxShadow: '0 16px 30px -14px rgba(11,27,51,.55)', transform: scene === 3 ? 'none' : 'translateY(18px)', opacity: scene === 3 ? 1 : 0, transition: 'transform .7s .25s cubic-bezier(.22,1,.36,1), opacity .7s .25s' }}>
+              <img src="/cards/card-shield.jpg" alt="" className="w-full h-full object-cover" />
+            </div>
+            <div className="absolute left-4 right-4 bottom-[30px]">
+              <span className="h-[46px] rounded-full flex items-center justify-center text-[13px] font-bold text-white" style={{ background: A.navy }}>{t('fxSeeCard')}</span>
+            </div>
+          </div>
           </div>
           <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[120px] h-[5px] rounded-full z-20" style={{ background: '#0B1B33' }} />
         </div>
@@ -1385,6 +1503,12 @@ export default function Landing({ onStart, lang, setLang }) {
         .lp2-tick { animation: lp2TickK 1.2s ease-out; }
         @keyframes lp2PulseK { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,.55); } 70% { box-shadow: 0 0 0 5px rgba(16,185,129,0); } }
         .lp2-pulse { animation: lp2PulseK 1.8s infinite; }
+        @keyframes lp2SpinK { to { transform: rotate(360deg); } }
+        .lp2-spin { animation: lp2SpinK .8s linear infinite; }
+        @keyframes lp2DrawK { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+        .lp2-draw { animation: lp2DrawK .55s .2s cubic-bezier(.65,0,.35,1) both; }
+        @keyframes lp2RingK { 0% { box-shadow: 0 0 0 0 rgba(34,211,238,.5); } 100% { box-shadow: 0 0 0 26px rgba(34,211,238,0); } }
+        .lp2-ring { animation: lp2RingK 1.2s ease-out 2; }
         @media (prefers-reduced-motion: reduce) { .lp2-grow, .lp2-in, .lp2-tick, .lp2-pulse, .lp2-bob, .lp2-float { animation: none !important; } }
         .lp2-crisp { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; font-variant-numeric: tabular-nums; }
         .lp2-crisp img { image-rendering: -webkit-optimize-contrast; }
