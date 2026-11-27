@@ -74,7 +74,7 @@ const D = {
   dbPending: ['Annatant', 'En attente', 'Pending'],
   dbPendingSub: ['2 operasyon', '2 opérations', '2 operations'],
   dbCard: ['Kat', 'Carte', 'Card'],
-  dbCardSoon: ['Kat Pwo — byento', 'Carte Pro — bientôt', 'Pro card — soon'],
+  dbCardSoon: ['Kat Pwo', 'Carte Pro', 'Pro card'],
   dbFlow: ['Flou trezori', 'Flux de trésorerie', 'Cash flow'],
   dbMonths: ['12 mwa', '12 mois', '12 months'],
   dbInTab: ['Antre', 'Entrées', 'In'],
@@ -453,15 +453,18 @@ function HeroPhone({ t, bare = false }) {
   const acts = [[ArrowUpRight, 'hpSend'], [ArrowDownLeft, 'hpReceive'], [Banknote, 'hpWithdraw'], [LayoutGrid, 'hpMore']];
   const tx = [
     ['hpTx1', 'hpTx1s', '+2 500 HTG', true, ArrowDownLeft],
-    ['hpTx2', 'hpTx2s', '−1 200 HTG', false, ArrowUpRight],
-    ['hpTx3', 'hpTx3s', '−850 HTG', false, Store],
   ];
   const CARDS3 = [['/cards/card-ocean.jpg', 'Basic'], ['/cards/card-world.jpg', 'Standard'], ['/cards/card-shield.jpg', 'Premium']];
   const [front, setFront] = useState(0);
+  const [leaving, setLeaving] = useState(-1); // kat ki sot devan an: li disparèt pandan l ap pase dèyè
   useEffect(() => {
     if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined;
-    const id = setInterval(() => setFront((f) => (f + 1) % 3), 3200);
-    return () => clearInterval(id);
+    let tm;
+    const id = setInterval(() => {
+      setFront((f) => { setLeaving(f); return (f + 1) % 3; });
+      clearTimeout(tm); tm = setTimeout(() => setLeaving(-1), 620);
+    }, 3200);
+    return () => { clearInterval(id); clearTimeout(tm); };
   }, []);
   return (
     <div className={bare ? "lp2-crisp relative w-[330px]" : "lp2-phone lp2-crisp relative w-[330px] mx-auto lg:mr-28 lg:ml-0 my-4"} style={jak}>
@@ -514,11 +517,11 @@ function HeroPhone({ t, bare = false }) {
                   <div key={label} className="absolute overflow-hidden" style={{
                     top: [56, 28, 0][role], left: r(W * (1 - sc) / 2), width: r(W * sc), height: r(H * sc), borderRadius: R, background: '#0B1B33', zIndex: 3 - role,
                     boxShadow: isFront ? '0 12px 22px -8px rgba(11,42,92,.55)' : 'none',
-                    transition: 'top .7s cubic-bezier(.22,1,.36,1), left .7s cubic-bezier(.22,1,.36,1), width .7s cubic-bezier(.22,1,.36,1), height .7s cubic-bezier(.22,1,.36,1), box-shadow .7s',
+                    opacity: leaving === i ? 0 : 1,
+                    transition: (leaving === i ? '' : 'opacity .45s ease-out, ') + 'top .55s cubic-bezier(.22,1,.36,1), left .55s cubic-bezier(.22,1,.36,1), width .55s cubic-bezier(.22,1,.36,1), height .55s cubic-bezier(.22,1,.36,1), box-shadow .55s',
                   }}>
                     <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    <span className="absolute right-3 top-[5px] rounded-full px-2 py-[2px] text-[10px] font-bold text-white" style={{ background: 'rgba(0,0,0,.42)', opacity: isFront ? 0 : 1, transition: 'opacity .4s' }}>{label}</span>
-                    <div style={{ opacity: isFront ? 1 : 0, transition: isFront ? 'opacity .45s .35s' : 'opacity .2s' }}>
+                    <div style={{ opacity: isFront ? 1 : 0, transition: isFront ? 'opacity .25s ease-out .12s' : 'none' }}>
                       <div className="absolute" style={{ left: r(W * 0.07), top: r(H * 0.475) }}>
                         <div className="flex items-end gap-1">
                           <span style={{ ...emboss, fontWeight: 800, fontSize: Math.round(W * 0.082), lineHeight: 1 }}>48 750</span>
@@ -579,7 +582,7 @@ function HeroPhone({ t, bare = false }) {
             </div>
           </div>
           {/* ba navigasyon glass */}
-          <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-[110px] z-[5]" style={{ background: `linear-gradient(180deg, rgba(242,244,248,0) 0%, ${A.canvas} 62%)` }} />
+          <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-[96px] z-[5]" style={{ background: `linear-gradient(180deg, rgba(242,244,248,0) 0%, ${A.canvas} 40%)` }} />
           <div className="absolute left-0 right-0 bottom-[26px] flex justify-center z-10">
             <div className="h-[50px] rounded-[26px] flex items-center gap-1.5 px-[6px]" style={{ background: '#0F2752', boxShadow: '0 12px 24px -10px rgba(9,32,74,.6)' }}>
               <span className="h-[38px] px-3.5 rounded-full bg-white flex items-center gap-1.5 text-[11px] font-bold" style={{ color: '#09204A' }}><Home size={14} />{t('navHome')}</span>
