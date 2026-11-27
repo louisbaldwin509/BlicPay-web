@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ArrowRight, ArrowLeftRight, BadgeCheck, Building2, Check, ChevronDown, CreditCard, Globe, Lock, Menu,
   Phone, QrCode, ShieldCheck, Smartphone, Sparkles, Wallet, X, Fingerprint, Zap, ScanLine, Store,
-  Briefcase, UserRound, ChevronRight, ArrowDownLeft, ArrowUpRight, Bell, Home, Clock } from 'lucide-react';
+  Briefcase, UserRound, ChevronRight, ArrowDownLeft, ArrowUpRight, Bell, Home, Clock, Banknote, LayoutGrid, Plus, Eye } from 'lucide-react';
 // Paj sit la ak adrès yo
 const PAGE_PATH = { home: '/', plans: '/comptes', card: '/carte', business: '/entreprises', security: '/securite', help: '/aide', about: '/a-propos', terms: '/conditions', privacy: '/confidentialite' };
 const PATH_PAGE = Object.fromEntries(Object.entries(PAGE_PATH).map(([k, v]) => [v, k]));
@@ -29,16 +29,23 @@ const display = { fontFamily: "'Manrope', sans-serif" };
 
 // [kreyòl, français, english]
 const D = {
+  hpHi: ['Bonjou Isabelle', 'Bonjour Isabelle', 'Hello Isabelle'],
+  hpTagline: ['Lajan w, an sekirite, toupatou.', 'Votre argent, en sécurité, partout.', 'Your money, safe, everywhere.'],
+  hpWithdraw: ['Retrè', 'Retrait', 'Withdraw'],
+  hpMore: ['Plis', 'Plus', 'More'],
+  hpCardTitle: ['Kat vityèl BLICPay', 'Carte virtuelle BLICPay', 'BLICPay virtual card'],
+  hpCardSoon: ['Byento disponib — peye an liy ak balans ou.', 'Bientôt disponible — payez en ligne avec votre solde.', 'Coming soon — pay online with your balance.'],
+  hpSee: ['Wè', 'Voir', 'See'],
   hpHello: ['Bonjou 👋', 'Bonjour 👋', 'Hello 👋'],
-  hpDeposit: ['Depoze', 'Déposer', 'Top up'],
+  hpDeposit: ['Depoze', 'Déposer', 'Deposit'],
   hpSend: ['Voye', 'Envoyer', 'Send'],
   hpPay: ['Peye', 'Payer', 'Pay'],
   hpReceive: ['Resevwa', 'Recevoir', 'Receive'],
-  hpRecent: ['Aktivite resan', 'Activité récente', 'Recent activity'],
+  hpRecent: ['Dènye tranzaksyon', 'Dernières transactions', 'Recent transactions'],
   hpAll: ['Wè tout', 'Tout voir', 'See all'],
   hpTx1: ['Rechaj MonCash', 'Recharge MonCash', 'MonCash top-up'],
   hpTx1s: ['Jodi a · 10:24', 'Aujourd’hui · 10:24', 'Today · 10:24'],
-  hpTx2: ['Voye bay Jean', 'Envoyé à Jean', 'Sent to Jean'],
+  hpTx2: ['Transfè bay Jean P.', 'Transfert à Jean P.', 'Transfer to Jean P.'],
   hpTx2s: ['Jodi a · 09:02', 'Aujourd’hui · 09:02', 'Today · 09:02'],
   hpTx3: ['Peman QR · Boutik Lakay', 'Paiement QR · Boutik Lakay', 'QR payment · Boutik Lakay'],
   hpTx3s: ['Yè · 17:40', 'Hier · 17:40', 'Yesterday · 17:40'],
@@ -393,91 +400,129 @@ function Reveal({ children, delay = 0, className = '' }) {
   );
 }
 
-// Telefòn ak ekran aplikasyon BLICPay la (desine an kòd, pa yon imaj)
+// Telefòn ak ekran akèy aplikasyon BLICPay la — menm jan ak app la (kat anpile,
+// balans sou kat la, bouton « Depoze », aksyon, kat vityèl, tranzaksyon, ba glass).
 function HeroPhone({ t }) {
-  const acts = [[ArrowDownLeft, 'hpDeposit'], [ArrowUpRight, 'hpSend'], [ScanLine, 'hpPay'], [QrCode, 'hpReceive']];
+  const A = { canvas: '#F2F4F8', alt: '#F1F5F9', ink: '#0B1B33', muted: '#64748B', navy: '#0B1B33', cyan: '#00B4D8' };
+  const jak = { fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif" };
+  const W = 262, H = Math.round(W / (1438 / 905)), R = 13;
+  const emboss = { color: '#F4F6F9', textShadow: '1px 1.5px 2px rgba(0,0,0,.45)' };
+  const acts = [[ArrowUpRight, 'hpSend'], [ArrowDownLeft, 'hpReceive'], [Banknote, 'hpWithdraw'], [LayoutGrid, 'hpMore']];
   const tx = [
-    ['hpTx1', 'hpTx1s', '+ 2 500', true, '/logos/moncash-wide.png'],
-    ['hpTx2', 'hpTx2s', '− 1 200', false, null],
-    ['hpTx3', 'hpTx3s', '− 850', false, null],
+    ['hpTx1', 'hpTx1s', '+2 500 HTG', true, ArrowDownLeft],
+    ['hpTx2', 'hpTx2s', '−1 200 HTG', false, ArrowUpRight],
   ];
+  const back = (src, label, top, scale) => (
+    <div className="absolute left-0 overflow-hidden" style={{ top, width: W, height: H, borderRadius: R, transform: `scale(${scale})`, transformOrigin: 'top center', background: '#0B1B33' }}>
+      <img src={src} alt="" className="w-full h-full object-cover" />
+      <span className="absolute right-3 top-[6px] rounded-full px-2 py-[2px] text-[8.5px] font-bold text-white" style={{ background: 'rgba(0,0,0,.35)' }}>{label} · {t('soon')}</span>
+    </div>
+  );
   return (
-    <div className="relative w-[290px] sm:w-[310px] mx-auto lg:mr-10 lg:ml-0 my-4">
-      {/* glow */}
+    <div className="relative w-[314px] mx-auto lg:mr-28 lg:ml-0 my-4" style={jak}>
       <div className="absolute -inset-16 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.28), transparent 62%)' }} />
-      {/* telefòn */}
-      <div className="lp2-phone relative rounded-[46px] p-[10px]" style={{ background: 'linear-gradient(145deg, #2A3446, #0B111C)', boxShadow: '0 50px 90px -30px rgba(0,0,0,.75), inset 0 0 0 1.5px rgba(255,255,255,.12)' }}>
-        <div className="relative rounded-[37px] overflow-hidden" style={{ background: '#F2F4F8', height: 600 }}>
-          {/* tèt ble */}
-          <div className="relative px-5 pt-3 pb-16" style={{ background: `linear-gradient(160deg, ${C.night}, ${C.navyDeep} 55%, #134A92)` }}>
-            <div className="flex items-center justify-between text-[11px] font-semibold text-white/90">
-              <span>9:41</span>
-              <span className="w-[86px] h-[24px] rounded-full bg-black" />
-              <span className="flex items-center gap-1"><span className="w-4 h-2.5 rounded-[3px] border border-white/80 relative"><span className="absolute inset-[1px] right-[4px] rounded-[1px] bg-white/90" /></span></span>
+      <div className="relative rounded-[46px] p-[10px]" style={{ background: 'linear-gradient(145deg, #2A3446, #0B111C)', boxShadow: '0 50px 90px -30px rgba(0,0,0,.75), inset 0 0 0 1.5px rgba(255,255,255,.12)' }}>
+        <div className="relative rounded-[37px] overflow-hidden" style={{ background: A.canvas, height: 610 }}>
+          {/* ba estati */}
+          <div className="flex items-center justify-between px-6 pt-2.5 text-[11px] font-semibold" style={{ color: A.ink }}>
+            <span>9:41</span>
+            <span className="w-[84px] h-[24px] rounded-full bg-black" />
+            <span className="w-4 h-2.5 rounded-[3px] border relative" style={{ borderColor: A.ink }}><span className="absolute inset-[1px] right-[4px] rounded-[1px]" style={{ background: A.ink }} /></span>
+          </div>
+          <div className="px-4 pt-3">
+            {/* antèt */}
+            <div className="flex items-center gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-[18px] leading-tight truncate" style={{ fontWeight: 800, color: A.ink, letterSpacing: '-.02em' }}>{t('hpHi')}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: A.muted }}>{t('hpTagline')}</p>
+              </div>
+              <span className="w-[34px] h-[34px] rounded-full bg-white flex items-center justify-center" style={{ boxShadow: '0 4px 10px rgba(11,27,51,.06)' }}><Bell size={15} color={A.ink} /></span>
+              <span className="w-[34px] h-[34px] rounded-full p-[2px] bg-white" style={{ boxShadow: '0 4px 10px rgba(11,27,51,.08)' }}>
+                <span className="w-full h-full rounded-full flex items-center justify-center text-[11px] font-bold text-white" style={{ background: 'linear-gradient(135deg, #1B78D6, #0A3D7A)' }}>IP</span>
+              </span>
             </div>
-            <div className="mt-4 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold" style={{ background: C.cyan, color: C.night }}>IP</span>
-                <div>
-                  <p className="text-[10.5px] text-white/60">{t('hpHello')}</p>
-                  <p className="text-[13px] font-bold text-white -mt-0.5">Isabelle</p>
+            {/* kat anpile */}
+            <div className="relative mt-2" style={{ height: 56 + H }}>
+              {back('/cards/card-shield.jpg', 'Premium', 0, 0.9)}
+              {back('/cards/card-world.jpg', 'Standard', 28, 0.95)}
+              <div className="absolute left-0 overflow-hidden" style={{ top: 56, width: W, height: H, borderRadius: R, background: '#0B1B33', boxShadow: '0 12px 22px -8px rgba(11,42,92,.55)' }}>
+                <img src="/cards/card-ocean.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute" style={{ left: W * 0.07, top: H * 0.475 }}>
+                  <div className="flex items-end gap-1">
+                    <span style={{ ...emboss, fontWeight: 800, fontSize: Math.round(W * 0.082), lineHeight: 1 }}>48 750</span>
+                    <span style={{ ...emboss, fontWeight: 700, fontSize: Math.round(W * 0.036) }}>HTG</span>
+                    <Eye size={11} color="rgba(255,255,255,.85)" style={{ marginBottom: 2 }} />
+                  </div>
+                  <p style={{ ...emboss, fontWeight: 700, fontSize: Math.round(W * 0.036), marginTop: 1 }}>≈ 371,85 $ US</p>
+                </div>
+                <span className="absolute" style={{ ...emboss, left: W * 0.506, top: H * 0.695, fontWeight: 800, fontSize: Math.round(W * 0.05), letterSpacing: 1 }}>••/••</span>
+                <span className="absolute truncate" style={{ ...emboss, left: W * 0.075, right: W * 0.42, bottom: H * 0.09, fontWeight: 500, fontSize: Math.round(W * 0.042), letterSpacing: '.05em' }}>ISABELLE PIERRE</span>
+                <div className="absolute right-0 bottom-0 pl-1.5 pt-1.5" style={{ background: A.canvas, borderTopLeftRadius: 16 }}>
+                  <span className="h-8 pl-1.5 pr-3 rounded-full flex items-center gap-1.5 text-[10.5px] font-bold text-white" style={{ background: A.navy }}>
+                    <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center"><Plus size={11} color={A.navy} strokeWidth={3} /></span>{t('hpDeposit')}
+                  </span>
                 </div>
               </div>
-              <span className="w-9 h-9 rounded-full flex items-center justify-center relative" style={{ background: 'rgba(255,255,255,.1)' }}><Bell size={16} color="#fff" /><span className="absolute top-2 right-2.5 w-1.5 h-1.5 rounded-full" style={{ background: C.cyan }} /></span>
             </div>
-            <p className="mt-5 text-[11px] text-white/60">{t('heroBalance')}</p>
-            <p className="mt-0.5 text-white" style={{ ...display, fontWeight: 800, fontSize: 30, letterSpacing: '-.02em' }}>48 750<span className="text-[15px] font-bold text-white/70 ml-1.5">HTG</span></p>
-            <p className="text-[11.5px] font-semibold" style={{ color: '#A5F3FC' }}>≈ 371,85 $ US</p>
-          </div>
-          {/* aksyon yo */}
-          <div className="relative -mt-11 mx-4 rounded-[22px] bg-white p-3.5 grid grid-cols-4 gap-1" style={{ boxShadow: '0 14px 30px -16px rgba(11,27,51,.35)' }}>
-            {acts.map(([Ic, k]) => (
-              <div key={k} className="flex flex-col items-center gap-1.5">
-                <span className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Ic size={18} color="#fff" /></span>
-                <span className="text-[10px] font-semibold" style={{ color: C.ink }}>{t(k)}</span>
+            {/* aksyon */}
+            <div className="mt-3 rounded-[20px] bg-white py-3 px-1 flex justify-around">
+              {acts.map(([Ic, k]) => (
+                <div key={k} className="flex flex-col items-center gap-1.5 w-[58px]">
+                  <span className="w-[38px] h-[38px] rounded-full flex items-center justify-center" style={{ background: A.alt }}><Ic size={16} color={A.ink} /></span>
+                  <span className="text-[9.5px] font-semibold" style={{ color: A.ink }}>{t(k)}</span>
+                </div>
+              ))}
+            </div>
+            {/* kat vityèl */}
+            <div className="mt-2.5 rounded-[18px] bg-white p-2.5 flex items-center gap-2">
+              <span className="relative w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0" style={{ background: A.alt }}>
+                <CreditCard size={15} color={A.ink} /><span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full" style={{ background: A.cyan }} />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold truncate" style={{ color: A.ink }}>{t('hpCardTitle')}</p>
+                <p className="text-[9px] truncate" style={{ color: A.muted }}>{t('hpCardSoon')}</p>
               </div>
-            ))}
-          </div>
-          {/* aktivite */}
-          <div className="mx-4 mt-4">
-            <div className="flex items-center justify-between">
-              <p className="text-[12.5px] font-bold" style={{ color: C.ink }}>{t('hpRecent')}</p>
-              <p className="text-[10.5px] font-semibold" style={{ color: C.sky }}>{t('hpAll')}</p>
+              <span className="rounded-full px-3 py-1.5 text-[9.5px] font-bold text-white" style={{ background: A.navy }}>{t('hpSee')}</span>
             </div>
-            <div className="mt-2.5 space-y-2">
-              {tx.map(([k, sub, amt, inc, logo]) => (
-                <div key={k} className="flex items-center gap-2.5 rounded-2xl bg-white px-3 py-2.5">
-                  <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 overflow-hidden" style={{ background: inc ? '#E0F7FB' : '#EEF2F8' }}>
-                    {logo ? <img src={logo} alt="" className="w-7 h-auto" /> : k === 'hpTx2' ? <ArrowUpRight size={16} color={C.navy} /> : <Store size={16} color={C.navy} />}
-                  </span>
+            {/* tranzaksyon */}
+            <div className="mt-2.5 rounded-[18px] bg-white px-3 pt-2.5 pb-16">
+              <div className="flex items-center justify-between">
+                <p className="text-[12.5px] font-bold" style={{ color: A.ink }}>{t('hpRecent')}</p>
+                <p className="text-[9.5px]" style={{ color: A.muted }}>{t('hpAll')}</p>
+              </div>
+              {tx.map(([k, sub, amt, inc, Ic]) => (
+                <div key={k} className="flex items-center gap-2.5 py-2">
+                  <span className="w-[30px] h-[30px] rounded-full flex items-center justify-center shrink-0" style={{ background: inc ? 'rgba(16,185,129,.12)' : A.alt }}><Ic size={13} color={inc ? '#059669' : A.ink} /></span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11.5px] font-bold truncate" style={{ color: C.ink }}>{t(k)}</p>
-                    <p className="text-[10px] truncate" style={{ color: C.muted }}>{t(sub)}</p>
+                    <p className="text-[10.5px] font-bold truncate" style={{ color: A.ink }}>{t(k)}</p>
+                    <p className="text-[9px]" style={{ color: A.muted }}>{t(sub)}</p>
                   </div>
-                  <p className="text-[11.5px] font-bold whitespace-nowrap" style={{ color: inc ? '#0E9F8A' : C.ink }}>{amt}</p>
+                  <p className="text-[10.5px] font-bold whitespace-nowrap" style={{ color: inc ? '#059669' : A.ink }}>{amt}</p>
                 </div>
               ))}
             </div>
           </div>
           {/* ba navigasyon glass */}
-          <div className="absolute left-4 right-4 bottom-4 h-14 rounded-[28px] flex items-center justify-between px-2" style={{ background: 'rgba(9,32,74,.88)', backdropFilter: 'blur(14px)', boxShadow: '0 12px 24px -10px rgba(9,32,74,.6)' }}>
-            <span className="h-10 px-3.5 rounded-full bg-white flex items-center gap-1.5 text-[11px] font-bold" style={{ color: C.navyDeep }}><Home size={14} />{t('navHome')}</span>
-            <span className="w-10 h-10 rounded-full flex items-center justify-center"><CreditCard size={17} color="rgba(255,255,255,.85)" /></span>
-            <span className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, #29D3F5, #00A3D9)` }}><QrCode size={17} color="#fff" /></span>
-            <span className="w-10 h-10 rounded-full flex items-center justify-center"><Clock size={17} color="rgba(255,255,255,.85)" /></span>
-            <span className="w-10 h-10 rounded-full flex items-center justify-center"><UserRound size={17} color="rgba(255,255,255,.85)" /></span>
+          <div className="absolute left-0 right-0 bottom-4 flex justify-center">
+            <div className="h-[50px] rounded-[26px] flex items-center gap-1.5 px-[6px]" style={{ background: 'rgba(9,32,74,.9)', backdropFilter: 'blur(14px)', boxShadow: '0 12px 24px -10px rgba(9,32,74,.6)' }}>
+              <span className="h-[38px] px-3.5 rounded-full bg-white flex items-center gap-1.5 text-[10.5px] font-bold" style={{ color: '#09204A' }}><Home size={14} />{t('navHome')}</span>
+              {[CreditCard, null, Clock, UserRound].map((Ic, n) => Ic
+                ? <span key={n} className="w-[38px] h-[38px] rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,.08)' }}><Ic size={15} color="rgba(255,255,255,.88)" /></span>
+                : <span key={n} className="w-[38px] h-[38px] rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #29D3F5, #00A3D9)' }}><QrCode size={16} color="#fff" /></span>)}
+            </div>
           </div>
+          <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24 h-1 rounded-full" style={{ background: 'rgba(11,27,51,.35)' }} />
         </div>
       </div>
       {/* notifikasyon k ap flote */}
-      <div className="lp2-bob absolute hidden sm:flex -left-24 top-[66%] rounded-2xl bg-white px-3.5 py-3 items-center gap-3" style={{ boxShadow: '0 20px 40px -16px rgba(0,0,0,.45)' }}>
+      <div className="lp2-bob absolute hidden sm:flex -left-36 top-[64%] rounded-2xl bg-white px-3.5 py-3 items-center gap-3" style={{ boxShadow: '0 20px 40px -16px rgba(0,0,0,.45)', fontFamily: 'inherit' }}>
         <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#E0F7FB' }}><ArrowLeftRight size={16} color="#0E7490" /></span>
         <div>
           <p className="text-[10.5px]" style={{ color: C.muted }}>{t('heroReceived')}</p>
           <p className="text-[13px] font-bold" style={{ color: '#0E9F8A' }}>+ 2 500 HTG</p>
         </div>
       </div>
-      <div className="lp2-bob absolute hidden sm:flex -right-20 top-[20%] rounded-2xl px-3.5 py-3 items-center gap-3 text-white" style={{ background: 'rgba(6,18,43,.9)', border: '1px solid rgba(34,211,238,.35)', backdropFilter: 'blur(8px)', boxShadow: '0 20px 40px -16px rgba(0,0,0,.6)', animationDelay: '1.6s' }}>
+      <div className="lp2-bob absolute hidden sm:flex -right-52 top-[30%] rounded-2xl px-3.5 py-3 items-center gap-3 text-white" style={{ background: 'rgba(6,18,43,.9)', border: '1px solid rgba(34,211,238,.35)', backdropFilter: 'blur(8px)', boxShadow: '0 20px 40px -16px rgba(0,0,0,.6)', animationDelay: '1.6s' }}>
         <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: C.cyan }}><Check size={17} color={C.night} strokeWidth={3} /></span>
         <div>
           <p className="text-[10.5px] text-white/60">{t('hpPaid')}</p>
@@ -1057,7 +1102,7 @@ export default function Landing({ onStart, lang, setLang }) {
   return (
     <div style={{ background: '#fff', color: C.ink, overflowX: 'hidden' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
         html { scroll-behavior: smooth; }
         .lp2-btn { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
         .lp2-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
