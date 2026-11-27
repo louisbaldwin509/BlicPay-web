@@ -10,6 +10,7 @@ const PAGE_PATH = { home: '/', plans: '/comptes', card: '/carte', business: '/en
 const PATH_PAGE = Object.fromEntries(Object.entries(PAGE_PATH).map(([k, v]) => [v, k]));
 // Ikòn plan yo (Personnel / Pro / Entreprise)
 const PLAN_ICON = { personal: UserRound, pro: Store, business: Building2 };
+const PLAN_3D = { personal: 'purse', pro: 'convenience_store', business: 'office_building' };
 const PLAN_GRAD = {
   personal: 'linear-gradient(135deg, #3CC4F0 0%, #1B78D6 100%)',
   pro: 'linear-gradient(135deg, #FFC85A 0%, #E8901C 100%)',
@@ -378,6 +379,12 @@ function Reveal({ children, delay = 0, className = '' }) {
   );
 }
 
+// Ilistrasyon 3D (Microsoft Fluent Emoji — MIT)
+function Img3D({ name, size = 64, float = false, className = '', style }) {
+  return <img src={`/3d/${name}.png`} alt="" aria-hidden="true" width={size} height={size} loading="lazy" draggable={false}
+    className={`select-none ${float ? 'lp2-bob' : ''} ${className}`} style={{ width: size, height: size, filter: 'drop-shadow(0 14px 18px rgba(11,27,51,.18))', ...style }} />;
+}
+
 function CardImg({ src, style, className = '' }) {
   return (
     <div className={`absolute rounded-2xl overflow-hidden ${className}`} style={{ aspectRatio: '1.586', backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center', boxShadow: '0 30px 60px -20px rgba(10,31,69,.55)', ...style }}>
@@ -394,12 +401,12 @@ export default function Landing({ onStart, lang, setLang }) {
   const [modal, setModal] = useState(null);
 
   const FEATURES = [
-    [Wallet, 'f1', '#E6F6FD', C.sky],
-    [ArrowLeftRight, 'f2', '#E6F0FB', C.navy],
-    [QrCode, 'f3', '#E4F5EF', C.mint],
-    [CreditCard, 'f4', '#EEF0FF', '#4F46E5', true],
-    [CreditCard, 'f5', '#F1F2F4', '#111827', true],
-    [Store, 'f6', '#FDF3E3', C.amber],
+    [Wallet, 'f1', '#E6F6FD', C.sky, false, 'money_with_wings'],
+    [ArrowLeftRight, 'f2', '#E6F0FB', C.navy, false, 'envelope_with_arrow'],
+    [QrCode, 'f3', '#E4F5EF', C.mint, false, 'mobile_phone'],
+    [CreditCard, 'f4', '#EEF0FF', '#4F46E5', true, 'credit_card'],
+    [CreditCard, 'f5', '#F1F2F4', '#111827', true, 'shopping_bags'],
+    [Store, 'f6', '#FDF3E3', C.amber, false, 'convenience_store'],
   ];
   // Paj yo: chak youn gen pwòp adrès li (blicpayht.com/comptes, /carte…)
   const [page, setPage] = useState(() => PATH_PAGE[window.location.pathname.replace(/\/+$/, '') || '/'] || 'home');
@@ -463,6 +470,8 @@ export default function Landing({ onStart, lang, setLang }) {
             <CardImg src="/cards/card-world.jpg" name="Standard" className="lp2-float w-[62%] left-[2%] top-[8%]" style={{ '--r': '-12deg', transform: 'rotate(-12deg)' }} />
             <CardImg src="/cards/card-ocean.jpg" name="Basic" className="lp2-float w-[62%] right-[2%] top-[2%]" style={{ '--r': '9deg', transform: 'rotate(9deg)', animationDelay: '1.2s' }} />
             <CardImg src="/cards/card-shield.jpg" name="Premium" className="lp2-float w-[70%] left-[15%] top-[30%]" style={{ '--r': '-2deg', transform: 'rotate(-2deg)', animationDelay: '.6s' }} />
+            <Img3D name="coin" size={72} float className="absolute hidden sm:block top-[46%] -left-4" style={{ animationDelay: '.4s' }} />
+            <Img3D name="money_with_wings" size={84} float className="absolute hidden sm:block right-[-14px] top-[44%]" style={{ animationDelay: '1.4s' }} />
             <div className="absolute left-0 bottom-2 sm:bottom-6 rounded-2xl bg-white border px-4 py-3 shadow-xl flex items-center gap-3" style={{ borderColor: C.border }}>
               <span className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#E4F5EF' }}><ArrowLeftRight size={18} color={C.mint} /></span>
               <div>
@@ -488,11 +497,11 @@ export default function Landing({ onStart, lang, setLang }) {
             <p className="mt-3 text-lg" style={{ color: C.muted }}>{t('featSub')}</p>
           </Reveal>
           <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map(([Icon, k, bg, fg, soon], n) => (
+            {FEATURES.map(([Icon, k, bg, fg, soon, img], n) => (
               <Reveal key={k} delay={n * 70}>
                 <div className="lp2-card h-full rounded-3xl bg-white border p-6" style={{ borderColor: C.border }}>
                   <div className="flex items-start justify-between">
-                    <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${bg}, ${fg})`, boxShadow: `0 10px 20px -10px ${fg}` }}><Icon size={22} color="#fff" /></span>
+                    <span className="w-[72px] h-[72px] rounded-[22px] flex items-center justify-center" style={{ background: bg }}><Img3D name={img} size={52} /></span>
                     {soon && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: '#FDF3E3', color: C.amber }}>{t('soon')}</span>}
                   </div>
                   <h3 className="mt-5 text-lg font-bold" style={display}>{t(`${k}t`)}</h3>
@@ -548,11 +557,11 @@ export default function Landing({ onStart, lang, setLang }) {
             <h2 className="mt-3 text-3xl sm:text-[42px] tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('howTitle')}</h2>
           </Reveal>
           <div className="mt-14 grid md:grid-cols-3 gap-6">
-            {[[Fingerprint, 's1'], [Wallet, 's2'], [Zap, 's3']].map(([Icon, k], n) => (
+            {[[Fingerprint, 's1', 'identification_card'], [Wallet, 's2', 'coin'], [Zap, 's3', 'rocket']].map(([Icon, k, img], n) => (
               <Reveal key={k} delay={n * 100}>
                 <div className="relative rounded-3xl border p-7 h-full" style={{ borderColor: C.border }}>
                   <span className="absolute -top-4 left-7 w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>{n + 1}</span>
-                  <span className="mt-3 w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: '#EEF5FD' }}><Icon size={24} color={C.navy} /></span>
+                  <Img3D name={img} size={60} className="mt-3" />
                   <h3 className="mt-4 text-lg font-bold" style={display}>{t(`${k}t`)}</h3>
                   <p className="mt-2 text-sm leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
                 </div>
@@ -586,15 +595,13 @@ export default function Landing({ onStart, lang, setLang }) {
           <Reveal>
             <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t('secEyebrow')}</p>
             <h2 className="mt-3 text-3xl sm:text-[42px] leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('secTitle')}</h2>
-            <div className="mt-8 w-20 h-20 rounded-3xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, boxShadow: '0 20px 40px -16px rgba(20,58,115,.6)' }}>
-              <ShieldCheck size={38} color="#fff" />
-            </div>
+            <Img3D name="shield" size={150} float className="mt-8" />
           </Reveal>
           <div className="grid sm:grid-cols-2 gap-5">
-            {[[ScanLine, 'sec1'], [Lock, 'sec2'], [BadgeCheck, 'sec3'], [ShieldCheck, 'sec4']].map(([Icon, k], n) => (
+            {[[ScanLine, 'sec1', 'identification_card'], [Lock, 'sec2', 'key'], [BadgeCheck, 'sec3', 'bar_chart'], [ShieldCheck, 'sec4', 'locked']].map(([Icon, k, img], n) => (
               <Reveal key={k} delay={n * 80}>
                 <div className="lp2-card rounded-3xl bg-white border p-6 h-full" style={{ borderColor: C.border }}>
-                  <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, #3CC4F0, ${C.navy})` }}><Icon size={20} color="#fff" /></span>
+                  <Img3D name={img} size={52} />
                   <h3 className="mt-4 font-bold" style={display}>{t(`${k}t`)}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
                 </div>
@@ -633,7 +640,7 @@ export default function Landing({ onStart, lang, setLang }) {
                   {dk && <div className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,200,90,.22), transparent 70%)' }} />}
                   <div className="relative p-7 lg:p-8 flex flex-col flex-1">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: PLAN_GRAD[pl.k], boxShadow: PLAN_SHADOW[pl.k] }}><pl.icon size={23} color="#fff" strokeWidth={1.8} /></span>
+                      <span className="w-[68px] h-[68px] rounded-[22px] flex items-center justify-center" style={{ background: dk ? 'rgba(255,255,255,.08)' : pl.k === 'business' ? '#EEF2F9' : '#EAF6FD' }}><Img3D name={PLAN_3D[pl.k]} size={50} /></span>
                       {dk
                         ? <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-wider rounded-full px-3 py-1.5" style={{ background: PLAN_GRAD.pro, color: '#3A2300' }}><Sparkles size={13} />{t('plPopular')}</span>
                         : <span className="text-[11.5px] font-bold uppercase tracking-wider rounded-full px-3 py-1.5" style={{ background: '#F1F5FA', color: C.muted }}>{t(pl.tag)}</span>}
@@ -686,9 +693,9 @@ export default function Landing({ onStart, lang, setLang }) {
           {/* Bann konfyans */}
           <Reveal>
             <div className="mt-12 max-w-6xl mx-auto grid sm:grid-cols-3 gap-3">
-              {[[BadgeCheck, 'tr1', 'tr1s', 'linear-gradient(135deg,#34D399,#0E9F6E)'], [Wallet, 'tr2', 'tr2s', 'linear-gradient(135deg,#3CC4F0,#1B78D6)'], [ShieldCheck, 'tr3', 'tr3s', 'linear-gradient(135deg,#6E8BFF,#3B4FD8)']].map(([Ic, a, b, g]) => (
+              {[['check_mark_button', 'tr1', 'tr1s'], ['dollar_banknote', 'tr2', 'tr2s'], ['locked', 'tr3', 'tr3s']].map(([img, a, b]) => (
                 <div key={a} className="flex items-start gap-3 rounded-2xl bg-white p-4" style={{ border: `1px solid ${C.border}` }}>
-                  <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: g }}><Ic size={18} color="#fff" /></span>
+                  <Img3D name={img} size={42} className="shrink-0" />
                   <div><p className="text-[14.5px] font-bold" style={{ ...display }}>{t(a)}</p><p className="text-[13px] mt-0.5 leading-snug" style={{ color: C.muted }}>{t(b)}</p></div>
                 </div>
               ))}
@@ -720,9 +727,9 @@ export default function Landing({ onStart, lang, setLang }) {
                 </button>
               </div>
               <div className="space-y-3">
-                {[[QrCode, 'biz1'], [Zap, 'biz2'], [Smartphone, 'biz3']].map(([Icon, k]) => (
+                {[[QrCode, 'biz1', 'mobile_phone'], [Zap, 'biz2', 'chart_increasing'], [Smartphone, 'biz3', 'bar_chart']].map(([Icon, k, img]) => (
                   <div key={k} className="flex items-center gap-4 rounded-2xl bg-white border p-4" style={{ borderColor: C.border }}>
-                    <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: PLAN_GRAD.pro }}><Icon size={20} color="#fff" /></span>
+                    <Img3D name={img} size={44} />
                     <span className="font-semibold">{t(k)}</span>
                   </div>
                 ))}
@@ -770,18 +777,24 @@ export default function Landing({ onStart, lang, setLang }) {
       </>);
 
   // ---- Tèt paj (paj entèn yo)
-  const PageHero = ({ title, sub, eyebrow }) => (
+  const PageHero = ({ title, sub, eyebrow, art }) => (
     <section className="relative overflow-hidden" style={{ background: `linear-gradient(160deg, ${C.navyDeep} 0%, #0E2E66 60%, #154C9C 100%)`, color: '#fff' }}>
       <div className="absolute inset-0 opacity-[.12] lp2-grid" style={{ filter: 'invert(1)' }} />
       <div className="absolute -right-32 -top-32 w-[420px] h-[420px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(41,182,232,.35), transparent 65%)' }} />
       <div className="relative max-w-6xl mx-auto px-5 pt-12 pb-14 lg:pt-16 lg:pb-20">
+        {art && (
+          <div className="hidden md:flex absolute right-5 lg:right-10 top-1/2 -translate-y-1/2 items-center justify-center">
+            <div className="absolute w-[260px] h-[260px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(125,227,255,.35), transparent 68%)' }} />
+            {art.map((a, n) => <Img3D key={a} name={a} size={n ? 92 : 190} float className={n ? 'absolute' : 'relative'} style={n ? { right: n === 1 ? -36 : 'auto', left: n === 2 ? -30 : 'auto', top: n === 1 ? -26 : 'auto', bottom: n === 2 ? -18 : 'auto', animationDelay: `${n * 0.9}s`, filter: 'drop-shadow(0 16px 22px rgba(0,0,0,.35))' } : { filter: 'drop-shadow(0 24px 30px rgba(0,0,0,.4))' }} />)}
+          </div>
+        )}
         <div className="flex items-center gap-2 text-[13px]" style={{ color: 'rgba(255,255,255,.65)' }}>
           <button onClick={() => nav('home')} className="hover:text-white">{t('navHome')}</button>
           <ChevronRight size={14} />
           <span className="text-white font-semibold">{eyebrow || title}</span>
         </div>
-        <h1 className="mt-4 text-[36px] sm:text-[52px] leading-[1.05] tracking-tight max-w-3xl" style={{ ...display, fontWeight: 800 }}>{title}</h1>
-        {sub && <p className="mt-4 text-lg leading-relaxed max-w-2xl" style={{ color: 'rgba(255,255,255,.78)' }}>{sub}</p>}
+        <h1 className="mt-4 text-[36px] sm:text-[52px] leading-[1.05] tracking-tight max-w-2xl" style={{ ...display, fontWeight: 800 }}>{title}</h1>
+        {sub && <p className="mt-4 text-lg leading-relaxed max-w-xl" style={{ color: 'rgba(255,255,255,.78)' }}>{sub}</p>}
       </div>
     </section>
   );
@@ -808,7 +821,7 @@ export default function Landing({ onStart, lang, setLang }) {
                 ? { background: `linear-gradient(160deg, ${C.navyDeep}, #154C9C)`, color: '#fff', outline: '1.5px solid rgba(255,200,90,.55)', outlineOffset: -1.5 }
                 : { background: '#fff', border: `1px solid ${C.border}` }}>
                 <div className="flex items-center justify-between">
-                  <span className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: PLAN_GRAD[k], boxShadow: PLAN_SHADOW[k] }}>{React.createElement(PLAN_ICON[k], { size: 21, color: '#fff', strokeWidth: 1.8 })}</span>
+                  <Img3D name={PLAN_3D[k]} size={56} />
                   <span className="text-lg" style={{ ...display, fontWeight: 800 }}>{t(price)}</span>
                 </div>
                 <p className="mt-5 text-xl" style={{ ...display, fontWeight: 800 }}>{t(name)}</p>
@@ -848,10 +861,11 @@ export default function Landing({ onStart, lang, setLang }) {
               <h2 className="mt-3 text-3xl sm:text-4xl leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('secTitle')}</h2>
               <SeeMore to="security" label={t('tzSecBtn')} />
             </div>
+
             <div className="grid sm:grid-cols-2 gap-3">
-              {[[ScanLine, 'sec1t'], [Lock, 'sec2t'], [BadgeCheck, 'sec3t'], [ShieldCheck, 'sec4t']].map(([Icon, k]) => (
+              {[[ScanLine, 'sec1t', 'identification_card'], [Lock, 'sec2t', 'key'], [BadgeCheck, 'sec3t', 'bar_chart'], [ShieldCheck, 'sec4t', 'locked']].map(([Icon, k, img]) => (
                 <div key={k} className="flex items-center gap-3 rounded-2xl bg-white border p-4" style={{ borderColor: C.border }}>
-                  <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg, #3CC4F0, ${C.navy})` }}><Icon size={18} color="#fff" /></span>
+                  <Img3D name={img} size={40} className="shrink-0" />
                   <span className="font-semibold text-[15px]">{t(k)}</span>
                 </div>
               ))}
@@ -867,7 +881,7 @@ export default function Landing({ onStart, lang, setLang }) {
         <Reveal>
           <div className="rounded-[32px] p-8 sm:p-10 flex flex-col md:flex-row md:items-center gap-6 md:justify-between" style={{ background: 'linear-gradient(135deg, #FFF8EC, #FFEFD3)', border: '1px solid #F7DDB0' }}>
             <div className="flex items-start gap-4">
-              <span className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: PLAN_GRAD.pro, boxShadow: PLAN_SHADOW.pro }}><Store size={22} color="#fff" /></span>
+              <Img3D name="convenience_store" size={64} className="shrink-0 -mt-1" />
               <div>
                 <p className="text-sm font-bold uppercase tracking-widest" style={{ color: '#B86E0B' }}>{t('bizEyebrow')}</p>
                 <h3 className="mt-1.5 text-2xl tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('bizTitle')}</h3>
@@ -885,6 +899,7 @@ export default function Landing({ onStart, lang, setLang }) {
     <section className="py-20 lg:py-24">
       <div className="max-w-6xl mx-auto px-5">
         <Reveal className="max-w-2xl">
+          <Img3D name="shopping_bags" size={76} float className="mb-4" />
           <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t('whereT')}</p>
           <h2 className="mt-3 text-3xl sm:text-[40px] leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('whereH')}</h2>
           <p className="mt-3 text-lg" style={{ color: C.muted }}>{t('whereS')}</p>
@@ -911,11 +926,11 @@ export default function Landing({ onStart, lang, setLang }) {
             <p className="mt-2 text-[15px]" style={{ color: C.muted }}>{t('supportBody')}</p>
             <div className="mt-6 grid sm:grid-cols-2 gap-3">
               <a href="https://wa.me/13073460474" target="_blank" rel="noopener noreferrer" className="lp2-card flex items-center gap-3 rounded-2xl border p-4" style={{ borderColor: C.border }}>
-                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#4ADE80,#16A34A)' }}><Smartphone size={19} color="#fff" /></span>
+                <Img3D name="speech_balloon" size={46} />
                 <span><span className="block text-[15px] font-bold">{t('whatsapp')}</span><span className="block text-xs" style={{ color: C.muted }}>+1 307 346 0474</span></span>
               </a>
               <a href="tel:+13073460474" className="lp2-card flex items-center gap-3 rounded-2xl border p-4" style={{ borderColor: C.border }}>
-                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, #3CC4F0, ${C.navy})` }}><Phone size={19} color="#fff" /></span>
+                <Img3D name="mobile_phone" size={46} />
                 <span><span className="block text-[15px] font-bold">{t('call')}</span><span className="block text-xs" style={{ color: C.muted }}>+1 307 346 0474</span></span>
               </a>
             </div>
@@ -947,14 +962,14 @@ export default function Landing({ onStart, lang, setLang }) {
 
   const PAGE_CONTENT = {
     home: <>{heroSec}{servicesSec}{howSec}{plansTeaser}{cardTeaser}{securityTeaser}{bizTeaser}{ctaSec}</>,
-    plans: <><PageHero title={t('phPlansT')} sub={t('phPlansS')} eyebrow={t('navPlans')} />{plansSec}{ctaSec}</>,
+    plans: <><PageHero title={t('phPlansT')} sub={t('phPlansS')} eyebrow={t('navPlans')} art={['gem_stone', 'coin', 'purse']} />{plansSec}{ctaSec}</>,
     card: <>{cardSec}{whereSec}{ctaSec}</>,
-    business: <><PageHero title={t('phBizT')} sub={t('phBizS')} eyebrow={t('navBusiness')} />{bizSec}{plansSec}</>,
-    security: <><PageHero title={t('phSecT')} sub={t('phSecS')} eyebrow={t('navSecurity')} />{securitySec}{ctaSec}</>,
-    help: <><PageHero title={t('phHelpT')} sub={t('phHelpS')} eyebrow={t('navHelp')} />{faqSec}{contactSec}</>,
-    about: <><PageHero title={t('about')} sub={t('phAboutS')} /><DocSec body={t('aboutBody') + '\n\n' + t('disclaimer')} />{ctaSec}</>,
-    terms: <><PageHero title={t('terms')} sub={t('phLegalS')} /><DocSec body={t('termsBody')} /></>,
-    privacy: <><PageHero title={t('privacy')} sub={t('phLegalS')} /><DocSec body={t('privacyBody')} /></>,
+    business: <><PageHero title={t('phBizT')} sub={t('phBizS')} eyebrow={t('navBusiness')} art={['convenience_store', 'chart_increasing', 'handshake']} />{bizSec}{plansSec}</>,
+    security: <><PageHero title={t('phSecT')} sub={t('phSecS')} eyebrow={t('navSecurity')} art={['shield', 'key', 'locked']} />{securitySec}{ctaSec}</>,
+    help: <><PageHero title={t('phHelpT')} sub={t('phHelpS')} eyebrow={t('navHelp')} art={['speech_balloon', 'sparkles']} />{faqSec}{contactSec}</>,
+    about: <><PageHero title={t('about')} sub={t('phAboutS')} art={['globe_showing_americas', 'rocket', 'handshake']} /><DocSec body={t('aboutBody') + '\n\n' + t('disclaimer')} />{ctaSec}</>,
+    terms: <><PageHero title={t('terms')} sub={t('phLegalS')} art={['page_facing_up']} /><DocSec body={t('termsBody')} /></>,
+    privacy: <><PageHero title={t('privacy')} sub={t('phLegalS')} art={['locked']} /><DocSec body={t('privacyBody')} /></>,
   };
 
   return (
@@ -970,6 +985,8 @@ export default function Landing({ onStart, lang, setLang }) {
         .lp2-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(11,27,51,.25); }
         @keyframes lp2Float { 0%,100% { transform: translateY(0) rotate(var(--r)); } 50% { transform: translateY(-12px) rotate(var(--r)); } }
         .lp2-float { animation: lp2Float 7s ease-in-out infinite; }
+        @keyframes lp2Bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .lp2-bob { animation: lp2Bob 5s ease-in-out infinite; }
         .lp2-grid { background-image: radial-gradient(rgba(20,58,115,.08) 1px, transparent 1px); background-size: 22px 22px; }
       `}</style>
 
