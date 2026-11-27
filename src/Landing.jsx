@@ -36,6 +36,27 @@ const D = {
   plTitle: ['Yon kont pou chak bezwen.', 'Un compte pour chaque besoin.', 'An account for every need.'],
   plSub: ['Pou lavi chak jou, pou aktivite w oswa pou antrepriz ou — pri klè, san sipriz.', 'Pour le quotidien, pour votre activité ou pour votre entreprise — des tarifs clairs, sans surprise.', 'For everyday life, your trade or your company — clear pricing, no surprises.'],
   plPro: ['Pwofesyonèl', 'Professionnel', 'Professional'],
+  plTagP: ['Pou ou', 'Pour vous', 'For you'],
+  plTagPro: ['Pou aktivite w', 'Pour votre activité', 'For your trade'],
+  plTagB: ['Pou sosyete w', 'Pour votre société', 'For your company'],
+  plIncl: ['Sa ki ladan l', 'Ce qui est inclus', 'What’s included'],
+  plPlusP: ['Tout kont Pèsonèl la, plis:', 'Tout le compte Personnel, plus :', 'Everything in Personal, plus:'],
+  plPlusPro: ['Tout kont Pwo a, plis:', 'Tout le compte Pro, plus :', 'Everything in Pro, plus:'],
+  plOnce: ['yon sèl fwa', 'une seule fois', 'one-time'],
+  plForever: ['pou toujou', 'pour toujours', 'forever'],
+  plNoSub: ['San abònman · san frè kache', 'Sans abonnement · sans frais cachés', 'No subscription · no hidden fees'],
+  tr1: ['San abònman, san frè kache', 'Sans abonnement, sans frais cachés', 'No subscription, no hidden fees'],
+  tr1s: ['Ou peye frè ouvèti a yon sèl fwa, se tout.', 'Vous payez l’ouverture une seule fois, c’est tout.', 'You pay the opening fee once, that’s it.'],
+  tr2: ['Peye an goud', 'Payé en gourdes', 'Paid in gourdes'],
+  tr2s: ['Selon to BRH jou a — ak balans ou, MonCash oswa NatCash.', 'Au taux BRH du jour — par solde, MonCash ou NatCash.', 'At the daily BRH rate — by balance, MonCash or NatCash.'],
+  tr3: ['Verifikasyon sekirize', 'Vérification sécurisée', 'Secure verification'],
+  tr3s: ['Dokiman w yo chifre epi verifye pa ekip nou.', 'Vos documents sont chiffrés et vérifiés par notre équipe.', 'Your documents are encrypted and reviewed by our team.'],
+  gPrice: ['Pri', 'Tarifs', 'Pricing'],
+  gPay: ['Peman', 'Paiements', 'Payments'],
+  gTrust: ['Vizibilite ak konfyans', 'Visibilité & confiance', 'Visibility & trust'],
+  gVerif: ['Verifikasyon', 'Vérification', 'Verification'],
+  vNoneW: ['Okenn', 'Aucun', 'None'],
+  plChoose: ['Chwazi', 'Choisir', 'Choose'],
   plProFor: ['Pou moun k ap vann oswa k ap bay yon sèvis pou kont yo.', 'Pour ceux qui vendent ou offrent un service à leur compte.', 'For anyone who sells or offers a service on their own.'],
   plProPrice: ['100 $ US', '100 $ US', 'US$100'],
   plOpenPro: ['Louvri yon kont pwo', 'Ouvrir un compte pro', 'Open a pro account'],
@@ -223,6 +244,93 @@ function Logo({ size = 30 }) {
   );
 }
 
+// Tablo konparezon kont yo: tablo sou òdinatè, onglè pa plan sou telefòn
+function PlanCompare({ t, onStart }) {
+  const [plan, setPlan] = useState('pro');
+  const groups = [
+                    ['gPrice', [['r1', t('plFree'), t('plProPrice'), t('plBizPrice')], ['r2', t('vNoneW'), t('vNoneW'), t('vNoneW')], ['r4', '100 HTG', '100 HTG', '100 HTG']]],
+                    ['gPay', [['r3', t('vFreeInstant'), t('vFreeInstant'), t('vFreeInstant')], ['r9', t('vPersonalQr'), t('vProQr'), t('vBizQr')], ['r12', t('vStd'), t('vHigh'), t('vHighest')]]],
+                    ['gTrust', [['r13', t('vNameP'), t('vNamePro'), t('vNameB')], ['r14', null, true, true], ['r10', null, true, true]]],
+                    ['gVerif', [['r11', t('vKyc'), t('vProCheck'), t('vKyb')]]],
+                  ];
+  const PLANS = [['personal', 'plPersonal', 'register'], ['pro', 'plPro', 'register-pro'], ['business', 'plBusiness', 'register-business']];
+  const cell = (v) => v === true
+    ? <span className="w-6 h-6 rounded-full inline-flex items-center justify-center" style={{ background: '#E3F5EE' }}><Check size={14} color={C.mint} strokeWidth={3.2} /></span>
+    : v === null ? <span className="w-6 h-6 rounded-full inline-flex items-center justify-center" style={{ background: '#F1F3F7' }}><X size={12} color="#A7B0BF" strokeWidth={3} /></span> : v;
+  const idx = PLANS.findIndex(([k]) => k === plan);
+  return (
+    <>
+      {/* Telefòn: chwazi yon plan */}
+      <div className="sm:hidden mt-7">
+        <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl" style={{ background: '#E9EEF5' }}>
+          {PLANS.map(([k, name]) => (
+            <button key={k} onClick={() => setPlan(k)} className="h-10 rounded-xl text-[13px] font-bold flex items-center justify-center gap-1.5 transition"
+              style={plan === k ? { background: '#fff', color: C.ink, boxShadow: '0 2px 8px -2px rgba(11,27,51,.18)' } : { color: C.muted }}>
+              <span className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: PLAN_GRAD[k] }}>{React.createElement(PLAN_ICON[k], { size: 11, color: '#fff', strokeWidth: 2.2 })}</span>
+              {t(name).replace('Professionnel', 'Pro').replace('Pwofesyonèl', 'Pwo').replace('Professional', 'Pro')}
+            </button>
+          ))}
+        </div>
+        <div className="mt-4 rounded-[22px] bg-white overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+          {groups.map(([g, rows]) => (
+            <div key={g}>
+              <div className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest" style={{ color: C.sky, background: '#F7F9FC', borderTop: `1px solid ${C.border}` }}>{t(g)}</div>
+              {rows.map((r) => (
+                <div key={r[0]} className="px-4 py-3.5 flex items-center justify-between gap-4 text-[14px]" style={{ borderTop: `1px solid ${C.border}` }}>
+                  <span style={{ color: C.muted }}>{t(r[0])}</span>
+                  <span className="font-semibold text-right" style={{ color: C.ink }}>{cell(r[idx + 1])}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+          <div className="p-4" style={{ borderTop: `1px solid ${C.border}` }}>
+            <button onClick={() => onStart(PLANS[idx][2])} className="w-full h-12 rounded-2xl font-bold inline-flex items-center justify-center gap-2 text-white" style={{ background: plan === 'pro' ? PLAN_GRAD.pro : C.navy, color: plan === 'pro' ? '#2A1A00' : '#fff' }}>
+              {t(plan === 'personal' ? 'plOpenPersonal' : plan === 'pro' ? 'plOpenPro' : 'plOpenBusiness')}<ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
+      </div>
+      {/* Òdinatè / tablèt: tablo */}
+      <div className="hidden sm:block">
+              <div className="mt-8 rounded-[24px] bg-white border overflow-x-auto" style={{ borderColor: C.border }}>
+                <div className="min-w-[640px]">
+                  <div className="grid grid-cols-[1.25fr_1fr_1fr_1fr] items-end" style={{ borderBottom: `1px solid ${C.border}` }}>
+                    <div className="px-4 sm:px-6 py-5" />
+                    {[['personal', 'plPersonal', 'register'], ['pro', 'plPro', 'register-pro'], ['business', 'plBusiness', 'register-business']].map(([k, name, act]) => (
+                      <div key={k} className="px-3 sm:px-5 py-5" style={k === 'pro' ? { background: '#FFF8EC' } : undefined}>
+                        <div className="flex items-center gap-2">
+                          <span className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: PLAN_GRAD[k] }}>{React.createElement(PLAN_ICON[k], { size: 16, color: '#fff', strokeWidth: 2 })}</span>
+                          <span className="text-[14.5px] font-bold" style={{ ...display }}>{t(name)}</span>
+                        </div>
+                        <button onClick={() => onStart(act)} className="mt-3 text-[12.5px] font-bold inline-flex items-center gap-1" style={{ color: k === 'pro' ? '#B86E0B' : C.navy }}>{t('plChoose')}<ArrowRight size={13} /></button>
+                      </div>
+                    ))}
+                  </div>
+                  {groups.map(([g, rows]) => (
+                    <React.Fragment key={g}>
+                      <div className="grid grid-cols-[1.25fr_1fr_1fr_1fr]" style={{ background: '#F7F9FC', borderTop: `1px solid ${C.border}` }}>
+                        <div className="px-4 sm:px-6 py-2.5 text-[11.5px] font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t(g)}</div>
+                        <div /><div style={{ background: '#FFF3DD' }} /><div />
+                      </div>
+                      {rows.map(([k, a, b, c]) => (
+                        <div key={k} className="grid grid-cols-[1.25fr_1fr_1fr_1fr] text-[13px] sm:text-[14px]" style={{ borderTop: `1px solid ${C.border}` }}>
+                          <div className="px-4 sm:px-6 py-4 font-medium" style={{ color: C.muted }}>{t(k)}</div>
+                          {[a, b, c].map((v, j) => (
+                            <div key={j} className="px-3 sm:px-5 py-4 font-semibold flex items-center" style={{ color: C.ink, ...(j === 1 ? { background: '#FFF8EC' } : {}) }}>
+                              {v === true ? <span className="w-6 h-6 rounded-full inline-flex items-center justify-center" style={{ background: '#E3F5EE' }}><Check size={14} color={C.mint} strokeWidth={3.2} /></span> : v === null ? <span className="w-6 h-6 rounded-full inline-flex items-center justify-center" style={{ background: '#F1F3F7' }}><X size={12} color="#A7B0BF" strokeWidth={3} /></span> : v}
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+      </div>
+    </>
+  );
+}
+
 function Reveal({ children, delay = 0, className = '' }) {
   const ref = React.useRef(null);
   const [on, setOn] = useState(false);
@@ -274,6 +382,8 @@ export default function Landing({ onStart, lang, setLang }) {
         .lp2-btn { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
         .lp2-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
         .lp2-card { transition: transform .25s ease, box-shadow .25s ease; }
+        .lp2-plan { transition: transform .25s ease, box-shadow .25s ease; }
+        .lp2-plan:hover { transform: translateY(-6px); }
         .lp2-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(11,27,51,.25); }
         @keyframes lp2Float { 0%,100% { transform: translateY(0) rotate(var(--r)); } 50% { transform: translateY(-12px) rotate(var(--r)); } }
         .lp2-float { animation: lp2Float 7s ease-in-out infinite; }
@@ -504,73 +614,91 @@ export default function Landing({ onStart, lang, setLang }) {
             <p className="mt-4 text-lg" style={{ color: C.muted }}>{t('plSub')}</p>
           </Reveal>
 
-          <div className="mt-14 grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="mt-14 grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7 max-w-6xl mx-auto items-stretch">
             {[
-              { k: 'personal', name: 'plPersonal', who: 'plPersonalFor', price: 'plFree', priceSub: 'plFreeSub', ideal: 'plIdealP', items: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'], cta: 'plOpenPersonal', action: 'register', icon: PLAN_ICON.personal, dark: false },
-              { k: 'pro', name: 'plPro', who: 'plProFor', price: 'plProPrice', priceSub: 'plBizPriceSub', ideal: 'plIdealPro', items: ['pr1', 'pr2', 'pr3', 'pr4', 'pr5', 'pr6'], cta: 'plOpenPro', action: 'register-pro', icon: PLAN_ICON.pro, dark: true },
-              { k: 'business', name: 'plBusiness', who: 'plBusinessFor', price: 'plBizPrice', priceSub: 'plBizPriceSub', ideal: 'plIdealB', items: ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7'], cta: 'plOpenBusiness', action: 'register-business', icon: PLAN_ICON.business, dark: false },
-            ].map((pl, n) => (
-              <Reveal key={pl.k} delay={n * 120}>
-                <div className="lp2-card relative h-full rounded-[28px] p-8 flex flex-col" style={pl.dark
-                  ? { background: `linear-gradient(160deg, ${C.navyDeep} 0%, #0E2E66 60%, #154C9C 100%)`, color: '#fff', boxShadow: '0 30px 60px -30px rgba(10,31,69,.6)' }
-                  : { background: '#fff', border: `1px solid ${C.border}` }}>
-                  {pl.dark && <span className="absolute top-6 right-6 text-xs font-bold rounded-full px-3 py-1" style={{ background: 'rgba(41,182,232,.18)', color: '#8FDDF7' }}>{t('plPopular')}</span>}
-                  <span className="w-14 h-14 rounded-[18px] flex items-center justify-center" style={{ background: PLAN_GRAD[pl.k], boxShadow: PLAN_SHADOW[pl.k] }}><pl.icon size={26} color="#fff" strokeWidth={1.75} /></span>
-                  <h3 className="mt-5 text-2xl" style={{ ...display, fontWeight: 800 }}>{t(pl.name)}</h3>
-                  <p className="mt-1 text-sm" style={{ color: pl.dark ? 'rgba(255,255,255,.72)' : C.muted }}>{t(pl.who)}</p>
-                  <div className="mt-6 pb-6" style={{ borderBottom: `1px solid ${pl.dark ? 'rgba(255,255,255,.12)' : C.border}` }}>
-                    <p className="text-4xl tracking-tight" style={{ ...display, fontWeight: 800 }}>{t(pl.price)}</p>
-                    <p className="mt-1 text-sm" style={{ color: pl.dark ? 'rgba(255,255,255,.65)' : C.muted }}>{t(pl.priceSub)}</p>
+              { k: 'personal', tag: 'plTagP', name: 'plPersonal', who: 'plPersonalFor', amount: null, ideal: 'plIdealP', head: 'plIncl', items: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'], cta: 'plOpenPersonal', action: 'register', icon: PLAN_ICON.personal, dark: false },
+              { k: 'pro', tag: 'plTagPro', name: 'plPro', who: 'plProFor', amount: '100', ideal: 'plIdealPro', head: 'plPlusP', items: ['pr1', 'pr2', 'pr3', 'pr4', 'pr5', 'pr6'], cta: 'plOpenPro', action: 'register-pro', icon: PLAN_ICON.pro, dark: true },
+              { k: 'business', tag: 'plTagB', name: 'plBusiness', who: 'plBusinessFor', amount: '500', ideal: 'plIdealB', head: 'plPlusPro', items: ['b2', 'b3', 'b4', 'b5', 'b6', 'b7'], cta: 'plOpenBusiness', action: 'register-business', icon: PLAN_ICON.business, dark: false },
+            ].map((pl, n) => {
+              const dk = pl.dark;
+              const sub = dk ? 'rgba(255,255,255,.68)' : C.muted;
+              const line = dk ? 'rgba(255,255,255,.12)' : C.border;
+              return (
+              <Reveal key={pl.k} delay={n * 120} className={dk ? 'lg:-my-4' : ''}>
+                <div className="lp2-plan relative h-full rounded-[30px] flex flex-col overflow-hidden" style={dk
+                  ? { background: `linear-gradient(165deg, ${C.navyDeep} 0%, #0E2E66 55%, #154C9C 100%)`, color: '#fff', boxShadow: '0 40px 80px -36px rgba(10,31,69,.75)', outline: '1.5px solid rgba(255,200,90,.55)', outlineOffset: -1.5 }
+                  : { background: '#fff', border: `1px solid ${C.border}`, boxShadow: '0 1px 2px rgba(11,27,51,.04)' }}>
+                  {/* liy koulè anwo */}
+                  <div className="h-1.5 w-full" style={{ background: PLAN_GRAD[pl.k] }} />
+                  {dk && <div className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,200,90,.22), transparent 70%)' }} />}
+                  <div className="relative p-7 lg:p-8 flex flex-col flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: PLAN_GRAD[pl.k], boxShadow: PLAN_SHADOW[pl.k] }}><pl.icon size={23} color="#fff" strokeWidth={1.8} /></span>
+                      {dk
+                        ? <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-wider rounded-full px-3 py-1.5" style={{ background: PLAN_GRAD.pro, color: '#3A2300' }}><Sparkles size={13} />{t('plPopular')}</span>
+                        : <span className="text-[11.5px] font-bold uppercase tracking-wider rounded-full px-3 py-1.5" style={{ background: '#F1F5FA', color: C.muted }}>{t(pl.tag)}</span>}
+                    </div>
+                    <h3 className="mt-5 text-[26px] leading-tight" style={{ ...display, fontWeight: 800 }}>{t(pl.name)}</h3>
+                    <p className="mt-1.5 text-[14.5px] leading-snug min-h-[42px]" style={{ color: sub }}>{t(pl.who)}</p>
+
+                    <div className="mt-6 flex items-end gap-2">
+                      {pl.amount ? (
+                        <>
+                          <span className="text-[52px] leading-none tracking-tight" style={{ ...display, fontWeight: 800 }}>{pl.amount}<span className="text-[26px] align-top ml-1" style={{ fontWeight: 700 }}>$</span></span>
+                          <span className="pb-1.5 text-sm leading-tight" style={{ color: sub }}>US<br />{t('plOnce')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-[52px] leading-none tracking-tight" style={{ ...display, fontWeight: 800 }}>0<span className="text-[26px] align-top ml-1" style={{ fontWeight: 700 }}>$</span></span>
+                          <span className="pb-1.5 text-sm leading-tight" style={{ color: sub }}>{t('plFree')}<br />{t('plForever')}</span>
+                        </>
+                      )}
+                    </div>
+                    <p className="mt-2 text-[13px] flex items-center gap-1.5" style={{ color: sub }}><BadgeCheck size={14} color={dk ? '#FFC85A' : C.mint} />{t('plNoSub')}</p>
+
+                    <button onClick={() => onStart(pl.action)} className="lp2-btn mt-6 h-12 rounded-2xl font-bold inline-flex items-center justify-center gap-2 text-[15px]"
+                      style={dk ? { background: PLAN_GRAD.pro, color: '#2A1A00', boxShadow: '0 12px 24px -12px rgba(232,144,28,.9)' } : pl.k === 'business' ? { background: C.navyDeep, color: '#fff' } : { background: '#fff', color: C.navy, border: `1.5px solid ${C.navy}` }}>
+                      {t(pl.cta)}<ArrowRight size={18} />
+                    </button>
+
+                    <p className="mt-6 text-[13px] font-semibold rounded-xl px-3.5 py-2.5 leading-snug" style={dk ? { background: 'rgba(255,255,255,.08)', color: '#E6F4FB' } : { background: '#F4F8FD', color: C.navy }}>{t(pl.ideal)}</p>
+
+                    <div className="mt-6 pt-6" style={{ borderTop: `1px solid ${line}` }}>
+                      <p className="text-[12px] font-bold uppercase tracking-widest" style={{ color: dk ? '#FFC85A' : C.sky }}>{t(pl.head)}</p>
+                      <ul className="mt-4 space-y-3.5">
+                        {pl.items.map((it) => (
+                          <li key={it} className="flex items-start gap-3 text-[14.5px] leading-snug">
+                            <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-px" style={{ background: dk ? 'rgba(255,200,90,.16)' : pl.k === 'business' ? '#E8EEF8' : '#E5F4FC' }}>
+                              <Check size={12.5} color={dk ? '#FFC85A' : pl.k === 'business' ? C.navyDeep : '#1B78D6'} strokeWidth={3.2} />
+                            </span>
+                            <span style={{ color: dk ? 'rgba(255,255,255,.92)' : C.ink }}>{t(it)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                  <p className="mt-5 text-[13.5px] font-semibold rounded-xl px-3.5 py-2.5" style={pl.dark ? { background: 'rgba(41,182,232,.14)', color: '#BDEBFB' } : { background: '#EEF6FD', color: C.navy }}>{t(pl.ideal)}</p>
-                  <ul className="mt-5 space-y-3 flex-1">
-                    {pl.items.map((it) => (
-                      <li key={it} className="flex items-start gap-3 text-[15px]">
-                        <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: PLAN_GRAD[pl.k] }}><Check size={12} color="#fff" strokeWidth={3.2} /></span>
-                        <span style={{ color: pl.dark ? 'rgba(255,255,255,.9)' : C.ink }}>{t(it)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <button onClick={() => onStart(pl.action)} className="lp2-btn mt-8 h-12 rounded-full font-bold inline-flex items-center justify-center gap-2"
-                    style={pl.dark ? { background: '#fff', color: C.navy } : { background: C.navy, color: '#fff' }}>
-                    {t(pl.cta)}<ArrowRight size={18} />
-                  </button>
                 </div>
               </Reveal>
-            ))}
+              );
+            })}
           </div>
 
+          {/* Bann konfyans */}
           <Reveal>
-            <div className="mt-16 max-w-6xl mx-auto rounded-[24px] bg-white border overflow-x-auto" style={{ borderColor: C.border }}>
-              <div className="min-w-[620px]">
-              <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] text-[12.5px] sm:text-sm font-bold" style={{ background: '#F9FBFD', borderBottom: `1px solid ${C.border}` }}>
-                <div className="px-3 sm:px-5 py-4" style={{ ...display }}>{t('cmpTitle')}</div>
-                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><span className="w-7 h-7 rounded-lg hidden sm:flex items-center justify-center shrink-0" style={{ background: PLAN_GRAD.personal }}><PLAN_ICON.personal size={15} color="#fff" strokeWidth={2} /></span>{t('plPersonal')}</div>
-                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><span className="w-7 h-7 rounded-lg hidden sm:flex items-center justify-center shrink-0" style={{ background: PLAN_GRAD.pro }}><PLAN_ICON.pro size={15} color="#fff" strokeWidth={2} /></span>{t('plPro')}</div>
-                <div className="px-3 sm:px-5 py-4 flex items-center gap-2"><span className="w-7 h-7 rounded-lg hidden sm:flex items-center justify-center shrink-0" style={{ background: PLAN_GRAD.business }}><PLAN_ICON.business size={15} color="#fff" strokeWidth={2} /></span>{t('plBusiness')}</div>
-              </div>
-              {[
-                ['r1', t('plFree'), t('plProPrice'), t('plBizPrice')],
-                ['r2', t('vNone'), t('vNone'), t('vNone')],
-                ['r3', t('vFreeInstant'), t('vFreeInstant'), t('vFreeInstant')],
-                ['r4', '100 HTG', '100 HTG', '100 HTG'],
-                ['r12', t('vStd'), t('vHigh'), t('vHighest')],
-                ['r13', t('vNameP'), t('vNamePro'), t('vNameB')],
-                ['r9', t('vPersonalQr'), t('vProQr'), t('vBizQr')],
-                ['r14', null, true, true],
-                ['r10', null, true, true],
-                ['r11', t('vKyc'), t('vProCheck'), t('vKyb')],
-              ].map(([k, a, b, c], i) => (
-                <div key={k} className="grid grid-cols-[1.2fr_1fr_1fr_1fr] text-[12.5px] sm:text-[14px]" style={{ borderTop: i ? `1px solid ${C.border}` : 'none' }}>
-                  <div className="px-3 sm:px-5 py-3.5 font-medium" style={{ color: C.muted }}>{t(k)}</div>
-                  {[a, b, c].map((v, j) => (
-                    <div key={j} className="px-3 sm:px-5 py-3.5 font-semibold" style={{ color: C.ink }}>
-                      {v === true ? <span className="w-[22px] h-[22px] rounded-full inline-flex items-center justify-center" style={{ background: C.mint }}><Check size={13} color="#fff" strokeWidth={3.2} /></span> : v === null ? <span style={{ color: '#B8C1CF' }}>—</span> : v}
-                    </div>
-                  ))}
+            <div className="mt-12 max-w-6xl mx-auto grid sm:grid-cols-3 gap-3">
+              {[[BadgeCheck, 'tr1', 'tr1s', 'linear-gradient(135deg,#34D399,#0E9F6E)'], [Wallet, 'tr2', 'tr2s', 'linear-gradient(135deg,#3CC4F0,#1B78D6)'], [ShieldCheck, 'tr3', 'tr3s', 'linear-gradient(135deg,#6E8BFF,#3B4FD8)']].map(([Ic, a, b, g]) => (
+                <div key={a} className="flex items-start gap-3 rounded-2xl bg-white p-4" style={{ border: `1px solid ${C.border}` }}>
+                  <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: g }}><Ic size={18} color="#fff" /></span>
+                  <div><p className="text-[14.5px] font-bold" style={{ ...display }}>{t(a)}</p><p className="text-[13px] mt-0.5 leading-snug" style={{ color: C.muted }}>{t(b)}</p></div>
                 </div>
               ))}
-              </div>
+            </div>
+          </Reveal>
+
+          <Reveal>
+            <div className="mt-16 max-w-6xl mx-auto">
+              <h3 className="text-2xl sm:text-3xl text-center tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('cmpTitle')}</h3>
+              <PlanCompare t={t} onStart={onStart} />
             </div>
             <p className="mt-4 max-w-6xl mx-auto text-xs leading-relaxed" style={{ color: C.muted }}>{t('plNote')}</p>
           </Reveal>
