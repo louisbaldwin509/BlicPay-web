@@ -458,7 +458,7 @@ Non, telefòn, adrès, dokiman idantite (pou KYC) ak istorik tranzaksyon ou.
 Pou jere kont ou, verifye idantite ou (obligasyon regilasyon), trete tranzaksyon ak ofri sipò.
 
 3. Pataj
-Nou pa vann done ou. Nou ka pataje enfòmasyon ak patnè ki nesesè pou sèvis la (verifikasyon idantite, bank patnè pou kat yo) oswa ak otorite si lalwa mande sa.
+Nou pa vann done ou. Nou ka pataje enfòmasyon ak patnè ki nesesè pou sèvis la (verifikasyon idantite, emetè patnè kat yo) oswa ak otorite si lalwa mande sa.
 
 4. Sekirite
 Modpas ak PIN chifre; aksè entèn limite.
@@ -474,7 +474,7 @@ Nom, téléphone, adresse, pièces d’identité (pour le KYC) et historique de 
 Gérer votre compte, vérifier votre identité (obligation réglementaire), traiter les transactions et offrir un support.
 
 3. Partage
-Nous ne vendons pas vos données. Nous pouvons les partager avec les partenaires nécessaires au service (vérification d’identité, banque partenaire des cartes) ou avec les autorités si la loi l’exige.
+Nous ne vendons pas vos données. Nous pouvons les partager avec les partenaires nécessaires au service (vérification d’identité, émetteur partenaire des cartes) ou avec les autorités si la loi l’exige.
 
 4. Sécurité
 Mots de passe et PIN chiffrés ; accès interne limité.
@@ -490,7 +490,7 @@ Name, phone, address, identity documents (for KYC) and your transaction history.
 To run your account, verify your identity (a regulatory requirement), process transactions and provide support.
 
 3. Sharing
-We do not sell your data. We may share it with partners needed to provide the service (identity verification, the card-issuing partner bank) or with authorities where the law requires.
+We do not sell your data. We may share it with partners needed to provide the service (identity verification, the card-issuing partner) or with authorities where the law requires.
 
 4. Security
 Passwords and PINs are encrypted; internal access is limited.
