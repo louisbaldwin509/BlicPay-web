@@ -1681,11 +1681,11 @@ export default function Landing({ onStart, lang, setLang }) {
 
       {/* NAV */}
       <header className="sticky top-0 z-40 border-b" style={{ background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(12px)', borderColor: C.border }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-5 h-16 flex items-center gap-3 sm:gap-6">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-5 h-16 flex items-center gap-3 sm:gap-6">
           <a href="/" className="flex items-center gap-2 shrink-0" onClick={(e) => { e.preventDefault(); nav('home'); }}>
             <img src="/brand/logo-full.png" alt="BLICPay" className="h-[34px] sm:h-[42px] w-auto" />
           </a>
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium" style={{ color: C.muted }}>
+          <nav className="hidden xl:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-[14.5px] font-medium" style={{ color: C.muted }}>
             {NAV.map(([id, k]) => (
               <a key={id} href={PAGE_PATH[id]} onClick={(e) => { e.preventDefault(); nav(id); }} className="relative py-5 hover:text-[#0B1B33] transition-colors" style={page === id ? { color: C.ink, fontWeight: 700 } : undefined}>
                 {t(k)}
@@ -1695,8 +1695,8 @@ export default function Landing({ onStart, lang, setLang }) {
           </nav>
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
             <div className="relative">
-              <button onClick={() => setLangOpen((v) => !v)} className="h-10 w-10 sm:w-auto sm:px-3 rounded-full border flex items-center justify-center gap-1.5 text-sm font-semibold" style={{ borderColor: C.border }} aria-label="Language">
-                <Globe size={16} /><span className="uppercase hidden sm:inline">{lang}</span>
+              <button onClick={() => setLangOpen((v) => !v)} className="h-10 w-10 rounded-full border flex items-center justify-center text-sm font-semibold" style={{ borderColor: C.border }} aria-label="Language" title={lang.toUpperCase()}>
+                <Globe size={17} />
               </button>
               {langOpen && (
                 <div className="absolute right-0 mt-2 w-44 rounded-2xl border bg-white shadow-xl p-1.5 z-50" style={{ borderColor: C.border }}>
@@ -1710,13 +1710,13 @@ export default function Landing({ onStart, lang, setLang }) {
             </div>
             <button onClick={() => onStart('login')} className="hidden sm:block h-10 px-4 rounded-full text-sm font-semibold" style={{ color: C.navy }}>{t('login')}</button>
             <button onClick={() => onStart('register')} className="lp2-btn h-10 px-4 sm:px-5 rounded-full text-[13px] sm:text-sm font-bold text-white whitespace-nowrap" style={{ background: C.navyDeep }}>{t('signup')}</button>
-            <button onClick={() => setMenu((v) => !v)} className="lg:hidden w-10 h-10 shrink-0 rounded-full border flex items-center justify-center" style={{ borderColor: C.border }} aria-label="Menu">
+            <button onClick={() => setMenu((v) => !v)} className="xl:hidden w-10 h-10 shrink-0 rounded-full border flex items-center justify-center" style={{ borderColor: C.border }} aria-label="Menu">
               {menu ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>
         {menu && (
-          <div className="lg:hidden border-t px-5 py-3 flex flex-col" style={{ borderColor: C.border }}>
+          <div className="xl:hidden border-t px-5 py-3 flex flex-col" style={{ borderColor: C.border }}>
             {[['home', 'navHome'], ...NAV].map(([id, k]) => (
               <a key={id} href={PAGE_PATH[id]} onClick={(e) => { e.preventDefault(); nav(id); }} className="flex items-center justify-between py-3 font-semibold border-b last:border-0" style={{ borderColor: C.border, color: page === id ? C.navy : C.ink }}>
                 {t(k)}<ChevronRight size={16} color={page === id ? C.sky : '#B8C1CF'} />
