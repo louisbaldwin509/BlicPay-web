@@ -644,11 +644,11 @@ function HeroPhone({ t, bare = false }) {
             </div>
             <p className="mt-4 text-center text-[21px] font-extrabold tracking-tight" style={{ color: A.ink }}>{CARDS3[pick][1]}</p>
             <p className="text-center text-[11px] mt-0.5" style={{ color: A.muted }}>{t(['fxBasic', 'fxStandard', 'fxPremium'][pick])}</p>
-            <div className="relative mt-5 h-[262px]">
-              <div className="absolute top-0 flex gap-4" style={{ left: '50%', transform: `translateX(${-82 - pick * 180}px)`, transition: 'transform .6s cubic-bezier(.22,1,.36,1)' }}>
+            <div className="relative mt-8 h-[176px]">
+              <div className="absolute top-0 flex gap-3" style={{ left: '50%', transform: `translateX(${-118 - pick * 248}px)`, transition: 'transform .6s cubic-bezier(.22,1,.36,1)' }}>
                 {CARDS3.map(([src], i) => (
-                  <div key={src} className="relative w-[164px] h-[260px] rounded-[16px] overflow-hidden shrink-0" style={{ transform: `scale(${i === pick ? 1 : 0.9})`, opacity: i === pick ? 1 : 0.55, transition: 'transform .6s, opacity .6s', boxShadow: i === pick ? '0 18px 30px -14px rgba(11,27,51,.55)' : 'none', background: '#0B1B33' }}>
-                    <img src={src} alt="" className="absolute left-1/2 top-1/2 max-w-none" style={{ width: 260, height: 164, transform: 'translate(-50%,-50%) rotate(90deg)' }} />
+                  <div key={src} className="relative w-[236px] h-[149px] rounded-[14px] overflow-hidden shrink-0" style={{ transform: `scale(${i === pick ? 1.06 : 0.9})`, opacity: i === pick ? 1 : 0.5, transition: 'transform .6s, opacity .6s', boxShadow: i === pick ? '0 20px 34px -14px rgba(11,27,51,.6)' : 'none', background: '#0B1B33', marginTop: 10 }}>
+                    <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
