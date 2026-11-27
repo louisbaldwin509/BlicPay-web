@@ -88,6 +88,9 @@ const D = {
   dbPay2s: ['Jodi a · 11:05', 'Aujourd’hui · 11:05', 'Today · 11:05'],
   dbPay3: ['Peman QR · Nadège P.', 'Paiement QR · Nadège P.', 'QR payment · Nadège P.'],
   dbPay3s: ['Yè · 18:47', 'Hier · 18:47', 'Yesterday · 18:47'],
+  dbPayQr: ['Peman QR', 'Paiement QR', 'QR payment'],
+  dbNow: ['Kounye a', 'À l’instant', 'Just now'],
+  dbLive: ['An dirèk', 'En direct', 'Live'],
   dbChip: ['Nouvo peman kliyan', 'Nouveau paiement client', 'New customer payment'],
   navHome: ['Akèy', 'Accueil', 'Home'],
   navSecurity: ['Sekirite', 'Sécurité', 'Security'],
@@ -453,12 +456,13 @@ function HeroPhone({ t, bare = false }) {
     ['hpTx2', 'hpTx2s', '−1 200 HTG', false, ArrowUpRight],
     ['hpTx3', 'hpTx3s', '−850 HTG', false, Store],
   ];
-  const back = (src, label, top, scale) => (
-    <div className="absolute overflow-hidden" style={{ top, left: r(W * (1 - scale) / 2), width: r(W * scale), height: r(H * scale), borderRadius: R, background: '#0B1B33' }}>
-      <img src={src} alt="" className="w-full h-full object-cover" />
-      <span className="absolute right-3 top-[5px] rounded-full px-2 py-[2px] text-[10px] font-bold text-white" style={{ background: 'rgba(0,0,0,.42)' }}>{label} · {t('soon')}</span>
-    </div>
-  );
+  const CARDS3 = [['/cards/card-ocean.jpg', 'Basic'], ['/cards/card-world.jpg', 'Standard'], ['/cards/card-shield.jpg', 'Premium']];
+  const [front, setFront] = useState(0);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const id = setInterval(() => setFront((f) => (f + 1) % 3), 3200);
+    return () => clearInterval(id);
+  }, []);
   return (
     <div className={bare ? "lp2-crisp relative w-[330px]" : "lp2-phone lp2-crisp relative w-[330px] mx-auto lg:mr-28 lg:ml-0 my-4"} style={jak}>
       {!bare && <div className="absolute -inset-16 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.28), transparent 62%)' }} />}
@@ -500,27 +504,40 @@ function HeroPhone({ t, bare = false }) {
                 <span className="w-full h-full rounded-full flex items-center justify-center text-[11px] font-bold text-white" style={{ background: 'linear-gradient(135deg, #1B78D6, #0A3D7A)' }}>IP</span>
               </span>
             </div>
-            {/* kat anpile */}
+            {/* kat anpile — yo chanje plas otomatikman (Basic → Standard → Premium) */}
             <div className="relative mt-2" style={{ height: 56 + H }}>
-              {back('/cards/card-shield.jpg', 'Premium', 0, 0.9)}
-              {back('/cards/card-world.jpg', 'Standard', 28, 0.95)}
-              <div className="absolute left-0 overflow-hidden" style={{ top: 56, width: W, height: H, borderRadius: R, background: '#0B1B33', boxShadow: '0 12px 22px -8px rgba(11,42,92,.55)' }}>
-                <img src="/cards/card-ocean.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
-                <div className="absolute" style={{ left: r(W * 0.07), top: r(H * 0.475) }}>
-                  <div className="flex items-end gap-1">
-                    <span style={{ ...emboss, fontWeight: 800, fontSize: Math.round(W * 0.082), lineHeight: 1 }}>48 750</span>
-                    <span style={{ ...emboss, fontWeight: 700, fontSize: Math.round(W * 0.036) }}>HTG</span>
-                    <Eye size={11} color="rgba(255,255,255,.85)" style={{ marginBottom: 2 }} />
+              {CARDS3.map(([src, label], i) => {
+                const role = (i - front + 3) % 3; // 0 = devan, 1 = mitan, 2 = dèyè
+                const sc = [1, 0.95, 0.9][role];
+                const isFront = role === 0;
+                return (
+                  <div key={label} className="absolute overflow-hidden" style={{
+                    top: [56, 28, 0][role], left: r(W * (1 - sc) / 2), width: r(W * sc), height: r(H * sc), borderRadius: R, background: '#0B1B33', zIndex: 3 - role,
+                    boxShadow: isFront ? '0 12px 22px -8px rgba(11,42,92,.55)' : 'none',
+                    transition: 'top .7s cubic-bezier(.22,1,.36,1), left .7s cubic-bezier(.22,1,.36,1), width .7s cubic-bezier(.22,1,.36,1), height .7s cubic-bezier(.22,1,.36,1), box-shadow .7s',
+                  }}>
+                    <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <span className="absolute right-3 top-[5px] rounded-full px-2 py-[2px] text-[10px] font-bold text-white" style={{ background: 'rgba(0,0,0,.42)', opacity: isFront ? 0 : 1, transition: 'opacity .4s' }}>{label}</span>
+                    <div style={{ opacity: isFront ? 1 : 0, transition: isFront ? 'opacity .45s .35s' : 'opacity .2s' }}>
+                      <div className="absolute" style={{ left: r(W * 0.07), top: r(H * 0.475) }}>
+                        <div className="flex items-end gap-1">
+                          <span style={{ ...emboss, fontWeight: 800, fontSize: Math.round(W * 0.082), lineHeight: 1 }}>48 750</span>
+                          <span style={{ ...emboss, fontWeight: 700, fontSize: Math.round(W * 0.036) }}>HTG</span>
+                          <Eye size={11} color="rgba(255,255,255,.85)" style={{ marginBottom: 2 }} />
+                        </div>
+                        <p style={{ ...emboss, fontWeight: 700, fontSize: Math.round(W * 0.036), marginTop: 1 }}>≈ 371,85 $ US</p>
+                      </div>
+                      <span className="absolute" style={{ ...emboss, left: r(W * 0.506), top: r(H * 0.695), fontWeight: 800, fontSize: Math.round(W * 0.05), letterSpacing: 1 }}>••/••</span>
+                      <span className="absolute truncate" style={{ ...emboss, left: r(W * 0.075), right: r(W * 0.42), bottom: r(H * 0.09), fontWeight: 500, fontSize: Math.round(W * 0.042), letterSpacing: '.05em' }}>ISABELLE PIERRE</span>
+                    </div>
                   </div>
-                  <p style={{ ...emboss, fontWeight: 700, fontSize: Math.round(W * 0.036), marginTop: 1 }}>≈ 371,85 $ US</p>
-                </div>
-                <span className="absolute" style={{ ...emboss, left: r(W * 0.506), top: r(H * 0.695), fontWeight: 800, fontSize: Math.round(W * 0.05), letterSpacing: 1 }}>••/••</span>
-                <span className="absolute truncate" style={{ ...emboss, left: r(W * 0.075), right: r(W * 0.42), bottom: r(H * 0.09), fontWeight: 500, fontSize: Math.round(W * 0.042), letterSpacing: '.05em' }}>ISABELLE PIERRE</span>
-                <div className="absolute right-0 bottom-0 pl-1.5 pt-1.5" style={{ background: A.canvas, borderTopLeftRadius: 16 }}>
-                  <span className="h-8 pl-1.5 pr-3 rounded-full flex items-center gap-1.5 text-[11px] font-bold text-white" style={{ background: A.navy }}>
-                    <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center"><Plus size={11} color={A.navy} strokeWidth={3} /></span>{t('hpDeposit')}
-                  </span>
-                </div>
+                );
+              })}
+              {/* bouton « Depoze » nan kwen kat devan an */}
+              <div className="absolute right-0 pl-1.5 pt-1.5 z-10" style={{ top: 56 + H - 38, background: A.canvas, borderTopLeftRadius: 16 }}>
+                <span className="h-8 pl-1.5 pr-3 rounded-full flex items-center gap-1.5 text-[11px] font-bold text-white" style={{ background: A.navy }}>
+                  <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center"><Plus size={11} color={A.navy} strokeWidth={3} /></span>{t('hpDeposit')}
+                </span>
               </div>
             </div>
             {/* aksyon */}
@@ -602,13 +619,27 @@ function HeroLaptop({ t }) {
   const jak = { fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif" };
   const SW = 872, SH = Math.round(872 / 1.54);
   const tile = (Ic) => <span className="w-[26px] h-[26px] rounded-[8px] flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Ic size={13} color="#fff" /></span>;
+  // Animasyon: yon nouvo peman kliyan rive chak kèk segonn — balans yo monte an dirèk
+  const POOL = [['Boutik Lakay', 2150], ['Wilner D.', 950], ['Sabine M.', 1800], ['Ricardo T.', 600], ['Marie J.', 1250], ['Jean-Robert', 3400], ['Nadège P.', 780]];
+  const fmt = (n) => n.toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ');
+  const START = { bal: 56782, inflow: 21370, n: 0, rows: [['Marie J.', 1250, 'dbPay1s', 'a'], ['Jean-Robert', 3400, 'dbPay2s', 'b'], ['Nadège P.', 780, 'dbPay3s', 'c']] };
+  const [live, setLive] = useState(START);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const id = setInterval(() => setLive((L) => {
+      if (L.n >= 6) return { ...START, n: 0 }; // rekòmanse bouk la pou chif yo pa monte san fen
+      const [name, amt] = POOL[L.n % POOL.length];
+      return { bal: L.bal + amt, inflow: L.inflow + amt, n: L.n + 1, rows: [[name, amt, 'dbNow', `p${L.n}`], ...L.rows].slice(0, 3) };
+    }), 4200);
+    return () => clearInterval(id);
+  }, []);
   const stats = [
-    [Wallet, 'dbAvail', '56 782', 'BP-482913'],
-    [ArrowDownLeft, 'dbIn', '21 370', 'dbInSub'],
+    [Wallet, 'dbAvail', fmt(live.bal), 'BP-482913'],
+    [ArrowDownLeft, 'dbIn', fmt(live.inflow), 'dbInSub'],
     [ArrowUpRight, 'dbOut', '8 620', 'dbOutSub'],
     [Clock, 'dbPending', '1 250', 'dbPendingSub'],
   ];
-  const bars = [22, 29, 27, 37, 33, 41, 39, 47, 44, 51, 56, 66];
+  const bars = [18, 24, 22, 30, 27, 34, 32, 39, 36, 42, 46, 52];
   const pays = [['dbPay1', 'dbPay1s', '+1 250'], ['dbPay2', 'dbPay2s', '+3 400'], ['dbPay3', 'dbPay3s', '+780']];
   return (
     <div className="lp2-crisp relative" style={{ width: 1000, ...jak }}>
@@ -661,8 +692,8 @@ function HeroLaptop({ t }) {
                   <div className="absolute -right-10 -top-10 w-[120px] h-[120px] rounded-full" style={{ background: 'rgba(255,200,90,.14)' }} />
                   <p className="relative text-[11px] font-bold">{t('dbWallet')}</p>
                   <p className="relative text-[8.5px] text-white/60">{t('dbWalletSub')}</p>
-                  <p className="relative mt-3 text-[25px] font-extrabold leading-none tracking-tight">56 782<span className="text-[11px] font-bold text-white/70 ml-1">HTG</span></p>
-                  <p className="relative text-[10px] font-semibold text-white/75 mt-1">≈ 432,79 $ US</p>
+                  <p className="relative mt-3 text-[25px] font-extrabold leading-none tracking-tight">{fmt(live.bal)}<span className="text-[11px] font-bold text-white/70 ml-1">HTG</span></p>
+                  <p className="relative text-[10px] font-semibold text-white/75 mt-1">≈ {(live.bal / 131.2).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $ US</p>
                   <span className="relative mt-1.5 inline-flex items-center gap-1 h-[18px] px-1.5 rounded-full text-[8.5px] font-bold" style={{ background: 'rgba(52,211,153,.16)', color: '#6EE7B7' }}><ShieldCheck size={9} />{t('dbVerified')}</span>
                   <span className="relative mt-2.5 h-[28px] rounded-[9px] flex items-center justify-center gap-1 text-[10px] font-bold" style={{ background: P.gold, color: '#2A1A00' }}><Plus size={11} strokeWidth={3} />{t('dbAddFunds')}</span>
                   <div className="relative mt-1.5 grid grid-cols-3 gap-1.5">
@@ -677,7 +708,7 @@ function HeroLaptop({ t }) {
                     <div key={k} className="rounded-[14px] bg-white p-2.5" style={{ border: `1px solid ${P.line}` }}>
                       <div className="flex items-center justify-between">{tile(Ic)}<span className="text-[10px]" style={{ color: P.muted }}>•••</span></div>
                       <p className="mt-2 text-[9.5px]" style={{ color: P.muted }}>{t(k)}</p>
-                      <p className="text-[16px] font-extrabold leading-tight">{v}<span className="text-[9px] font-bold ml-1" style={{ color: P.muted }}>HTG</span></p>
+                      <p key={v} className="lp2-tick text-[16px] font-extrabold leading-tight">{v}<span className="text-[9px] font-bold ml-1" style={{ color: P.muted }}>HTG</span></p>
                       <p className="text-[8.5px] mt-0.5" style={{ color: k === 'dbIn' ? '#0E9F6E' : P.muted }}>{sub.startsWith('BP') ? sub : t(sub)}</p>
                     </div>
                   ))}
@@ -707,12 +738,12 @@ function HeroLaptop({ t }) {
                       {['dbInTab', 'dbOutTab', 'dbNet'].map((k, n) => <span key={k} className="h-[20px] px-2.5 rounded-full flex items-center text-[9px] font-semibold" style={n === 0 ? { background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,.08)' } : { color: P.muted }}>{t(k)}</span>)}
                     </div>
                   </div>
-                  <div className="mt-2 h-[88px] flex items-end gap-[7px] relative">
+                  <div className="mt-2 h-[96px] flex items-end gap-[7px] relative">
                     {[0, 1, 2].map((n) => <div key={n} className="absolute left-0 right-0 border-t border-dashed" style={{ bottom: 18 + n * 24, borderColor: P.line }} />)}
                     {bars.map((h, n) => (
                       <div key={n} className="relative flex-1 flex flex-col items-center justify-end gap-1 h-full">
-                        {n === 11 && <span className="absolute -top-1 h-[17px] px-1.5 rounded-full flex items-center text-[8.5px] font-bold text-white whitespace-nowrap" style={{ background: P.char }}>21 370 HTG</span>}
-                        <div className="w-full rounded-t-[5px]" style={{ height: h, background: n === 11 ? P.gold : 'linear-gradient(180deg, #F3D9A8, #EBC98A)' }} />
+                        {n === 11 && <span className="absolute h-[17px] px-1.5 rounded-full flex items-center text-[8.5px] font-bold text-white whitespace-nowrap z-10" style={{ background: P.char, bottom: Math.min(60, Math.round(h * live.inflow / 21370)) + 18, transition: 'bottom .8s cubic-bezier(.22,1,.36,1)' }}>{fmt(live.inflow)} HTG</span>}
+                        <div className="lp2-grow w-full rounded-t-[5px]" style={{ height: n === 11 ? Math.min(60, Math.round(h * live.inflow / 21370)) : h, background: n === 11 ? P.gold : 'linear-gradient(180deg, #F3D9A8, #EBC98A)', animationDelay: `${n * 70}ms`, transition: 'height .8s cubic-bezier(.22,1,.36,1)' }} />
                         <span className="text-[8px]" style={{ color: P.muted }}>{t('dbM')[n]}</span>
                       </div>
                     ))}
@@ -720,13 +751,16 @@ function HeroLaptop({ t }) {
                 </div>
                 {/* dènye peman */}
                 <div className="rounded-[14px] bg-white p-3" style={{ border: `1px solid ${P.line}` }}>
-                  <div className="flex items-center justify-between"><p className="text-[11px] font-bold">{t('dbLatest')}</p><span className="text-[9px]" style={{ color: P.muted }}>{t('hpAll')}</span></div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-bold">{t('dbLatest')}</p>
+                    <span className="flex items-center gap-1 text-[8.5px] font-bold" style={{ color: '#059669' }}><span className="lp2-pulse w-[6px] h-[6px] rounded-full" style={{ background: '#10B981' }} />{t('dbLive')}</span>
+                  </div>
                   <div className="mt-1.5">
-                    {pays.map(([k, sub, v]) => (
-                      <div key={k} className="flex items-center gap-2 py-[7px]" style={{ borderTop: `1px solid ${P.line}` }}>
+                    {live.rows.map(([name, v, when, id], n) => (
+                      <div key={id} className={`flex items-center gap-2 py-[7px] px-1 -mx-1 rounded-[8px] ${when === 'dbNow' && n === 0 ? 'lp2-in' : ''}`} style={{ borderTop: n ? `1px solid ${P.line}` : `1px solid ${P.line}` }}>
                         <span className="w-[24px] h-[24px] rounded-full flex items-center justify-center" style={{ background: 'rgba(16,185,129,.12)' }}><QrCode size={11} color="#059669" /></span>
-                        <div className="flex-1 min-w-0"><p className="text-[10px] font-bold truncate">{t(k)}</p><p className="text-[8.5px]" style={{ color: P.muted }}>{t(sub)}</p></div>
-                        <span className="text-[10px] font-bold" style={{ color: '#059669' }}>{v}</span>
+                        <div className="flex-1 min-w-0"><p className="text-[10px] font-bold truncate">{t('dbPayQr')} · {name}</p><p className="text-[8.5px]" style={{ color: P.muted }}>{t(when)}</p></div>
+                        <span className="text-[10px] font-bold" style={{ color: '#059669' }}>+{fmt(v)}</span>
                       </div>
                     ))}
                   </div>
@@ -1340,6 +1374,15 @@ export default function Landing({ onStart, lang, setLang }) {
         .lp2-float { animation: lp2Float 7s ease-in-out infinite; }
         @keyframes lp2Bob { 0%,100% { transform: translate3d(0,0,0); } 50% { transform: translate3d(0,-10px,0); } }
         .lp2-bob { animation: lp2Bob 5.5s ease-in-out infinite; }
+        @keyframes lp2GrowK { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+        .lp2-grow { transform-origin: bottom; animation: lp2GrowK .9s cubic-bezier(.22,1,.36,1) both; }
+        @keyframes lp2InK { 0% { opacity: 0; transform: translateY(-8px); background: rgba(16,185,129,.22); } 35% { opacity: 1; transform: none; background: rgba(16,185,129,.18); } 100% { background: rgba(16,185,129,0); } }
+        .lp2-in { animation: lp2InK 1.6s ease-out both; }
+        @keyframes lp2TickK { 0% { color: #059669; } 100% { color: inherit; } }
+        .lp2-tick { animation: lp2TickK 1.2s ease-out; }
+        @keyframes lp2PulseK { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,.55); } 70% { box-shadow: 0 0 0 5px rgba(16,185,129,0); } }
+        .lp2-pulse { animation: lp2PulseK 1.8s infinite; }
+        @media (prefers-reduced-motion: reduce) { .lp2-grow, .lp2-in, .lp2-tick, .lp2-pulse, .lp2-bob, .lp2-float { animation: none !important; } }
         .lp2-crisp { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; font-variant-numeric: tabular-nums; }
         .lp2-crisp img { image-rendering: -webkit-optimize-contrast; }
         .lp2-devices { zoom: .6; }
