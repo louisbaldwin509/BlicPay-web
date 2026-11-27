@@ -23,7 +23,7 @@ const PLAN_SHADOW = {
 
 const C = {
   ink: '#0B1B33', muted: '#5D6B7E', border: '#E6EAF1', bg: '#F5F8FC',
-  navy: '#143A73', navyDeep: '#0A1F45', sky: '#29B6E8', mint: '#1E9E7C', amber: '#D98B1D',
+  navy: '#143A73', navyDeep: '#0A1F45', night: '#06122B', sky: '#0891B2', cyan: '#22D3EE', mint: '#0E9F8A', amber: '#0891B2',
 };
 const display = { fontFamily: "'Manrope', sans-serif" };
 
@@ -394,12 +394,12 @@ export default function Landing({ onStart, lang, setLang }) {
   const [modal, setModal] = useState(null);
 
   const FEATURES = [
-    [Wallet, 'f1', '#E6F6FD', C.sky],
-    [ArrowLeftRight, 'f2', '#E6F0FB', C.navy],
-    [QrCode, 'f3', '#E4F5EF', C.mint],
-    [CreditCard, 'f4', '#EEF0FF', '#4F46E5', true],
-    [CreditCard, 'f5', '#F1F2F4', '#111827', true],
-    [Store, 'f6', '#FDF3E3', C.amber],
+    [Wallet, 'f1'],
+    [ArrowLeftRight, 'f2'],
+    [QrCode, 'f3'],
+    [CreditCard, 'f4', null, null, true],
+    [CreditCard, 'f5', null, null, true],
+    [Store, 'f6'],
   ];
   // Paj yo: chak youn gen pwòp adrès li (blicpayht.com/comptes, /carte…)
   const [page, setPage] = useState(() => PATH_PAGE[window.location.pathname.replace(/\/+$/, '') || '/'] || 'home');
@@ -424,35 +424,35 @@ export default function Landing({ onStart, lang, setLang }) {
   // ---- Seksyon yo (chak paj itilize sa l bezwen)
   const heroSec = (<>
       {/* HERO */}
-      <section id="top" className="relative">
-        <div className="absolute inset-0 lp2-grid" style={{ maskImage: 'linear-gradient(180deg, #000 30%, transparent)' }} />
-        <div className="absolute -top-40 -right-40 w-[520px] h-[520px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(41,182,232,.22), transparent 65%)' }} />
+      <section id="top" className="relative overflow-hidden" style={{ background: `radial-gradient(1200px 600px at 85% -10%, rgba(34,211,238,.22), transparent 60%), linear-gradient(165deg, ${C.night} 0%, ${C.navyDeep} 55%, #0E2E66 100%)`, color: '#fff' }}>
+        <div className="absolute inset-0 lp2-grid opacity-60" style={{ filter: 'invert(1)', maskImage: 'linear-gradient(180deg, #000 20%, transparent 85%)' }} />
+        <div className="absolute -bottom-48 -left-40 w-[560px] h-[560px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.14), transparent 65%)' }} />
         <div className="relative max-w-6xl mx-auto px-5 pt-14 pb-20 lg:pt-20 lg:pb-28 grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <Reveal>
-              <span className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border" style={{ borderColor: '#CDE8F8', background: '#F0F9FE', color: C.navy }}>
-                <Sparkles size={14} color={C.sky} />{t('badge')}
+              <span className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border" style={{ borderColor: 'rgba(34,211,238,.35)', background: 'rgba(34,211,238,.1)', color: '#CFF7FD' }}>
+                <Sparkles size={14} color={C.cyan} />{t('badge')}
               </span>
             </Reveal>
             <Reveal delay={80}>
               <h1 className="mt-5 text-[40px] leading-[1.05] sm:text-[56px] tracking-tight" style={{ ...display, fontWeight: 800 }}>
                 {t('h1a')}<br />
-                <span style={{ background: `linear-gradient(90deg, ${C.navy}, ${C.sky})`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{t('h1b')}</span>
+                <span style={{ background: `linear-gradient(90deg, ${C.cyan}, #A5F3FC)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{t('h1b')}</span>
               </h1>
             </Reveal>
-            <Reveal delay={160}><p className="mt-5 text-lg leading-relaxed max-w-xl" style={{ color: C.muted }}>{t('sub')}</p></Reveal>
+            <Reveal delay={160}><p className="mt-5 text-lg leading-relaxed max-w-xl" style={{ color: 'rgba(255,255,255,.74)' }}>{t('sub')}</p></Reveal>
             <Reveal delay={240}>
               <div className="mt-8 flex flex-wrap gap-3">
-                <button onClick={() => onStart('register')} className="lp2-btn h-12 px-6 rounded-full font-bold text-white flex items-center gap-2" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, boxShadow: '0 12px 30px -10px rgba(20,58,115,.6)' }}>
+                <button onClick={() => onStart('register')} className="lp2-btn h-12 px-6 rounded-full font-bold flex items-center gap-2" style={{ background: C.cyan, color: C.night, boxShadow: '0 14px 34px -12px rgba(34,211,238,.75)' }}>
                   {t('start')}<ArrowRight size={18} />
                 </button>
-                <button onClick={() => onStart('login')} className="lp2-btn h-12 px-6 rounded-full font-semibold border" style={{ borderColor: C.border }}>{t('login')}</button>
+                <button onClick={() => onStart('login')} className="lp2-btn h-12 px-6 rounded-full font-semibold border text-white" style={{ borderColor: 'rgba(255,255,255,.28)', background: 'rgba(255,255,255,.06)' }}>{t('login')}</button>
               </div>
             </Reveal>
             <Reveal delay={320}>
-              <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm" style={{ color: C.muted }}>
+              <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm" style={{ color: 'rgba(255,255,255,.7)' }}>
                 {[[BadgeCheck, 'trust1'], [Lock, 'trust2'], [ShieldCheck, 'trust3']].map(([Icon, k]) => (
-                  <span key={k} className="inline-flex items-center gap-1.5"><Icon size={16} color={C.mint} />{t(k)}</span>
+                  <span key={k} className="inline-flex items-center gap-1.5"><Icon size={16} color={C.cyan} />{t(k)}</span>
                 ))}
               </div>
             </Reveal>
@@ -470,7 +470,7 @@ export default function Landing({ onStart, lang, setLang }) {
                 <p className="text-sm font-bold" style={{ color: C.mint }}>+ 2 500 HTG</p>
               </div>
             </div>
-            <div className="absolute right-0 bottom-10 sm:bottom-16 rounded-2xl px-4 py-3 shadow-xl text-white" style={{ background: C.navyDeep }}>
+            <div className="absolute right-0 bottom-10 sm:bottom-16 rounded-2xl px-4 py-3 shadow-xl text-white" style={{ background: 'rgba(6,18,43,.85)', border: '1px solid rgba(34,211,238,.3)', backdropFilter: 'blur(8px)' }}>
               <p className="text-[11px] opacity-70">{t('heroBalance')}</p>
               <p className="text-lg font-bold" style={display}>48 750 <span className="text-xs opacity-70">HTG</span></p>
             </div>
@@ -492,8 +492,8 @@ export default function Landing({ onStart, lang, setLang }) {
               <Reveal key={k} delay={n * 70}>
                 <div className="lp2-card h-full rounded-3xl bg-white border p-6" style={{ borderColor: C.border }}>
                   <div className="flex items-start justify-between">
-                    <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${bg}, ${fg})`, boxShadow: `0 10px 20px -10px ${fg}` }}><Icon size={22} color="#fff" /></span>
-                    {soon && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: '#FDF3E3', color: C.amber }}>{t('soon')}</span>}
+                    <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})`, boxShadow: '0 10px 22px -10px rgba(20,58,115,.55)' }}><Icon size={22} color="#fff" /></span>
+                    {soon && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: '#E0F7FB', color: '#0E7490' }}>{t('soon')}</span>}
                   </div>
                   <h3 className="mt-5 text-lg font-bold" style={display}>{t(`${k}t`)}</h3>
                   <p className="mt-2 text-sm leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
@@ -506,17 +506,17 @@ export default function Landing({ onStart, lang, setLang }) {
       </>);
   const cardSec = (<>
       {/* KAT */}
-      <section id="card" className="py-20 lg:py-28 relative overflow-hidden" style={{ background: `linear-gradient(160deg, ${C.navyDeep} 0%, #0E2E66 60%, #154C9C 100%)`, color: '#fff' }}>
-        <div className="absolute -left-40 -bottom-40 w-[480px] h-[480px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(41,182,232,.25), transparent 65%)' }} />
+      <section id="card" className="py-20 lg:py-28 relative overflow-hidden" style={{ background: `radial-gradient(900px 420px at 90% -20%, rgba(34,211,238,.2), transparent 60%), linear-gradient(165deg, ${C.night} 0%, ${C.navyDeep} 55%, #0E2E66 100%)`, color: '#fff' }}>
+        <div className="absolute -left-40 -bottom-40 w-[480px] h-[480px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.2), transparent 65%)' }} />
         <div className="relative max-w-6xl mx-auto px-5 grid lg:grid-cols-2 gap-14 items-center">
           <Reveal>
-            <p className="text-sm font-bold uppercase tracking-widest" style={{ color: '#7DE3FF' }}>{t('cardEyebrow')}</p>
+            <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.cyan }}>{t('cardEyebrow')}</p>
             <h2 className="mt-3 text-3xl sm:text-[42px] leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('cardTitle')}</h2>
             <p className="mt-4 text-lg leading-relaxed" style={{ color: 'rgba(255,255,255,.75)' }}>{t('cardSub')}</p>
             <ul className="mt-7 space-y-3.5">
               {['card1', 'card2', 'card3'].map((k) => (
                 <li key={k} className="flex items-start gap-3">
-                  <span className="mt-0.5 w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(41,182,232,.25)' }}><Check size={14} color="#7DE3FF" /></span>
+                  <span className="mt-0.5 w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(34,211,238,.2)' }}><Check size={14} color="#7DE3FF" /></span>
                   <span style={{ color: 'rgba(255,255,255,.9)' }}>{t(k)}</span>
                 </li>
               ))}
@@ -551,7 +551,7 @@ export default function Landing({ onStart, lang, setLang }) {
             {[[Fingerprint, 's1'], [Wallet, 's2'], [Zap, 's3']].map(([Icon, k], n) => (
               <Reveal key={k} delay={n * 100}>
                 <div className="relative rounded-3xl border p-7 h-full" style={{ borderColor: C.border }}>
-                  <span className="absolute -top-4 left-7 w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>{n + 1}</span>
+                  <span className="absolute -top-4 left-7 w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: C.cyan, color: C.night }}>{n + 1}</span>
                   <span className="mt-3 w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: '#EEF5FD' }}><Icon size={24} color={C.navy} /></span>
                   <h3 className="mt-4 text-lg font-bold" style={display}>{t(`${k}t`)}</h3>
                   <p className="mt-2 text-sm leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
@@ -566,11 +566,11 @@ export default function Landing({ onStart, lang, setLang }) {
                 {[['/logos/moncash-wide.png', 'MonCash'], ['/logos/natcash-wide.png', 'NatCash']].map(([src, name]) => (
                   <span key={name} className="h-11 px-4 rounded-xl bg-white border flex items-center" style={{ borderColor: C.border }}><img src={src} alt={name} className="h-6 w-auto" /></span>
                 ))}
-                <span className="h-11 px-4 rounded-xl bg-white border flex items-center gap-2 text-sm font-semibold" style={{ borderColor: C.border }}><Building2 size={18} color={C.amber} />{t('branch')}</span>
+                <span className="h-11 px-4 rounded-xl bg-white border flex items-center gap-2 text-sm font-semibold" style={{ borderColor: C.border }}><Building2 size={18} color={C.navy} />{t('branch')}</span>
                 {[['Unibank', '/logos/unibank-icon.png'], ['Sogebank', '/logos/sogebank-icon.png']].map(([bank, logo]) => (
                   <span key={bank} className="h-11 pl-1.5 pr-3 rounded-xl bg-white border flex items-center gap-2 text-sm" style={{ borderColor: C.border }}>
                     <img src={logo} alt={bank} className="h-8 w-8 rounded-lg" /><span className="font-semibold">{bank}</span>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#FDF3E3', color: C.amber }}>{t('soon')}</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#E0F7FB', color: '#0E7490' }}>{t('soon')}</span>
                   </span>
                 ))}
               </div>
@@ -586,7 +586,7 @@ export default function Landing({ onStart, lang, setLang }) {
           <Reveal>
             <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.sky }}>{t('secEyebrow')}</p>
             <h2 className="mt-3 text-3xl sm:text-[42px] leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('secTitle')}</h2>
-            <div className="mt-8 w-20 h-20 rounded-3xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})`, boxShadow: '0 20px 40px -16px rgba(20,58,115,.6)' }}>
+            <div className="mt-8 w-20 h-20 rounded-3xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})`, boxShadow: '0 20px 40px -16px rgba(20,58,115,.6)' }}>
               <ShieldCheck size={38} color="#fff" />
             </div>
           </Reveal>
@@ -594,7 +594,7 @@ export default function Landing({ onStart, lang, setLang }) {
             {[[ScanLine, 'sec1'], [Lock, 'sec2'], [BadgeCheck, 'sec3'], [ShieldCheck, 'sec4']].map(([Icon, k], n) => (
               <Reveal key={k} delay={n * 80}>
                 <div className="lp2-card rounded-3xl bg-white border p-6 h-full" style={{ borderColor: C.border }}>
-                  <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, #3CC4F0, ${C.navy})` }}><Icon size={20} color="#fff" /></span>
+                  <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Icon size={20} color="#fff" /></span>
                   <h3 className="mt-4 font-bold" style={display}>{t(`${k}t`)}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
                 </div>
@@ -686,7 +686,7 @@ export default function Landing({ onStart, lang, setLang }) {
           {/* Bann konfyans */}
           <Reveal>
             <div className="mt-12 max-w-6xl mx-auto grid sm:grid-cols-3 gap-3">
-              {[[BadgeCheck, 'tr1', 'tr1s', 'linear-gradient(135deg,#34D399,#0E9F6E)'], [Wallet, 'tr2', 'tr2s', 'linear-gradient(135deg,#3CC4F0,#1B78D6)'], [ShieldCheck, 'tr3', 'tr3s', 'linear-gradient(135deg,#6E8BFF,#3B4FD8)']].map(([Ic, a, b, g]) => (
+              {[[BadgeCheck, 'tr1', 'tr1s', `linear-gradient(135deg, ${C.cyan}, ${C.navy})`], [Wallet, 'tr2', 'tr2s', `linear-gradient(135deg, ${C.cyan}, ${C.navy})`], [ShieldCheck, 'tr3', 'tr3s', `linear-gradient(135deg, ${C.cyan}, ${C.navy})`]].map(([Ic, a, b, g]) => (
                 <div key={a} className="flex items-start gap-3 rounded-2xl bg-white p-4" style={{ border: `1px solid ${C.border}` }}>
                   <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: g }}><Ic size={18} color="#fff" /></span>
                   <div><p className="text-[14.5px] font-bold" style={{ ...display }}>{t(a)}</p><p className="text-[13px] mt-0.5 leading-snug" style={{ color: C.muted }}>{t(b)}</p></div>
@@ -722,7 +722,7 @@ export default function Landing({ onStart, lang, setLang }) {
               <div className="space-y-3">
                 {[[QrCode, 'biz1'], [Zap, 'biz2'], [Smartphone, 'biz3']].map(([Icon, k]) => (
                   <div key={k} className="flex items-center gap-4 rounded-2xl bg-white border p-4" style={{ borderColor: C.border }}>
-                    <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: PLAN_GRAD.pro }}><Icon size={20} color="#fff" /></span>
+                    <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Icon size={20} color="#fff" /></span>
                     <span className="font-semibold">{t(k)}</span>
                   </div>
                 ))}
@@ -756,11 +756,11 @@ export default function Landing({ onStart, lang, setLang }) {
       <section className="py-20">
         <div className="max-w-6xl mx-auto px-5">
           <Reveal>
-            <div className="rounded-[32px] px-8 py-14 text-center text-white relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>
+            <div className="rounded-[32px] px-8 py-14 text-center text-white relative overflow-hidden" style={{ background: `radial-gradient(700px 300px at 50% -20%, rgba(34,211,238,.35), transparent 70%), linear-gradient(160deg, ${C.night}, ${C.navyDeep} 60%, #0E2E66)` }}>
               <div className="absolute inset-0 opacity-20 lp2-grid" />
               <h2 className="relative text-3xl sm:text-4xl tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('ctaTitle')}</h2>
               <p className="relative mt-3 opacity-85">{t('ctaSub')}</p>
-              <button onClick={() => onStart('register')} className="lp2-btn relative mt-8 h-12 px-7 rounded-full font-bold inline-flex items-center gap-2" style={{ background: '#fff', color: C.navy }}>
+              <button onClick={() => onStart('register')} className="lp2-btn relative mt-8 h-12 px-7 rounded-full font-bold inline-flex items-center gap-2" style={{ background: C.cyan, color: C.night, boxShadow: '0 14px 34px -12px rgba(34,211,238,.75)' }}>
                 {t('signup')}<ArrowRight size={18} />
               </button>
             </div>
@@ -771,9 +771,9 @@ export default function Landing({ onStart, lang, setLang }) {
 
   // ---- Tèt paj (paj entèn yo)
   const PageHero = ({ title, sub, eyebrow }) => (
-    <section className="relative overflow-hidden" style={{ background: `linear-gradient(160deg, ${C.navyDeep} 0%, #0E2E66 60%, #154C9C 100%)`, color: '#fff' }}>
+    <section className="relative overflow-hidden" style={{ background: `radial-gradient(900px 420px at 90% -20%, rgba(34,211,238,.2), transparent 60%), linear-gradient(165deg, ${C.night} 0%, ${C.navyDeep} 55%, #0E2E66 100%)`, color: '#fff' }}>
       <div className="absolute inset-0 opacity-[.12] lp2-grid" style={{ filter: 'invert(1)' }} />
-      <div className="absolute -right-32 -top-32 w-[420px] h-[420px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(41,182,232,.35), transparent 65%)' }} />
+      <div className="absolute -right-32 -top-32 w-[420px] h-[420px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.25), transparent 65%)' }} />
       <div className="relative max-w-6xl mx-auto px-5 pt-12 pb-14 lg:pt-16 lg:pb-20">
         <div className="flex items-center gap-2 text-[13px]" style={{ color: 'rgba(255,255,255,.65)' }}>
           <button onClick={() => nav('home')} className="hover:text-white">{t('navHome')}</button>
@@ -822,11 +822,11 @@ export default function Landing({ onStart, lang, setLang }) {
     </section>
   );
   const cardTeaser = (
-    <section className="relative overflow-hidden" style={{ background: `linear-gradient(160deg, ${C.navyDeep} 0%, #0E2E66 60%, #154C9C 100%)`, color: '#fff' }}>
-      <div className="absolute -left-40 -bottom-40 w-[480px] h-[480px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(41,182,232,.25), transparent 65%)' }} />
+    <section className="relative overflow-hidden" style={{ background: `radial-gradient(900px 420px at 90% -20%, rgba(34,211,238,.2), transparent 60%), linear-gradient(165deg, ${C.night} 0%, ${C.navyDeep} 55%, #0E2E66 100%)`, color: '#fff' }}>
+      <div className="absolute -left-40 -bottom-40 w-[480px] h-[480px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.2), transparent 65%)' }} />
       <div className="relative max-w-6xl mx-auto px-5 py-20 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
         <Reveal>
-          <p className="text-sm font-bold uppercase tracking-widest" style={{ color: '#7DE3FF' }}>{t('cardEyebrow')}</p>
+          <p className="text-sm font-bold uppercase tracking-widest" style={{ color: C.cyan }}>{t('cardEyebrow')}</p>
           <h2 className="mt-3 text-3xl sm:text-[42px] leading-tight tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('cardTitle')}</h2>
           <p className="mt-4 text-lg leading-relaxed" style={{ color: 'rgba(255,255,255,.75)' }}>{t('cardSub')}</p>
           <SeeMore to="card" label={t('tzCardBtn')} light />
@@ -851,7 +851,7 @@ export default function Landing({ onStart, lang, setLang }) {
             <div className="grid sm:grid-cols-2 gap-3">
               {[[ScanLine, 'sec1t'], [Lock, 'sec2t'], [BadgeCheck, 'sec3t'], [ShieldCheck, 'sec4t']].map(([Icon, k]) => (
                 <div key={k} className="flex items-center gap-3 rounded-2xl bg-white border p-4" style={{ borderColor: C.border }}>
-                  <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg, #3CC4F0, ${C.navy})` }}><Icon size={18} color="#fff" /></span>
+                  <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Icon size={18} color="#fff" /></span>
                   <span className="font-semibold text-[15px]">{t(k)}</span>
                 </div>
               ))}
@@ -911,11 +911,11 @@ export default function Landing({ onStart, lang, setLang }) {
             <p className="mt-2 text-[15px]" style={{ color: C.muted }}>{t('supportBody')}</p>
             <div className="mt-6 grid sm:grid-cols-2 gap-3">
               <a href="https://wa.me/13073460474" target="_blank" rel="noopener noreferrer" className="lp2-card flex items-center gap-3 rounded-2xl border p-4" style={{ borderColor: C.border }}>
-                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#4ADE80,#16A34A)' }}><Smartphone size={19} color="#fff" /></span>
+                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Smartphone size={19} color="#fff" /></span>
                 <span><span className="block text-[15px] font-bold">{t('whatsapp')}</span><span className="block text-xs" style={{ color: C.muted }}>+1 307 346 0474</span></span>
               </a>
               <a href="tel:+13073460474" className="lp2-card flex items-center gap-3 rounded-2xl border p-4" style={{ borderColor: C.border }}>
-                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, #3CC4F0, ${C.navy})` }}><Phone size={19} color="#fff" /></span>
+                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Phone size={19} color="#fff" /></span>
                 <span><span className="block text-[15px] font-bold">{t('call')}</span><span className="block text-xs" style={{ color: C.muted }}>+1 307 346 0474</span></span>
               </a>
             </div>
@@ -983,7 +983,7 @@ export default function Landing({ onStart, lang, setLang }) {
             {NAV.map(([id, k]) => (
               <a key={id} href={PAGE_PATH[id]} onClick={(e) => { e.preventDefault(); nav(id); }} className="relative py-5 hover:text-[#0B1B33] transition-colors" style={page === id ? { color: C.ink, fontWeight: 700 } : undefined}>
                 {t(k)}
-                {page === id && <span className="absolute left-0 right-0 -bottom-px h-[2.5px] rounded-full" style={{ background: `linear-gradient(90deg, ${C.navy}, ${C.sky})` }} />}
+                {page === id && <span className="absolute left-0 right-0 -bottom-px h-[2.5px] rounded-full" style={{ background: C.cyan }} />}
               </a>
             ))}
           </nav>
@@ -1003,7 +1003,7 @@ export default function Landing({ onStart, lang, setLang }) {
               )}
             </div>
             <button onClick={() => onStart('login')} className="hidden sm:block h-10 px-4 rounded-full text-sm font-semibold" style={{ color: C.navy }}>{t('login')}</button>
-            <button onClick={() => onStart('register')} className="lp2-btn h-10 px-4 sm:px-5 rounded-full text-[13px] sm:text-sm font-bold text-white whitespace-nowrap" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.sky})` }}>{t('signup')}</button>
+            <button onClick={() => onStart('register')} className="lp2-btn h-10 px-4 sm:px-5 rounded-full text-[13px] sm:text-sm font-bold text-white whitespace-nowrap" style={{ background: C.navyDeep }}>{t('signup')}</button>
             <button onClick={() => setMenu((v) => !v)} className="lg:hidden w-10 h-10 shrink-0 rounded-full border flex items-center justify-center" style={{ borderColor: C.border }} aria-label="Menu">
               {menu ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -1024,7 +1024,7 @@ export default function Landing({ onStart, lang, setLang }) {
       <main key={page}>{PAGE_CONTENT[page] || PAGE_CONTENT.home}</main>
 
       {/* FOOTER */}
-      <footer style={{ background: C.navyDeep, color: '#fff' }}>
+      <footer style={{ background: C.night, color: '#fff' }}>
         <div className="max-w-6xl mx-auto px-5 pt-14 pb-10 grid sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] gap-10">
           <div>
             <span className="inline-flex rounded-2xl bg-white px-3 py-2"><img src="/brand/logo-full.png" alt="BLICPay" style={{ height: 40, width: 'auto' }} /></span>
@@ -1040,7 +1040,7 @@ export default function Landing({ onStart, lang, setLang }) {
             ['footLegal', [['terms', 'terms'], ['privacy', 'privacy']]],
           ].map(([h, links]) => (
             <div key={h}>
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#7DE3FF' }}>{t(h)}</p>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: C.cyan }}>{t(h)}</p>
               <div className="mt-4 flex flex-col gap-2.5 text-sm items-start">
                 {links.map(([id, k]) => <a key={id} href={PAGE_PATH[id]} onClick={(e) => { e.preventDefault(); nav(id); }} style={{ color: 'rgba(255,255,255,.82)' }} className="hover:text-white">{t(k)}</a>)}
               </div>
