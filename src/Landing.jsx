@@ -405,12 +405,14 @@ function Reveal({ children, delay = 0, className = '' }) {
 function HeroPhone({ t }) {
   const A = { canvas: '#F2F4F8', alt: '#F1F5F9', ink: '#0B1B33', muted: '#64748B', navy: '#0B1B33', cyan: '#00B4D8' };
   const jak = { fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif" };
-  const W = 262, H = Math.round(W / (1438 / 905)), R = 13;
+  const W = 272, H = Math.round(W / (1438 / 905)), R = 14;
+  const SW = 304, SH = Math.round(SW * 852 / 393); // ekran iPhone 15 Pro (393 × 852)
   const emboss = { color: '#F4F6F9', textShadow: '1px 1.5px 2px rgba(0,0,0,.45)' };
   const acts = [[ArrowUpRight, 'hpSend'], [ArrowDownLeft, 'hpReceive'], [Banknote, 'hpWithdraw'], [LayoutGrid, 'hpMore']];
   const tx = [
     ['hpTx1', 'hpTx1s', '+2 500 HTG', true, ArrowDownLeft],
     ['hpTx2', 'hpTx2s', '−1 200 HTG', false, ArrowUpRight],
+    ['hpTx3', 'hpTx3s', '−850 HTG', false, Store],
   ];
   const back = (src, label, top, scale) => (
     <div className="absolute left-0 overflow-hidden" style={{ top, width: W, height: H, borderRadius: R, transform: `scale(${scale})`, transformOrigin: 'top center', background: '#0B1B33' }}>
@@ -419,17 +421,37 @@ function HeroPhone({ t }) {
     </div>
   );
   return (
-    <div className="relative w-[314px] mx-auto lg:mr-28 lg:ml-0 my-4" style={jak}>
+    <div className="relative w-[330px] mx-auto lg:mr-28 lg:ml-0 my-4" style={jak}>
       <div className="absolute -inset-16 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(34,211,238,.28), transparent 62%)' }} />
-      <div className="relative rounded-[46px] p-[10px]" style={{ background: 'linear-gradient(145deg, #2A3446, #0B111C)', boxShadow: '0 50px 90px -30px rgba(0,0,0,.75), inset 0 0 0 1.5px rgba(255,255,255,.12)' }}>
-        <div className="relative rounded-[37px] overflow-hidden" style={{ background: A.canvas, height: 610 }}>
-          {/* ba estati */}
-          <div className="flex items-center justify-between px-6 pt-2.5 text-[11px] font-semibold" style={{ color: A.ink }}>
-            <span>9:41</span>
-            <span className="w-[84px] h-[24px] rounded-full bg-black" />
-            <span className="w-4 h-2.5 rounded-[3px] border relative" style={{ borderColor: A.ink }}><span className="absolute inset-[1px] right-[4px] rounded-[1px]" style={{ background: A.ink }} /></span>
+      {/* bouton akote (aksyon, volim, kouran) */}
+      <span className="absolute -left-[3px] top-[118px] w-[4px] h-[30px] rounded-l-[3px]" style={{ background: 'linear-gradient(90deg, #5F646B, #A9ADB3)' }} />
+      <span className="absolute -left-[3px] top-[172px] w-[4px] h-[56px] rounded-l-[3px]" style={{ background: 'linear-gradient(90deg, #5F646B, #A9ADB3)' }} />
+      <span className="absolute -left-[3px] top-[240px] w-[4px] h-[56px] rounded-l-[3px]" style={{ background: 'linear-gradient(90deg, #5F646B, #A9ADB3)' }} />
+      <span className="absolute -right-[3px] top-[196px] w-[4px] h-[88px] rounded-r-[3px]" style={{ background: 'linear-gradient(270deg, #5F646B, #A9ADB3)' }} />
+      {/* kad titàn */}
+      <div className="relative rounded-[56px] p-[4px]" style={{ background: 'linear-gradient(145deg, #C9CCD1 0%, #7D8187 22%, #E3E5E8 48%, #6E7278 74%, #B7BBC0 100%)', boxShadow: '0 60px 100px -36px rgba(0,0,0,.8), 0 0 0 1px rgba(0,0,0,.35)' }}>
+        {/* bezèl nwa */}
+        <div className="rounded-[52px] p-[9px]" style={{ background: '#050608', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.06)' }}>
+        <div className="relative rounded-[43px] overflow-hidden" style={{ background: A.canvas, width: SW, height: SH }}>
+          {/* Dynamic Island */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-[11px] w-[104px] h-[30px] rounded-full bg-black z-20 flex items-center justify-end pr-3">
+            <span className="w-[9px] h-[9px] rounded-full" style={{ background: 'radial-gradient(circle at 35% 35%, #2B3A55, #0A0F18 70%)' }} />
           </div>
-          <div className="px-4 pt-3">
+          {/* ba estati */}
+          <div className="relative z-10 h-[50px] flex items-center justify-between px-[26px] pt-[3px]" style={{ color: A.ink }}>
+            <span className="text-[14px] font-semibold" style={{ letterSpacing: '-.01em' }}>9:41</span>
+            <span className="flex items-center gap-[5px]">
+              <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx=".8" fill="currentColor"/><rect x="4.6" y="5" width="3" height="6" rx=".8" fill="currentColor"/><rect x="9.2" y="2.6" width="3" height="8.4" rx=".8" fill="currentColor"/><rect x="13.8" y="0" width="3" height="11" rx=".8" fill="currentColor"/></svg>
+              <svg width="15" height="11" viewBox="0 0 15 11"><path d="M7.5 2.3c2.1 0 4 .8 5.5 2.1l1.1-1.1A9.4 9.4 0 0 0 7.5.7 9.4 9.4 0 0 0 .9 3.3L2 4.4a7.8 7.8 0 0 1 5.5-2.1Zm0 3.2c1.2 0 2.3.4 3.2 1.2l1.1-1.1a6.4 6.4 0 0 0-8.6 0l1.1 1.1c.9-.8 2-1.2 3.2-1.2Zm0 3.2c.4 0 .8.2 1.1.4L7.5 10.2 6.4 9.1c.3-.2.7-.4 1.1-.4Z" fill="currentColor"/></svg>
+              <span className="relative w-[25px] h-[12px] rounded-[4px] border" style={{ borderColor: 'rgba(11,27,51,.4)' }}>
+                <span className="absolute inset-[1.5px] right-[5px] rounded-[2px]" style={{ background: A.ink }} />
+                <span className="absolute -right-[3px] top-[3.5px] w-[1.5px] h-[4px] rounded-r" style={{ background: 'rgba(11,27,51,.4)' }} />
+              </span>
+            </span>
+          </div>
+          {/* refle sou vit la */}
+          <div className="pointer-events-none absolute inset-0 z-30" style={{ background: 'linear-gradient(125deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 32%)' }} />
+          <div className="px-4 pt-1">
             {/* antèt */}
             <div className="flex items-center gap-2">
               <div className="flex-1 min-w-0">
@@ -503,7 +525,8 @@ function HeroPhone({ t }) {
             </div>
           </div>
           {/* ba navigasyon glass */}
-          <div className="absolute left-0 right-0 bottom-4 flex justify-center">
+          <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-[110px] z-[5]" style={{ background: `linear-gradient(180deg, rgba(242,244,248,0) 0%, ${A.canvas} 62%)` }} />
+          <div className="absolute left-0 right-0 bottom-[26px] flex justify-center z-10">
             <div className="h-[50px] rounded-[26px] flex items-center gap-1.5 px-[6px]" style={{ background: 'rgba(9,32,74,.9)', backdropFilter: 'blur(14px)', boxShadow: '0 12px 24px -10px rgba(9,32,74,.6)' }}>
               <span className="h-[38px] px-3.5 rounded-full bg-white flex items-center gap-1.5 text-[10.5px] font-bold" style={{ color: '#09204A' }}><Home size={14} />{t('navHome')}</span>
               {[CreditCard, null, Clock, UserRound].map((Ic, n) => Ic
@@ -511,7 +534,8 @@ function HeroPhone({ t }) {
                 : <span key={n} className="w-[38px] h-[38px] rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #29D3F5, #00A3D9)' }}><QrCode size={16} color="#fff" /></span>)}
             </div>
           </div>
-          <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24 h-1 rounded-full" style={{ background: 'rgba(11,27,51,.35)' }} />
+          <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[120px] h-[5px] rounded-full z-20" style={{ background: '#0B1B33' }} />
+        </div>
         </div>
       </div>
       {/* notifikasyon k ap flote */}
