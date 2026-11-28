@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ArrowRight, ArrowLeftRight, BadgeCheck, Building2, Check, ChevronDown, CreditCard, Globe, Lock, Menu,
   Phone, QrCode, ShieldCheck, Smartphone, Sparkles, Wallet, X, Fingerprint, Zap, ScanLine, Store,
-  Briefcase, UserRound, ChevronRight, ArrowDownLeft, ArrowUpRight, Bell, Home, Clock, Banknote, LayoutGrid, Plus, Eye, Settings, Search, BarChart3, List, ChevronLeft } from 'lucide-react';
+  Briefcase, UserRound, ChevronRight, ArrowDownLeft, ArrowUpRight, Bell, Home, Clock, Banknote, LayoutGrid, Plus, Eye, Settings, Search, BarChart3, List, ChevronLeft, UtensilsCrossed, Wrench, Bus, Users, FileText, Download } from 'lucide-react';
 // Paj sit la ak adrès yo
 const PAGE_PATH = { home: '/', plans: '/comptes', card: '/carte', business: '/entreprises', security: '/securite', help: '/aide', about: '/a-propos', terms: '/conditions', privacy: '/confidentialite' };
 const PATH_PAGE = Object.fromEntries(Object.entries(PAGE_PATH).map(([k, v]) => [v, k]));
@@ -128,6 +128,70 @@ const D = {
   stC: ['lang: Kreyòl, Franse, Angle', 'langues : créole, français, anglais', 'languages: Creole, French, English'],
   stD: ['aksè ak kont ou, sou telefòn ak òdinatè', 'accès à votre compte, mobile et web', 'access to your account, mobile and web'],
   secLead: ['Chak kont verifye, chak operasyon pwoteje pa PIN ou, epi ekip nou siveye retrè yo.', 'Chaque compte est vérifié, chaque opération est protégée par votre PIN, et notre équipe contrôle les retraits.', 'Every account is verified, every operation is protected by your PIN, and our team reviews withdrawals.'],
+  bhBadge: ["Kont Pwo & Antrepriz", "Comptes Pro & Entreprise", "Pro & Business accounts"],
+  bhTitleA: ["Fè biznis ou", "Faites encaisser", "Get your business"],
+  bhTitleB: ["touche pi vit.", "votre commerce.", "paid faster."],
+  bhSub: ["Resevwa peman QR, swiv lavant ou an tan reyèl epi jere kès ou nan yon sèl kote — pou ti komès kou pou gwo antrepriz.", "Recevez des paiements QR, suivez vos ventes en temps réel et gérez votre caisse au même endroit — du petit commerce à l’entreprise.", "Accept QR payments, track sales in real time and manage your cash in one place — from small shops to companies."],
+  bhT1: ["Peman resevwa touswit", "Paiements reçus instantanément", "Payments received instantly"],
+  bhT2: ["Badj verifye", "Badge vérifié", "Verified badge"],
+  bhT3: ["Limit pi wo", "Plafonds plus élevés", "Higher limits"],
+  bhPortfolio: ["Pòtfèy biznis", "Portefeuille professionnel", "Business wallet"],
+  bhToday: ["Lavant jodi a", "Ventes du jour", "Today’s sales"],
+  bhVsYesterday: ["pa rapò a yè", "vs hier", "vs yesterday"],
+  bhScanPay: ["Eskane pou peye", "Scannez pour payer", "Scan to pay"],
+  bwEyebrow: ["Pou ki moun", "Pour qui", "Who it’s for"],
+  bwTitle: ["Fèt pou tout kalite biznis", "Pensé pour chaque type d’activité", "Built for every kind of business"],
+  bw1t: ["Boutik & mache", "Boutiques & commerces", "Shops & stores"],
+  bw1d: ["Kliyan yo peye ak QR, san monnen, san kach.", "Vos clients paient par QR, sans monnaie ni espèces.", "Customers pay by QR — no change, no cash."],
+  bw2t: ["Restoran & manje", "Restaurants & snacks", "Restaurants & food"],
+  bw2d: ["Kès rapid, menm lè gen anpil moun.", "Encaissement rapide, même aux heures de pointe.", "Fast checkout, even at rush hour."],
+  bw3t: ["Vandè sou entènèt", "Vendeurs en ligne", "Online sellers"],
+  bw3d: ["Voye yon lyen oswa yon QR sou WhatsApp, Instagram.", "Envoyez un QR ou un lien sur WhatsApp, Instagram.", "Share a QR or link on WhatsApp, Instagram."],
+  bw4t: ["Atizan & sèvis", "Artisans & services", "Trades & services"],
+  bw4d: ["Mekanisyen, kwafè, elektrisyen: touche apre travay la.", "Mécaniciens, coiffeurs, électriciens : payés sur place.", "Mechanics, barbers, electricians: paid on the spot."],
+  bw5t: ["Transpò", "Transport", "Transport"],
+  bw5d: ["Taksi, moto, livrezon: peman san kontak.", "Taxis, motos, livraisons : paiement sans contact.", "Taxis, motos, deliveries: contactless payment."],
+  bw6t: ["Pwofesyon liberal", "Professions libérales", "Professionals"],
+  bw6d: ["Doktè, avoka, konsiltan: fakti ak peman nan app la.", "Médecins, avocats, consultants : encaissez via l’app.", "Doctors, lawyers, consultants: get paid in the app."],
+  bfEyebrow: ["Zouti pwo", "Outils pro", "Pro tools"],
+  bfTitle: ["Tout sa biznis ou bezwen", "Tout ce dont votre activité a besoin", "Everything your business needs"],
+  bf1t: ["Peman QR", "Paiements QR", "QR payments"],
+  bf1d: ["Yon QR pou kès ou — kliyan an eskane, lajan an rantre sou kont ou touswit.", "Un QR pour votre caisse — le client scanne, l’argent arrive aussitôt sur votre compte.", "One QR for your counter — the customer scans, money lands instantly."],
+  bf2t: ["Tablo lavant", "Tableau de bord des ventes", "Sales dashboard"],
+  bf2d: ["Swiv lavant pa jou, semèn ak mwa, sou telefòn oswa sou òdinatè.", "Suivez vos ventes par jour, semaine et mois, sur mobile ou ordinateur.", "Track sales by day, week and month, on phone or desktop."],
+  bf3t: ["Badj verifye", "Badge vérifié", "Verified badge"],
+  bf3d: ["Non biznis ou parèt ak yon badj — kliyan yo konnen y ap peye bon moun.", "Votre nom s’affiche avec un badge — vos clients savent qu’ils paient la bonne personne.", "Your name shows a badge — customers know they’re paying the right business."],
+  bf4t: ["Limit pi wo", "Plafonds plus élevés", "Higher limits"],
+  bf4d: ["Resevwa ak voye plis lajan pase yon kont pèsonèl.", "Recevez et envoyez davantage qu’avec un compte personnel.", "Receive and send more than a personal account."],
+  bf5t: ["Ekspò rapò", "Export des relevés", "Statement export"],
+  bf5d: ["Telechaje tranzaksyon ou yo an CSV pou kontablite.", "Téléchargez vos transactions en CSV pour votre comptabilité.", "Download transactions as CSV for your accounting."],
+  bf6t: ["Plizyè itilizatè", "Multi-utilisateurs", "Multiple users"],
+  bf6d: ["Bay kesye ou yo aksè san yo pa wè tout kont lan (Antrepriz).", "Donnez accès à vos caissiers sans exposer tout le compte (Entreprise).", "Give cashiers access without exposing the whole account (Business)."],
+  bsEyebrow: ["Kijan pou louvri", "Comment ouvrir", "How to open"],
+  bsTitle: ["Kont ou pare an kèk etap", "Votre compte prêt en quelques étapes", "Your account in a few steps"],
+  bsSub: ["Ouvè a fèt nan app la. Ekip konfòmite nou an verifye dosye a anvan aktivasyon.", "L’ouverture se fait dans l’app. Notre équipe conformité vérifie le dossier avant l’activation.", "Sign-up happens in the app. Our compliance team reviews your file before activation."],
+  bs1t: ["Chwazi kalite kont lan", "Choisissez le type de compte", "Choose the account type"],
+  bs1d: ["Pwo pou travayè endepandan ak ti komès, Antrepriz pou sosyete.", "Pro pour indépendants et petits commerces, Entreprise pour les sociétés.", "Pro for freelancers and small shops, Business for companies."],
+  bs2t: ["Ranpli enfòmasyon ak dokiman", "Renseignez infos et documents", "Add details and documents"],
+  bs2d: ["Enfòmasyon biznis la ak dokiman ki nan lis la.", "Les informations de l’activité et les documents de la liste.", "Business information and the listed documents."],
+  bs3t: ["Peye frè ouvèti a", "Réglez les frais d’ouverture", "Pay the opening fee"],
+  bs3d: ["100 $ pou Pwo, 500 $ pou Antrepriz — yon sèl fwa.", "100 $ pour Pro, 500 $ pour Entreprise — une seule fois.", "$100 for Pro, $500 for Business — one time."],
+  bs4t: ["Verifikasyon & aktivasyon", "Vérification & activation", "Review & activation"],
+  bs4d: ["Nou verifye dosye a epi nou aktive kont ou — ou ka kòmanse touche.", "Nous vérifions le dossier puis activons votre compte — vous pouvez encaisser.", "We review your file and activate your account — start getting paid."],
+  dcDocs: ["Dokiman pou bay", "Documents à fournir", "Documents required"],
+  dcNif: ["Pyès idantite + NIF", "Pièce d’identité + NIF", "ID document + NIF"],
+  dcAddr: ["Prèv adrès (mwens pase 3 mwa)", "Justificatif d’adresse (moins de 3 mois)", "Proof of address (under 3 months)"],
+  dcBank: ["Relve bankè oswa mobil", "Relevé bancaire ou mobile", "Bank or mobile money statement"],
+  dcProof: ["Prèv aktivite (foto boutik, kat biznis…)", "Preuve d’activité (photo du local, carte de visite…)", "Proof of activity (shop photo, business card…)"],
+  dcProNote: ["Pou travayè endepandan ak ti komès.", "Pour indépendants et petits commerces.", "For freelancers and small shops."],
+  dcStatuts: ["Estati sosyete a", "Statuts de la société", "Articles of incorporation"],
+  dcNifPat: ["NIF ak patant sosyete a", "NIF et patente de la société", "Company NIF and trade licence (patente)"],
+  dcMci: ["Enskripsyon MCI / Moniteur", "Immatriculation MCI / Moniteur", "MCI registration / Moniteur"],
+  dcRep: ["Idantite reprezantan legal la", "Pièce d’identité du représentant légal", "Legal representative’s ID"],
+  dcUbo: ["Lis benefisyè efektif yo (≥ 25 %)", "Liste des bénéficiaires effectifs (≥ 25 %)", "Beneficial owners list (≥ 25%)"],
+  dcBizNote: ["Pou sosyete anrejistre (SA, SARL, LLC…).", "Pour les sociétés immatriculées (SA, SARL, LLC…).", "For registered companies (SA, SARL, LLC…)."],
+  bcTitle: ["Pare pou touche ak BLICPay?", "Prêt à encaisser avec BLICPay ?", "Ready to get paid with BLICPay?"],
+  bcSub: ["Louvri kont biznis ou jodi a, dirèkteman nan app la.", "Ouvrez votre compte professionnel dès aujourd’hui, directement dans l’app.", "Open your business account today, right in the app."],
   navHome: ['Akèy', 'Accueil', 'Home'],
   navSecurity: ['Sekirite', 'Sécurité', 'Security'],
   navHelp: ['Èd', 'Aide', 'Help'],
@@ -1624,11 +1688,159 @@ export default function Landing({ onStart, lang, setLang }) {
     </section>
   );
 
+
+  // ================= PAJ ANTREPRIZ =================
+  const bizHero = (
+    <section className="relative overflow-hidden" style={{ background: `radial-gradient(900px 520px at 90% -10%, rgba(255,200,90,.16), transparent 60%), radial-gradient(800px 500px at 0% 110%, rgba(34,211,238,.14), transparent 60%), linear-gradient(165deg, ${C.night} 0%, ${C.navyDeep} 60%, #0E2E66 100%)`, color: '#fff' }}>
+      <div className="absolute inset-0 lp2-grid opacity-50" style={{ filter: 'invert(1)', maskImage: 'linear-gradient(180deg, #000 20%, transparent 85%)' }} />
+      <div className="relative max-w-6xl mx-auto px-5 pt-12 pb-20 lg:pt-16 lg:pb-24 grid lg:grid-cols-[1.05fr_1fr] gap-12 items-center">
+        <Reveal>
+          <div className="flex items-center gap-2 text-[13px]" style={{ color: 'rgba(255,255,255,.65)' }}>
+            <button onClick={() => nav('home')} className="hover:text-white">{t('navHome')}</button><ChevronRight size={14} /><span className="text-white font-semibold">{t('navBusiness')}</span>
+          </div>
+          <span className="mt-6 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={{ background: 'rgba(255,200,90,.12)', color: '#FFD58A', border: '1px solid rgba(255,200,90,.3)' }}><Store size={14} />{t('bhBadge')}</span>
+          <h1 className="mt-5 text-[40px] sm:text-[56px] leading-[1.04] tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('bhTitleA')} <span style={{ background: 'linear-gradient(90deg,#FFC85A,#F59E0B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{t('bhTitleB')}</span></h1>
+          <p className="mt-5 text-lg leading-relaxed max-w-xl" style={{ color: 'rgba(255,255,255,.74)' }}>{t('bhSub')}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <button onClick={() => onStart('register-pro')} className="lp2-btn h-12 px-6 rounded-full font-bold inline-flex items-center gap-2" style={{ background: PLAN_GRAD.pro, color: '#2A1A00', boxShadow: '0 14px 34px -12px rgba(232,144,28,.8)' }}>{t('plOpenPro')}<ArrowRight size={18} /></button>
+            <button onClick={() => onStart('register-business')} className="lp2-btn h-12 px-6 rounded-full font-semibold border text-white" style={{ borderColor: 'rgba(255,255,255,.28)', background: 'rgba(255,255,255,.06)' }}>{t('plOpenBusiness')}</button>
+          </div>
+          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm" style={{ color: 'rgba(255,255,255,.72)' }}>
+            {['bhT1', 'bhT2', 'bhT3'].map((k) => <span key={k} className="flex items-center gap-2"><Check size={16} color="#FFC85A" strokeWidth={3} />{t(k)}</span>)}
+          </div>
+        </Reveal>
+        <Reveal delay={150} className="relative">
+          <div className="relative mx-auto lg:mr-0 max-w-[440px]">
+            {/* tablo Pwo */}
+            <div className="rounded-[26px] p-5 text-white" style={{ background: 'linear-gradient(160deg, #2A2F37, #1A1D23)', border: '1px solid rgba(255,255,255,.08)', boxShadow: '0 40px 80px -30px rgba(0,0,0,.7)' }}>
+              <div className="flex items-center gap-2.5">
+                <span className="w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-bold" style={{ background: 'linear-gradient(135deg,#6B4E2E,#2B2118)' }}>BC</span>
+                <div className="flex-1"><p className="text-[14px] font-bold flex items-center gap-1.5">Bella Cosmétiques <BadgeCheck size={15} color="#FFC85A" /></p><p className="text-[11.5px] text-white/55">{t('bhPortfolio')}</p></div>
+                <span className="h-6 px-2 rounded-full flex items-center gap-1 text-[10.5px] font-bold" style={{ background: 'rgba(255,200,90,.16)', color: '#FFC85A' }}><Store size={11} />Pro</span>
+              </div>
+              <p className="mt-5 text-[12px] text-white/55">{t('bhToday')}</p>
+              <p className="text-[38px] leading-none tracking-tight" style={{ ...display, fontWeight: 800 }}>18 450<span className="text-[15px] text-white/55 ml-1.5">HTG</span></p>
+              <p className="mt-1 text-[12px] font-semibold" style={{ color: '#6EE7B7' }}>+24 % {t('bhVsYesterday')}</p>
+              <div className="mt-5 flex items-end gap-1.5 h-[84px]">{[28, 40, 35, 52, 46, 60, 55, 70, 64, 82, 76, 100].map((h, i) => <span key={i} className="lp2-grow flex-1 rounded-t-[5px]" style={{ height: `${h}%`, background: i === 11 ? PLAN_GRAD.pro : 'rgba(243,217,168,.32)', animationDelay: `${i * 60}ms` }} />)}</div>
+              <div className="mt-5 space-y-2">
+                {[['Marie J.', '+1 250', '14:32'], ['Jean-Robert', '+3 400', '11:05'], ['Nadège P.', '+780', '09:18']].map(([n, v, h]) => (
+                  <div key={n} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5" style={{ background: 'rgba(255,255,255,.05)' }}>
+                    <span className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(16,185,129,.16)' }}><QrCode size={14} color="#6EE7B7" /></span>
+                    <div className="flex-1"><p className="text-[13px] font-semibold">{t('dbPayQr')} · {n}</p><p className="text-[11px] text-white/45">{h}</p></div>
+                    <p className="text-[13px] font-bold" style={{ color: '#6EE7B7' }}>{v}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* chevalet QR */}
+            <div className="lp2-bob absolute -left-[128px] bottom-6 w-[150px] rounded-[20px] bg-white p-3 text-center hidden lg:block" style={{ boxShadow: '0 30px 60px -24px rgba(0,0,0,.6)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.muted }}>{t('bhScanPay')}</p>
+              <div className="mt-2 mx-auto grid w-[110px] h-[110px]" style={{ gridTemplateColumns: `repeat(${QN}, 1fr)` }}>{qrCells.map((on, i) => <span key={i} style={{ background: on ? C.navyDeep : 'transparent' }} />)}</div>
+              <p className="mt-2 text-[12px] font-bold" style={{ color: C.ink }}>Bella Cosmétiques</p>
+              <img src="/brand/logo-full.png" alt="" className="mx-auto mt-1 h-[16px] w-auto opacity-80" />
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+
+  const bizWho = (
+    <section className="py-20 lg:py-24 bg-white">
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="text-center max-w-2xl mx-auto"><Eyebrow k="bwEyebrow" /><H2 k="bwTitle" /></Reveal>
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[[Store, 'bw1'], [UtensilsCrossed, 'bw2'], [Smartphone, 'bw3'], [Wrench, 'bw4'], [Bus, 'bw5'], [Briefcase, 'bw6']].map(([Icon, k], n) => (
+            <Reveal key={k} delay={n * 60}>
+              <div className="lp2-card h-full rounded-[22px] p-5 sm:p-6 border bg-white" style={{ borderColor: C.border }}>
+                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#FFF4E0' }}><Icon size={20} color="#C27A0E" /></span>
+                <p className="mt-4 text-[16.5px]" style={{ ...display, fontWeight: 800 }}>{t(`${k}t`)}</p>
+                <p className="mt-1 text-[13.5px] leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+
+  const bizFeatures = (
+    <section className="py-20 lg:py-28" style={{ background: C.bg }}>
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="max-w-2xl"><Eyebrow k="bfEyebrow" /><H2 k="bfTitle" /></Reveal>
+        <div className="mt-12 grid md:grid-cols-3 gap-5">
+          {[[QrCode, 'bf1'], [BarChart3, 'bf2'], [BadgeCheck, 'bf3'], [Zap, 'bf4'], [Download, 'bf5'], [Users, 'bf6']].map(([Icon, k], n) => (
+            <Reveal key={k} delay={n * 60}>
+              <div className="lp2-card h-full rounded-[24px] bg-white p-7 border" style={{ borderColor: C.border }}>
+                <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: n % 2 ? `linear-gradient(135deg, ${C.cyan}, ${C.navy})` : PLAN_GRAD.pro }}><Icon size={22} color="#fff" /></span>
+                <h3 className="mt-5 text-[19px]" style={{ ...display, fontWeight: 800 }}>{t(`${k}t`)}</h3>
+                <p className="mt-2 text-[14.5px] leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+
+  const bizSteps = (
+    <section className="py-20 lg:py-28 bg-white">
+      <div className="max-w-6xl mx-auto px-5 grid lg:grid-cols-[1fr_1.2fr] gap-14">
+        <Reveal>
+          <Eyebrow k="bsEyebrow" /><H2 k="bsTitle" />
+          <p className="mt-5 text-lg leading-relaxed" style={{ color: C.muted }}>{t('bsSub')}</p>
+          <ol className="mt-8 space-y-5">
+            {['bs1', 'bs2', 'bs3', 'bs4'].map((k, n) => (
+              <li key={k} className="flex gap-4">
+                <span className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-[14px] font-extrabold" style={{ background: n === 3 ? PLAN_GRAD.pro : C.navyDeep, color: n === 3 ? '#2A1A00' : '#fff' }}>{n + 1}</span>
+                <div><p className="text-[16px] font-bold" style={display}>{t(`${k}t`)}</p><p className="mt-0.5 text-[14.5px] leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p></div>
+              </li>
+            ))}
+          </ol>
+        </Reveal>
+        <Reveal delay={120}>
+          <div className="grid sm:grid-cols-2 gap-4 h-full">
+            {[['pro', 'plPro', ['dcNif', 'dcAddr', 'dcBank', 'dcProof'], 'dcProNote'], ['business', 'plBusiness', ['dcStatuts', 'dcNifPat', 'dcMci', 'dcRep', 'dcUbo'], 'dcBizNote']].map(([k, name, docs, note]) => (
+              <div key={k} className="rounded-[24px] p-6 flex flex-col" style={k === 'pro' ? { background: 'linear-gradient(160deg, #FFF8EC, #FFEBC7)', border: '1px solid #F7DDB0' } : { background: `linear-gradient(160deg, ${C.night}, ${C.navyDeep})`, color: '#fff' }}>
+                <div className="flex items-center gap-2.5">
+                  <span className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: PLAN_GRAD[k] }}>{React.createElement(PLAN_ICON[k], { size: 19, color: '#fff' })}</span>
+                  <div><p className="text-[16px] font-extrabold" style={display}>{t(name)}</p><p className="text-[12px]" style={{ color: k === 'pro' ? '#8A6A2E' : 'rgba(255,255,255,.6)' }}>{t('dcDocs')}</p></div>
+                </div>
+                <ul className="mt-5 space-y-3 flex-1">
+                  {docs.map((d) => <li key={d} className="flex items-start gap-2.5 text-[14px] leading-snug"><FileText size={16} className="mt-0.5 shrink-0" color={k === 'pro' ? '#C27A0E' : C.cyan} />{t(d)}</li>)}
+                </ul>
+                <p className="mt-5 text-[12px] leading-relaxed" style={{ color: k === 'pro' ? '#8A6A2E' : 'rgba(255,255,255,.6)' }}>{t(note)}</p>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+
+  const bizCta = (
+    <section className="pb-24 bg-white">
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal>
+          <div className="rounded-[32px] px-8 py-14 text-center relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #2A2F37, #14171C)', color: '#fff' }}>
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[520px] h-[260px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,200,90,.28), transparent 65%)' }} />
+            <h2 className="relative text-[30px] sm:text-[40px] tracking-tight" style={{ ...display, fontWeight: 800 }}>{t('bcTitle')}</h2>
+            <p className="relative mt-3 text-white/70">{t('bcSub')}</p>
+            <div className="relative mt-8 flex flex-wrap justify-center gap-3">
+              <button onClick={() => onStart('register-pro')} className="lp2-btn h-12 px-7 rounded-full font-bold inline-flex items-center gap-2" style={{ background: PLAN_GRAD.pro, color: '#2A1A00' }}>{t('plOpenPro')}<ArrowRight size={18} /></button>
+              <button onClick={() => onStart('register-business')} className="lp2-btn h-12 px-7 rounded-full font-semibold border text-white" style={{ borderColor: 'rgba(255,255,255,.28)' }}>{t('plOpenBusiness')}</button>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+
   const PAGE_CONTENT = {
     home: <>{heroSec}{statsBand}{servicesSec}{howSec}{plansTeaser}{cardTeaser}{securityTeaser}{bizTeaser}{ctaSec}</>,
     plans: <><PageHero title={t('phPlansT')} sub={t('phPlansS')} eyebrow={t('navPlans')} />{plansSec}{ctaSec}</>,
     card: <>{cardSec}{whereSec}{ctaSec}</>,
-    business: <><PageHero title={t('phBizT')} sub={t('phBizS')} eyebrow={t('navBusiness')} />{bizSec}{plansSec}</>,
+    business: <>{bizHero}{bizWho}{bizFeatures}{bizSteps}{plansSec}{bizCta}</>,
     security: <><PageHero title={t('phSecT')} sub={t('phSecS')} eyebrow={t('navSecurity')} />{securitySec}{ctaSec}</>,
     help: <><PageHero title={t('phHelpT')} sub={t('phHelpS')} eyebrow={t('navHelp')} />{faqSec}{contactSec}</>,
     about: <><PageHero title={t('about')} sub={t('phAboutS')} /><DocSec body={t('aboutBody') + '\n\n' + t('disclaimer')} />{ctaSec}</>,
