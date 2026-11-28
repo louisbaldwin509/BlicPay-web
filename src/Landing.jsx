@@ -228,6 +228,12 @@ const D = {
   ba4: ["Lis la plis anwo sou paj sa a. Pou Pwo: pyès idantite, NIF, prèv adrès, relve ak prèv aktivite. Pou Antrepriz: dokiman legal sosyete a ak benefisyè efektif yo.", "La liste complète figure plus haut sur cette page. Pro : pièce d’identité, NIF, justificatif d’adresse, relevé et preuve d’activité. Entreprise : documents légaux de la société et bénéficiaires effectifs.", "The full list is above on this page. Pro: ID, NIF, proof of address, statement and proof of activity. Business: company legal documents and beneficial owners."],
   bq5: ["Èske done mwen an sekirite?", "Mes données sont-elles protégées ?", "Is my data protected?"],
   ba5: ["Dokiman ou yo chifre epi se sèlman ekip konfòmite nou an ki verifye yo. Kont ou pwoteje ak PIN, Face ID ak kòd pa imèl.", "Vos documents sont chiffrés et vérifiés uniquement par notre équipe conformité. Votre compte est protégé par PIN, Face ID et code par e-mail.", "Your documents are encrypted and reviewed only by our compliance team. Your account is protected by PIN, Face ID and email code."],
+  bhVerified: ["Antrepriz verifye", "Entreprise vérifiée", "Verified business"],
+  bfSub: ["Sou telefòn oswa sou òdinatè, ou wè chak goud ki rantre — an tan reyèl.", "Sur téléphone ou sur ordinateur, vous voyez chaque gourde qui entre — en temps réel.", "On phone or desktop, see every gourde coming in — in real time."],
+  bfChipT: ["Lavant semèn sa a", "Ventes cette semaine", "Sales this week"],
+  bpSent: ["Peman voye · 1 250 HTG", "Paiement envoyé · 1 250 HTG", "Payment sent · 1,250 HTG"],
+  bp0t: ["Kliyan ou gen BLICPay", "Votre client a BLICPay", "Your customer has BLICPay"],
+  bp0d: ["Kont pèsonèl gratis, rechaje ak MonCash oswa NatCash.", "Compte personnel gratuit, rechargé avec MonCash ou NatCash.", "A free personal account, topped up with MonCash or NatCash."],
   navHome: ['Akèy', 'Accueil', 'Home'],
   navSecurity: ['Sekirite', 'Sécurité', 'Security'],
   navHelp: ['Èd', 'Aide', 'Help'],
@@ -1746,35 +1752,40 @@ export default function Landing({ onStart, lang, setLang }) {
           </div>
         </Reveal>
         <Reveal delay={150} className="relative">
-          <div className="relative mx-auto lg:mr-0 max-w-[440px]">
-            {BIZ_PHOTOS.hero && <img src={`/biz/${BIZ_PHOTOS.hero}`} alt="" className="absolute -top-8 -right-10 w-[78%] h-[88%] object-cover rounded-[28px] opacity-90 hidden lg:block" style={{ boxShadow: '0 40px 80px -30px rgba(0,0,0,.7)' }} />}
+          <div className="relative mx-auto lg:mr-0 max-w-[480px] lg:h-[580px]">
+            {/* foto */}
+            <div className="relative ml-auto w-[74%] sm:w-[60%] lg:w-[330px] aspect-[736/990] rounded-[30px] overflow-hidden" style={{ background: '#F2F4F7', boxShadow: '0 40px 80px -30px rgba(0,0,0,.7)' }}>
+              <img src="/biz/pro.jpg" alt="" className="w-full h-full object-cover" />
+              <span className="absolute top-4 right-4 h-8 px-3 rounded-full flex items-center gap-1.5 text-[12px] font-bold bg-white" style={{ color: C.ink, boxShadow: '0 8px 20px -8px rgba(11,27,51,.35)' }}><BadgeCheck size={15} color="#E8A23A" />{t('bhVerified')}</span>
+            </div>
             {/* tablo Pwo */}
-            <div className="rounded-[26px] p-5 text-white" style={{ background: 'linear-gradient(160deg, #2A2F37, #1A1D23)', border: '1px solid rgba(255,255,255,.08)', boxShadow: '0 40px 80px -30px rgba(0,0,0,.7)' }}>
+            <div className="relative -mt-36 sm:-mt-48 lg:mt-0 lg:absolute lg:left-0 lg:bottom-0 w-[88%] sm:w-[340px] rounded-[24px] p-4 text-white" style={{ background: 'linear-gradient(160deg, #2A2F37, #1A1D23)', border: '1px solid rgba(255,255,255,.08)', boxShadow: '0 40px 80px -30px rgba(0,0,0,.75)' }}>
               <div className="flex items-center gap-2.5">
-                <span className="w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-bold" style={{ background: 'linear-gradient(135deg,#6B4E2E,#2B2118)' }}>BC</span>
-                <div className="flex-1"><p className="text-[14px] font-bold flex items-center gap-1.5">Bella Cosmétiques <BadgeCheck size={15} color="#FFC85A" /></p><p className="text-[11.5px] text-white/55">{t('bhPortfolio')}</p></div>
+                <span className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold" style={{ background: 'linear-gradient(135deg,#6B4E2E,#2B2118)' }}>BC</span>
+                <div className="flex-1 min-w-0"><p className="text-[13.5px] font-bold flex items-center gap-1.5">Bella Cosmétiques <BadgeCheck size={14} color="#FFC85A" /></p><p className="text-[11px] text-white/55">{t('bhPortfolio')}</p></div>
                 <span className="h-6 px-2 rounded-full flex items-center gap-1 text-[10.5px] font-bold" style={{ background: 'rgba(255,200,90,.16)', color: '#FFC85A' }}><Store size={11} />Pro</span>
               </div>
-              <p className="mt-5 text-[12px] text-white/55">{t('bhToday')}</p>
-              <p className="text-[38px] leading-none tracking-tight" style={{ ...display, fontWeight: 800 }}>18 450<span className="text-[15px] text-white/55 ml-1.5">HTG</span></p>
-              <p className="mt-1 text-[12px] font-semibold" style={{ color: '#6EE7B7' }}>+24 % {t('bhVsYesterday')}</p>
-              <div className="mt-5 flex items-end gap-1.5 h-[84px]">{[28, 40, 35, 52, 46, 60, 55, 70, 64, 82, 76, 100].map((h, i) => <span key={i} className="lp2-grow flex-1 rounded-t-[5px]" style={{ height: `${h}%`, background: i === 11 ? PLAN_GRAD.pro : 'rgba(243,217,168,.32)', animationDelay: `${i * 60}ms` }} />)}</div>
-              <div className="mt-5 space-y-2">
-                {[['Marie J.', '+1 250', '14:32'], ['Jean-Robert', '+3 400', '11:05'], ['Nadège P.', '+780', '09:18']].map(([n, v, h]) => (
-                  <div key={n} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5" style={{ background: 'rgba(255,255,255,.05)' }}>
-                    <span className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(16,185,129,.16)' }}><QrCode size={14} color="#6EE7B7" /></span>
-                    <div className="flex-1"><p className="text-[13px] font-semibold">{t('dbPayQr')} · {n}</p><p className="text-[11px] text-white/45">{h}</p></div>
-                    <p className="text-[13px] font-bold" style={{ color: '#6EE7B7' }}>{v}</p>
+              <div className="mt-4 flex items-end justify-between gap-3">
+                <div><p className="text-[11.5px] text-white/55">{t('bhToday')}</p>
+                <p className="text-[32px] leading-none tracking-tight" style={{ ...display, fontWeight: 800 }}>18 450<span className="text-[13px] text-white/55 ml-1.5">HTG</span></p>
+                <p className="mt-1 text-[11.5px] font-semibold" style={{ color: '#6EE7B7' }}>+24 % {t('bhVsYesterday')}</p></div>
+                <div className="flex items-end gap-1 h-[58px] w-[110px]">{[35, 52, 46, 60, 55, 70, 82, 100].map((h, i) => <span key={i} className="lp2-grow flex-1 rounded-t-[4px]" style={{ height: `${h}%`, background: i === 7 ? PLAN_GRAD.pro : 'rgba(243,217,168,.32)', animationDelay: `${i * 60}ms` }} />)}</div>
+              </div>
+              <div className="mt-4 space-y-2">
+                {[['Marie J.', '+1 250', '14:32'], ['Jean-Robert', '+3 400', '11:05']].map(([n, v, h]) => (
+                  <div key={n} className="flex items-center gap-2.5 rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,.05)' }}>
+                    <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(16,185,129,.16)' }}><QrCode size={14} color="#6EE7B7" /></span>
+                    <div className="flex-1 min-w-0"><p className="text-[12.5px] font-semibold truncate">{t('dbPayQr')} · {n}</p><p className="text-[10.5px] text-white/45">{h}</p></div>
+                    <p className="text-[12.5px] font-bold" style={{ color: '#6EE7B7' }}>{v}</p>
                   </div>
                 ))}
               </div>
             </div>
             {/* chevalet QR */}
-            <div className="lp2-bob absolute -left-[128px] bottom-6 w-[150px] rounded-[20px] bg-white p-3 text-center hidden lg:block" style={{ boxShadow: '0 30px 60px -24px rgba(0,0,0,.6)' }}>
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.muted }}>{t('bhScanPay')}</p>
-              <div className="mt-2 mx-auto grid w-[110px] h-[110px]" style={{ gridTemplateColumns: `repeat(${QN}, 1fr)` }}>{qrCells.map((on, i) => <span key={i} style={{ background: on ? C.navyDeep : 'transparent' }} />)}</div>
-              <p className="mt-2 text-[12px] font-bold" style={{ color: C.ink }}>Bella Cosmétiques</p>
-              <img src="/brand/logo-full.png" alt="" className="mx-auto mt-1 h-[16px] w-auto opacity-80" />
+            <div className="lp2-bob absolute left-2 top-6 w-[128px] rounded-[18px] bg-white p-2.5 text-center hidden lg:block" style={{ boxShadow: '0 30px 60px -24px rgba(0,0,0,.6)' }}>
+              <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: C.muted }}>{t('bhScanPay')}</p>
+              <div className="mt-1.5 mx-auto grid w-[96px] h-[96px]" style={{ gridTemplateColumns: `repeat(${QN}, 1fr)` }}>{qrCells.map((on, i) => <span key={i} style={{ background: on ? C.navyDeep : 'transparent' }} />)}</div>
+              <p className="mt-1.5 text-[11px] font-bold" style={{ color: C.ink }}>Bella Cosmétiques</p>
             </div>
           </div>
         </Reveal>
@@ -1807,7 +1818,18 @@ export default function Landing({ onStart, lang, setLang }) {
   const bizFeatures = (
     <section className="py-20 lg:py-28 bg-white">
       <div className="max-w-6xl mx-auto px-5">
-        <Reveal className="max-w-2xl"><Eyebrow k="bfEyebrow" /><H2 k="bfTitle" /></Reveal>
+        <div className="grid lg:grid-cols-[1.2fr_1fr] gap-10 items-center">
+          <Reveal><Eyebrow k="bfEyebrow" /><H2 k="bfTitle" /><p className="mt-5 text-lg leading-relaxed max-w-xl" style={{ color: C.muted }}>{t('bfSub')}</p></Reveal>
+          <Reveal delay={120}>
+            <div className="relative rounded-[28px] overflow-hidden h-[260px] sm:h-[320px]" style={{ background: '#F2F3F5' }}>
+              <img src="/biz/laptop.jpg" alt="" loading="lazy" className="w-full h-full object-cover" style={{ objectPosition: '50% 35%' }} />
+              <span className="absolute left-4 bottom-4 rounded-2xl bg-white px-3.5 py-2.5 flex items-center gap-2.5" style={{ boxShadow: '0 14px 30px -12px rgba(11,27,51,.4)' }}>
+                <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: PLAN_GRAD.pro }}><BarChart3 size={15} color="#fff" /></span>
+                <span><span className="block text-[11px]" style={{ color: C.muted }}>{t('bfChipT')}</span><span className="block text-[14px] font-extrabold" style={{ color: C.ink }}>+24 %</span></span>
+              </span>
+            </div>
+          </Reveal>
+        </div>
         <div className="mt-12 grid md:grid-cols-3 gap-5">
           {[[QrCode, 'bf1'], [BarChart3, 'bf2'], [BadgeCheck, 'bf3'], [Zap, 'bf4'], [Download, 'bf5'], [Users, 'bf6']].map(([Icon, k], n) => (
             <Reveal key={k} delay={n * 60}>
@@ -1885,7 +1907,20 @@ export default function Landing({ onStart, lang, setLang }) {
     <section className="py-20 lg:py-28" style={{ background: C.bg }}>
       <div className="max-w-6xl mx-auto px-5">
         <Reveal className="text-center max-w-2xl mx-auto"><Eyebrow k="bpEyebrow" /><H2 k="bpTitle" /><p className="mt-5 text-lg leading-relaxed" style={{ color: C.muted }}>{t('bpSub')}</p></Reveal>
-        <div className="mt-14 grid md:grid-cols-3 gap-10">
+        <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+          {/* 0. foto kliyan */}
+          <Reveal>
+            <div className="relative mx-auto w-[220px] h-[400px] rounded-[32px] overflow-hidden" style={{ background: '#0F5E5E', boxShadow: '0 30px 60px -28px rgba(11,27,51,.45)' }}>
+              <img src="/biz/phone.jpg" alt="" loading="lazy" className="w-full h-full object-cover" style={{ objectPosition: '50% 20%' }} />
+              <span className="absolute left-3 right-3 bottom-3 rounded-2xl bg-white/95 px-3 py-2.5 flex items-center gap-2">
+                <span className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(16,185,129,.16)' }}><Check size={14} color="#0E9F6E" strokeWidth={3} /></span>
+                <span className="text-[11.5px] font-bold leading-tight" style={{ color: C.ink }}>{t('bpSent')}</span>
+              </span>
+            </div>
+            <p className="mt-7 text-center text-[13px] font-extrabold" style={{ color: C.sky }}>00</p>
+            <h3 className="mt-1 text-center text-[19px]" style={{ ...display, fontWeight: 800 }}>{t('bp0t')}</h3>
+            <p className="mt-2 text-center text-[14.5px] leading-relaxed max-w-[300px] mx-auto" style={{ color: C.muted }}>{t('bp0d')}</p>
+          </Reveal>
           {/* 1. eskane */}
           <Reveal>
             {miniPhone(
@@ -1949,8 +1984,15 @@ export default function Landing({ onStart, lang, setLang }) {
 
   const bizFaq = (
     <section className="py-20 lg:py-24 bg-white">
-      <div className="max-w-3xl mx-auto px-5">
-        <Reveal className="text-center"><Eyebrow k="faqTitle" /><H2 k="bqTitle" /></Reveal>
+      <div className="max-w-6xl mx-auto px-5 grid lg:grid-cols-[0.8fr_1.2fr] gap-12 items-start">
+        <Reveal className="hidden lg:block">
+          <div className="relative rounded-[30px] overflow-hidden aspect-[736/1104]" style={{ background: '#E9E6E3' }}>
+            <img src="/biz/bubble.jpg" alt="" className="w-full h-full object-cover" />
+            <span className="absolute flex items-center justify-center text-[64px] leading-none" style={{ left: '48%', top: '23%', width: '43%', height: '20%', ...display, fontWeight: 800, color: C.navyDeep }}>?</span>
+          </div>
+        </Reveal>
+        <div>
+        <Reveal><Eyebrow k="faqTitle" /><H2 k="bqTitle" /></Reveal>
         <div className="mt-10 space-y-3">
           {[1, 2, 3, 4, 5].map((n) => (
             <div key={n} className="rounded-2xl border bg-white" style={{ borderColor: faq === 100 + n ? C.sky : C.border }}>
@@ -1961,6 +2003,7 @@ export default function Landing({ onStart, lang, setLang }) {
               {faq === 100 + n && <p className="px-5 pb-5 text-[14.5px] leading-relaxed" style={{ color: C.muted }}>{t(`ba${n}`)}</p>}
             </div>
           ))}
+        </div>
         </div>
       </div>
     </section>
