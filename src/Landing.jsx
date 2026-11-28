@@ -9,6 +9,8 @@ import {
 const PAGE_PATH = { home: '/', plans: '/comptes', card: '/carte', business: '/entreprises', security: '/securite', help: '/aide', about: '/a-propos', terms: '/conditions', privacy: '/confidentialite' };
 const PATH_PAGE = Object.fromEntries(Object.entries(PAGE_PATH).map(([k, v]) => [v, k]));
 // Ikòn plan yo (Personnel / Pro / Entreprise)
+// Foto paj Antrepriz: mete non fichye ki nan public/biz/ lè foto yo disponib
+const BIZ_PHOTOS = {};
 const PLAN_ICON = { personal: UserRound, pro: Store, business: Building2 };
 const PLAN_GRAD = {
   personal: 'linear-gradient(135deg, #3CC4F0 0%, #1B78D6 100%)',
@@ -192,6 +194,40 @@ const D = {
   dcBizNote: ["Pou sosyete anrejistre (SA, SARL, LLC…).", "Pour les sociétés immatriculées (SA, SARL, LLC…).", "For registered companies (SA, SARL, LLC…)."],
   bcTitle: ["Pare pou touche ak BLICPay?", "Prêt à encaisser avec BLICPay ?", "Ready to get paid with BLICPay?"],
   bcSub: ["Louvri kont biznis ou jodi a, dirèkteman nan app la.", "Ouvrez votre compte professionnel dès aujourd’hui, directement dans l’app.", "Open your business account today, right in the app."],
+  btr1t: ["Anrejistre nan MCI", "Enregistrée au MCI", "Registered with MCI"],
+  btr1d: ["Ministè Komès ak Endistri", "Ministère du Commerce et de l’Industrie", "Ministry of Commerce and Industry"],
+  btr2t: ["BLICPAY LLC", "BLICPAY LLC", "BLICPAY LLC"],
+  btr2d: ["Sosyete anrejistre nan Etazini", "Société enregistrée aux États-Unis", "Company registered in the USA"],
+  btr3t: ["Dokiman chifre", "Documents chiffrés", "Encrypted documents"],
+  btr3d: ["Verifye pa ekip nou an", "Vérifiés par notre équipe", "Reviewed by our team"],
+  btr4t: ["Peye an goud", "Payé en gourdes", "Paid in gourdes"],
+  btr4d: ["Nan to BRH jou a", "Au taux BRH du jour", "At the daily BRH rate"],
+  bpEyebrow: ["Kijan kliyan ou peye", "Comment vos clients paient", "How your customers pay"],
+  bpTitle: ["3 segonn nan kès ou", "3 secondes à votre caisse", "3 seconds at your counter"],
+  bpSub: ["Pa gen machin, pa gen monnen pou bay. Kliyan an sèvi ak app BLICPay li.", "Pas de terminal, pas de monnaie à rendre. Le client utilise son app BLICPay.", "No terminal, no change to give. Customers use their BLICPay app."],
+  bp1t: ["Kliyan an eskane QR ou", "Le client scanne votre QR", "The customer scans your QR"],
+  bp1d: ["Sou kontwa a, sou yon afich oswa voye l sou WhatsApp.", "Sur le comptoir, sur une affiche ou envoyé sur WhatsApp.", "On the counter, on a poster or sent on WhatsApp."],
+  bp2t: ["Li wè non biznis ou", "Il voit le nom de votre commerce", "They see your business name"],
+  bp2d: ["Ak badj verifye a, li konfime montan an ak PIN oswa Face ID.", "Avec le badge vérifié, il confirme le montant par PIN ou Face ID.", "With the verified badge, they confirm by PIN or Face ID."],
+  bp3t: ["Ou resevwa lajan an touswit", "Vous êtes payé immédiatement", "You’re paid instantly"],
+  bp3d: ["Notifikasyon sou telefòn ou, epi lavant lan parèt nan tablo a.", "Notification sur votre téléphone, et la vente apparaît dans votre tableau de bord.", "A notification on your phone, and the sale shows in your dashboard."],
+  bpAmount: ["Montan pou peye", "Montant à payer", "Amount to pay"],
+  bpConfirm: ["Konfime peman an", "Confirmer le paiement", "Confirm payment"],
+  bpDate: ["Samdi 28 novanm", "Samedi 28 novembre", "Saturday, November 28"],
+  bpNow: ["kounye a", "maintenant", "now"],
+  bpNotif: ["Ou resevwa 1 250 HTG nan men Marie J.", "Vous avez reçu 1 250 HTG de Marie J.", "You received 1,250 HTG from Marie J."],
+  bpReceipt: ["Resi anrejistre nan istorik ou", "Reçu enregistré dans votre historique", "Receipt saved to your history"],
+  bqTitle: ["Sa biznis yo vle konnen", "Ce que les commerçants demandent", "What businesses ask"],
+  bq1: ["Ki diferans ant kont Pwo ak kont Antrepriz?", "Quelle différence entre Pro et Entreprise ?", "What’s the difference between Pro and Business?"],
+  ba1: ["Pwo se pou travayè endepandan ak ti komès ki pa anrejistre kòm sosyete. Antrepriz se pou sosyete anrejistre (SA, SARL, ONG, koperativ…) — li gen limit ki pi wo ak non sosyete a ki parèt.", "Pro s’adresse aux indépendants et petits commerces. Entreprise s’adresse aux sociétés enregistrées (S.A., SNC, ONG, coopératives…) avec les plafonds les plus élevés et le nom officiel de la société.", "Pro is for freelancers and small shops. Business is for registered companies (S.A., SNC, NGOs, co-ops…) with the highest limits and the official company name."],
+  bq2: ["Konbyen sa koute?", "Combien ça coûte ?", "How much does it cost?"],
+  ba2: ["Frè ouvèti a peye yon sèl fwa: 100 $ US pou Pwo, 500 $ US pou Antrepriz, an goud nan to BRH jou a. Pa gen abònman chak mwa.", "Les frais d’ouverture sont payés une seule fois : 100 $ US pour Pro, 500 $ US pour Entreprise, en gourdes au taux BRH du jour. Aucun abonnement mensuel.", "A one-time opening fee: US$100 for Pro, US$500 for Business, paid in gourdes at the daily BRH rate. No monthly subscription."],
+  bq3: ["Èske kliyan mwen bezwen BLICPay?", "Mon client doit-il avoir BLICPay ?", "Does my customer need BLICPay?"],
+  ba3: ["Wi. Kliyan an eskane QR ou ak app BLICPay li. Kreye yon kont pèsonèl gratis epi pran kèk minit.", "Oui. Le client scanne votre QR avec son app BLICPay. L’ouverture d’un compte personnel est gratuite et prend quelques minutes.", "Yes. Customers scan your QR with their BLICPay app. A personal account is free and takes a few minutes."],
+  bq4: ["Ki dokiman mwen bezwen?", "Quels documents dois-je fournir ?", "Which documents do I need?"],
+  ba4: ["Lis la plis anwo sou paj sa a. Pou Pwo: pyès idantite, NIF, prèv adrès, relve ak prèv aktivite. Pou Antrepriz: dokiman legal sosyete a ak benefisyè efektif yo.", "La liste complète figure plus haut sur cette page. Pro : pièce d’identité, NIF, justificatif d’adresse, relevé et preuve d’activité. Entreprise : documents légaux de la société et bénéficiaires effectifs.", "The full list is above on this page. Pro: ID, NIF, proof of address, statement and proof of activity. Business: company legal documents and beneficial owners."],
+  bq5: ["Èske done mwen an sekirite?", "Mes données sont-elles protégées ?", "Is my data protected?"],
+  ba5: ["Dokiman ou yo chifre epi se sèlman ekip konfòmite nou an ki verifye yo. Kont ou pwoteje ak PIN, Face ID ak kòd pa imèl.", "Vos documents sont chiffrés et vérifiés uniquement par notre équipe conformité. Votre compte est protégé par PIN, Face ID et code par e-mail.", "Your documents are encrypted and reviewed only by our compliance team. Your account is protected by PIN, Face ID and email code."],
   navHome: ['Akèy', 'Accueil', 'Home'],
   navSecurity: ['Sekirite', 'Sécurité', 'Security'],
   navHelp: ['Èd', 'Aide', 'Help'],
@@ -1711,6 +1747,7 @@ export default function Landing({ onStart, lang, setLang }) {
         </Reveal>
         <Reveal delay={150} className="relative">
           <div className="relative mx-auto lg:mr-0 max-w-[440px]">
+            {BIZ_PHOTOS.hero && <img src={`/biz/${BIZ_PHOTOS.hero}`} alt="" className="absolute -top-8 -right-10 w-[78%] h-[88%] object-cover rounded-[28px] opacity-90 hidden lg:block" style={{ boxShadow: '0 40px 80px -30px rgba(0,0,0,.7)' }} />}
             {/* tablo Pwo */}
             <div className="rounded-[26px] p-5 text-white" style={{ background: 'linear-gradient(160deg, #2A2F37, #1A1D23)', border: '1px solid rgba(255,255,255,.08)', boxShadow: '0 40px 80px -30px rgba(0,0,0,.7)' }}>
               <div className="flex items-center gap-2.5">
@@ -1752,10 +1789,13 @@ export default function Landing({ onStart, lang, setLang }) {
         <div className="mt-12 grid grid-cols-2 md:grid-cols-3 gap-4">
           {[[Store, 'bw1'], [UtensilsCrossed, 'bw2'], [Smartphone, 'bw3'], [Wrench, 'bw4'], [Bus, 'bw5'], [Briefcase, 'bw6']].map(([Icon, k], n) => (
             <Reveal key={k} delay={n * 60}>
-              <div className="lp2-card h-full rounded-[22px] p-5 sm:p-6 border bg-white" style={{ borderColor: C.border }}>
+              <div className="lp2-card h-full rounded-[22px] overflow-hidden border bg-white" style={{ borderColor: C.border }}>
+                {BIZ_PHOTOS[k] && <img src={`/biz/${BIZ_PHOTOS[k]}`} alt="" loading="lazy" className="w-full h-36 sm:h-44 object-cover" />}
+                <div className="p-5 sm:p-6">
                 <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#FFF4E0' }}><Icon size={20} color="#C27A0E" /></span>
                 <p className="mt-4 text-[16.5px]" style={{ ...display, fontWeight: 800 }}>{t(`${k}t`)}</p>
                 <p className="mt-1 text-[13.5px] leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
+                </div>
               </div>
             </Reveal>
           ))}
@@ -1765,7 +1805,7 @@ export default function Landing({ onStart, lang, setLang }) {
   );
 
   const bizFeatures = (
-    <section className="py-20 lg:py-28" style={{ background: C.bg }}>
+    <section className="py-20 lg:py-28 bg-white">
       <div className="max-w-6xl mx-auto px-5">
         <Reveal className="max-w-2xl"><Eyebrow k="bfEyebrow" /><H2 k="bfTitle" /></Reveal>
         <div className="mt-12 grid md:grid-cols-3 gap-5">
@@ -1818,6 +1858,114 @@ export default function Landing({ onStart, lang, setLang }) {
     </section>
   );
 
+
+  const bizTrust = (
+    <section className="bg-white border-b" style={{ borderColor: C.border }}>
+      <div className="max-w-6xl mx-auto px-5 py-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[[Building2, 'btr1'], [ShieldCheck, 'btr2'], [Lock, 'btr3'], [Banknote, 'btr4']].map(([Icon, k]) => (
+          <div key={k} className="flex items-center gap-3">
+            <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#EAF6FA' }}><Icon size={18} color={C.sky} /></span>
+            <div><p className="text-[13.5px] font-bold leading-tight" style={{ color: C.ink }}>{t(`${k}t`)}</p><p className="text-[12px] leading-snug" style={{ color: C.muted }}>{t(`${k}d`)}</p></div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+
+  const miniPhone = (children) => (
+    <div className="mx-auto w-[200px] h-[400px] rounded-[38px] p-[7px]" style={{ background: 'linear-gradient(145deg,#D9DCE1,#9EA3AB)', boxShadow: '0 30px 60px -28px rgba(11,27,51,.45)' }}>
+      <div className="relative w-full h-full rounded-[32px] overflow-hidden bg-white">
+        <span className="absolute top-2 left-1/2 -translate-x-1/2 w-[62px] h-[18px] rounded-full bg-black z-10" />
+        {children}
+      </div>
+    </div>
+  );
+
+  const bizPayFlow = (
+    <section className="py-20 lg:py-28" style={{ background: C.bg }}>
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="text-center max-w-2xl mx-auto"><Eyebrow k="bpEyebrow" /><H2 k="bpTitle" /><p className="mt-5 text-lg leading-relaxed" style={{ color: C.muted }}>{t('bpSub')}</p></Reveal>
+        <div className="mt-14 grid md:grid-cols-3 gap-10">
+          {/* 1. eskane */}
+          <Reveal>
+            {miniPhone(
+              <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: '#0B0F17' }}>
+                <p className="text-white/80 text-[11px] font-semibold mb-4">{t('bhScanPay')}</p>
+                <div className="relative w-[128px] h-[128px] p-2.5 bg-white rounded-xl">
+                  <div className="grid w-full h-full" style={{ gridTemplateColumns: `repeat(${QN}, 1fr)` }}>{qrCells.map((on, i) => <span key={i} style={{ background: on ? C.navyDeep : 'transparent' }} />)}</div>
+                  {['top-[-8px] left-[-8px] border-t-[3px] border-l-[3px] rounded-tl-xl', 'top-[-8px] right-[-8px] border-t-[3px] border-r-[3px] rounded-tr-xl', 'bottom-[-8px] left-[-8px] border-b-[3px] border-l-[3px] rounded-bl-xl', 'bottom-[-8px] right-[-8px] border-b-[3px] border-r-[3px] rounded-br-xl'].map((c) => <span key={c} className={`absolute w-6 h-6 ${c}`} style={{ borderColor: C.cyan }} />)}
+                </div>
+                <p className="mt-5 text-white text-[12px] font-bold">Bella Cosmétiques</p>
+              </div>
+            )}
+            <p className="mt-7 text-center text-[13px] font-extrabold" style={{ color: C.sky }}>01</p>
+            <h3 className="mt-1 text-center text-[19px]" style={{ ...display, fontWeight: 800 }}>{t('bp1t')}</h3>
+            <p className="mt-2 text-center text-[14.5px] leading-relaxed max-w-[300px] mx-auto" style={{ color: C.muted }}>{t('bp1d')}</p>
+          </Reveal>
+          {/* 2. konfime */}
+          <Reveal delay={120}>
+            {miniPhone(
+              <div className="absolute inset-0 px-4 pt-12 flex flex-col" style={{ background: C.bg }}>
+                <div className="flex flex-col items-center">
+                  <span className="w-12 h-12 rounded-full flex items-center justify-center text-[14px] font-bold text-white" style={{ background: 'linear-gradient(135deg,#6B4E2E,#2B2118)' }}>BC</span>
+                  <p className="mt-2 text-[12.5px] font-bold flex items-center gap-1" style={{ color: C.ink }}>Bella Cosmétiques <BadgeCheck size={13} color="#E8A23A" /></p>
+                  <p className="text-[10px]" style={{ color: C.muted }}>{t('bf3t')}</p>
+                </div>
+                <div className="mt-6 rounded-2xl bg-white py-5 text-center border" style={{ borderColor: C.border }}>
+                  <p className="text-[10px]" style={{ color: C.muted }}>{t('bpAmount')}</p>
+                  <p className="text-[28px] leading-none mt-1" style={{ ...display, fontWeight: 800, color: C.ink }}>1 250<span className="text-[11px] ml-1" style={{ color: C.muted }}>HTG</span></p>
+                </div>
+                <div className="mt-auto mb-6 h-11 rounded-full flex items-center justify-center gap-1.5 text-[11.5px] font-bold text-white whitespace-nowrap" style={{ background: `linear-gradient(135deg, ${C.navy}, ${C.navyDeep})` }}><Fingerprint size={15} />{t('bpConfirm')}</div>
+              </div>
+            )}
+            <p className="mt-7 text-center text-[13px] font-extrabold" style={{ color: C.sky }}>02</p>
+            <h3 className="mt-1 text-center text-[19px]" style={{ ...display, fontWeight: 800 }}>{t('bp2t')}</h3>
+            <p className="mt-2 text-center text-[14.5px] leading-relaxed max-w-[300px] mx-auto" style={{ color: C.muted }}>{t('bp2d')}</p>
+          </Reveal>
+          {/* 3. resevwa */}
+          <Reveal delay={240}>
+            {miniPhone(
+              <div className="absolute inset-0 px-3 pt-12" style={{ background: `linear-gradient(170deg, ${C.navyDeep}, #0E2E66)` }}>
+                <p className="text-center text-white text-[40px] leading-none mt-3" style={{ ...display, fontWeight: 300 }}>14:32</p>
+                <p className="text-center text-white/60 text-[10px] mt-1">{t('bpDate')}</p>
+                <div className="mt-7 rounded-2xl p-3 flex gap-2.5" style={{ background: 'rgba(255,255,255,.92)' }}>
+                  <img src="/brand/logo-symbol.png" alt="" className="w-8 h-8 rounded-lg object-contain bg-white" />
+                  <div className="min-w-0"><p className="text-[10.5px] font-bold" style={{ color: C.ink }}>BLICPay · {t('bpNow')}</p><p className="text-[10.5px] leading-snug" style={{ color: C.ink }}>{t('bpNotif')}</p></div>
+                </div>
+                <div className="mt-2 rounded-2xl p-3 flex items-center gap-2.5" style={{ background: 'rgba(255,255,255,.14)' }}>
+                  <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(16,185,129,.25)' }}><Check size={15} color="#6EE7B7" strokeWidth={3} /></span>
+                  <p className="text-[10.5px] text-white/85 leading-snug">{t('bpReceipt')}</p>
+                </div>
+              </div>
+            )}
+            <p className="mt-7 text-center text-[13px] font-extrabold" style={{ color: C.sky }}>03</p>
+            <h3 className="mt-1 text-center text-[19px]" style={{ ...display, fontWeight: 800 }}>{t('bp3t')}</h3>
+            <p className="mt-2 text-center text-[14.5px] leading-relaxed max-w-[300px] mx-auto" style={{ color: C.muted }}>{t('bp3d')}</p>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+
+  const bizFaq = (
+    <section className="py-20 lg:py-24 bg-white">
+      <div className="max-w-3xl mx-auto px-5">
+        <Reveal className="text-center"><Eyebrow k="faqTitle" /><H2 k="bqTitle" /></Reveal>
+        <div className="mt-10 space-y-3">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div key={n} className="rounded-2xl border bg-white" style={{ borderColor: faq === 100 + n ? C.sky : C.border }}>
+              <button onClick={() => setFaq(faq === 100 + n ? 0 : 100 + n)} className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left font-semibold" style={{ color: C.ink }}>
+                {t(`bq${n}`)}
+                <ChevronDown size={18} className="shrink-0" style={{ transform: faq === 100 + n ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+              </button>
+              {faq === 100 + n && <p className="px-5 pb-5 text-[14.5px] leading-relaxed" style={{ color: C.muted }}>{t(`ba${n}`)}</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+
   const bizCta = (
     <section className="pb-24 bg-white">
       <div className="max-w-6xl mx-auto px-5">
@@ -1840,7 +1988,7 @@ export default function Landing({ onStart, lang, setLang }) {
     home: <>{heroSec}{statsBand}{servicesSec}{howSec}{plansTeaser}{cardTeaser}{securityTeaser}{bizTeaser}{ctaSec}</>,
     plans: <><PageHero title={t('phPlansT')} sub={t('phPlansS')} eyebrow={t('navPlans')} />{plansSec}{ctaSec}</>,
     card: <>{cardSec}{whereSec}{ctaSec}</>,
-    business: <>{bizHero}{bizWho}{bizFeatures}{bizSteps}{plansSec}{bizCta}</>,
+    business: <>{bizHero}{bizTrust}{bizWho}{bizPayFlow}{bizFeatures}{bizSteps}{plansSec}{bizFaq}{bizCta}</>,
     security: <><PageHero title={t('phSecT')} sub={t('phSecS')} eyebrow={t('navSecurity')} />{securitySec}{ctaSec}</>,
     help: <><PageHero title={t('phHelpT')} sub={t('phHelpS')} eyebrow={t('navHelp')} />{faqSec}{contactSec}</>,
     about: <><PageHero title={t('about')} sub={t('phAboutS')} /><DocSec body={t('aboutBody') + '\n\n' + t('disclaimer')} />{ctaSec}</>,
