@@ -1009,16 +1009,16 @@ function PhotoNotifs({ t }) {
           : d === 1 ? { opacity: 1, transform: 'translateY(13px) scale(.93)', zIndex: 3, filter: 'brightness(.97)' }
           : { opacity: 0, visibility: 'hidden', transform: 'translateY(22px) scale(.86)', zIndex: 2 };
         return (
-          <div key={i} className="absolute inset-x-0 top-0 rounded-[20px] px-3 py-2.5 flex items-start gap-2.5" style={{ background: '#F6F6F8', boxShadow: '0 10px 30px -10px rgba(0,0,0,.45)', transition: 'opacity .45s ease, transform .6s cubic-bezier(.22,1,.36,1), visibility .45s', ...st }}>
-            <span className="w-[34px] h-[34px] rounded-[9px] bg-white flex items-center justify-center shrink-0 overflow-hidden" style={{ boxShadow: '0 0 0 .5px rgba(0,0,0,.12)' }}>
+          <div key={i} className="absolute inset-x-0 top-0 rounded-[24px] px-3 py-2.5 flex items-start gap-2.5" style={{ background: 'linear-gradient(145deg, rgba(255,255,255,.26), rgba(255,255,255,.08) 55%, rgba(255,255,255,.14))', backdropFilter: 'blur(10px) saturate(1.8) brightness(.9)', WebkitBackdropFilter: 'blur(10px) saturate(1.8) brightness(.9)', border: '1px solid rgba(255,255,255,.42)', boxShadow: 'inset 0 1.5px 1px rgba(255,255,255,.9), inset 0 -1px 1px rgba(255,255,255,.3), inset 0 0 18px rgba(255,255,255,.08), 0 0 0 .5px rgba(0,0,0,.3), 0 12px 30px -12px rgba(0,0,0,.4)', transition: 'opacity .45s ease, transform .6s cubic-bezier(.22,1,.36,1), visibility .45s', ...st }}>
+            <span className="w-[36px] h-[36px] rounded-[10px] bg-white flex items-center justify-center shrink-0 overflow-hidden" style={{ opacity: d === 0 ? 1 : 0, transition: 'opacity .3s', boxShadow: '0 2px 6px rgba(0,0,0,.18), inset 0 0 0 .5px rgba(0,0,0,.08)' }}>
               {ic === 'gmail' ? <img src="/brands/gmail.png" alt="" className="w-[22px] h-auto" /> : <img src="/brand/logo-symbol.png" alt="" className="w-[28px] h-[28px] object-contain" />}
             </span>
-            <span className="flex-1 min-w-0" style={{ fontFamily: "-apple-system, 'SF Pro Text', 'Inter', sans-serif" }}>
+            <span className="flex-1 min-w-0" style={{ opacity: d === 0 ? 1 : 0, transition: 'opacity .3s', fontFamily: "-apple-system, 'SF Pro Text', 'Inter', sans-serif", textShadow: '0 1px 3px rgba(0,0,0,.45)' }}>
               <span className="flex items-baseline justify-between gap-2">
-                <span className="text-[11.5px] font-semibold truncate" style={{ color: '#111' }}>{t(ti)}</span>
-                <span className="text-[10px] shrink-0" style={{ color: 'rgba(60,60,67,.6)' }}>{t('bpNow')}</span>
+                <span className="text-[11.5px] font-semibold truncate text-white">{t(ti)}</span>
+                <span className="text-[10px] shrink-0" style={{ color: 'rgba(255,255,255,.78)' }}>{t('bpNow')}</span>
               </span>
-              <span className="block text-[11px] leading-snug" style={{ color: '#1c1c1e' }}>{t(bo)}</span>
+              <span className="block text-[11px] leading-snug" style={{ color: 'rgba(255,255,255,.95)' }}>{t(bo)}</span>
             </span>
           </div>
         );
