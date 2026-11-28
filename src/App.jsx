@@ -347,7 +347,7 @@ function AuthShell({ lang, onLang, onHome, children }) {
             ))}
           </div>
         </div>
-        <p className="relative text-xs" style={{ color: 'rgba(255,255,255,.5)' }}>© {new Date().getFullYear()} BLICPay LLC</p>
+        <p className="relative text-xs" style={{ color: 'rgba(255,255,255,.5)' }}>© {new Date().getFullYear()} BLICPay</p>
       </aside>
 
       {/* Fòm nan */}
@@ -559,7 +559,7 @@ const T = {
     lp_trust1: 'Kont pwoteje', lp_trust2: 'Verifikasyon KYC', lp_trust3: 'Sipò rapid',
     lp_show1Title: 'Antre nan yon gwoup, *an kèk segond*.', lp_show1Sub: 'Chwazi nivo w, mande antre, epi swiv pwogrè gwoup ou an tan reyèl.',
     lp_show2Title: 'Chak alèt, *lamenm*.', lp_show2Sub: 'Depo, retrè, kotizasyon Sòl — resevwa chak alèt lamenm.',
-    lp_footDisclaimer: 'BLICPay LLC se yon platfòm finansye rekonèt e anrejistre nan Ministè Kòmès ak Endistri Ayiti. Kesyon? Kontakte ekip sipò nou an.',
+    lp_footDisclaimer: 'Kesyon? Kontakte ekip sipò nou an.',
   },
   fr: {
     welcome: 'Bienvenue,',
@@ -674,7 +674,7 @@ const T = {
     lp_trust1: 'Compte protégé', lp_trust2: 'Vérification KYC', lp_trust3: 'Support rapide',
     lp_show1Title: 'Rejoignez un groupe, *en quelques secondes*.', lp_show1Sub: 'Choisissez votre niveau, demandez à rejoindre, et suivez la progression du groupe en temps réel.',
     lp_show2Title: 'Chaque alerte, *à l\'instant*.', lp_show2Sub: 'Dépôt, retrait, cotisation Sòl — recevez chaque alerte immédiatement.',
-    lp_footDisclaimer: 'BLICPay LLC est une plateforme financière reconnue et enregistrée auprès du Ministère du Commerce et de l\'Industrie d\'Haïti. Des questions ? Contactez notre équipe de support.',
+    lp_footDisclaimer: 'Des questions ? Contactez notre équipe de support.',
   },
   en: {
     welcome: 'Welcome,',
@@ -789,7 +789,7 @@ const T = {
     lp_trust1: 'Protected account', lp_trust2: 'KYC verification', lp_trust3: 'Fast support',
     lp_show1Title: 'Join a group, *in seconds*.', lp_show1Sub: 'Choose your tier, request to join, and track your group\'s progress in real time.',
     lp_show2Title: 'Every alert, *instantly*.', lp_show2Sub: 'Deposits, withdrawals, Sòl payments — get every alert right away.',
-    lp_footDisclaimer: 'BLICPay LLC is a financial platform recognized and registered with the Haitian Ministry of Commerce and Industry. Questions? Contact our support team.',
+    lp_footDisclaimer: 'Questions? Contact our support team.',
   },
 };
 

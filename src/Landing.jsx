@@ -194,10 +194,10 @@ const D = {
   dcBizNote: ["Pou sosyete anrejistre (SA, SARL, LLC…).", "Pour les sociétés immatriculées (SA, SARL, LLC…).", "For registered companies (SA, SARL, LLC…)."],
   bcTitle: ["Pare pou touche ak BLICPay?", "Prêt à encaisser avec BLICPay ?", "Ready to get paid with BLICPay?"],
   bcSub: ["Louvri kont biznis ou jodi a, dirèkteman nan app la.", "Ouvrez votre compte professionnel dès aujourd’hui, directement dans l’app.", "Open your business account today, right in the app."],
-  btr1t: ["Anrejistre nan MCI", "Enregistrée au MCI", "Registered with MCI"],
-  btr1d: ["Ministè Komès ak Endistri", "Ministère du Commerce et de l’Industrie", "Ministry of Commerce and Industry"],
-  btr2t: ["BLICPAY LLC", "BLICPAY LLC", "BLICPAY LLC"],
-  btr2d: ["Sosyete anrejistre nan Etazini", "Société enregistrée aux États-Unis", "Company registered in the USA"],
+  btr1t: ["Idantite verifye", "Identité vérifiée", "Verified identity"],
+  btr1d: ["Chak kont verifye anvan aktivasyon", "Chaque compte vérifié avant activation", "Every account verified before activation"],
+  btr2t: ["PIN sou chak peman", "PIN à chaque paiement", "PIN on every payment"],
+  btr2d: ["Okenn operasyon san kòd ou", "Aucune opération sans votre code", "No operation without your code"],
   btr3t: ["Dokiman chifre", "Documents chiffrés", "Encrypted documents"],
   btr3d: ["Verifye pa ekip nou an", "Vérifiés par notre équipe", "Reviewed by our team"],
   btr4t: ["Peye an goud", "Payé en gourdes", "Paid in gourdes"],
@@ -297,10 +297,10 @@ const D = {
   ahTitleA: ["Peman dijital,", "Le paiement numérique,", "Digital payments,"],
   ahTitleB: ["fèt pou Ayiti.", "pensé pour Haïti.", "built for Haiti."],
   ahSub: ["BLICPay ap fè peman yo pi senp, pi rapid e pi an sekirite pou tout Ayisyen — an Ayiti kou nan dyaspora.", "BLICPay rend le paiement plus simple, plus rapide et plus sûr pour tous les Haïtiens — en Haïti comme dans la diaspora.", "BLICPay makes payments simpler, faster and safer for every Haitian — at home and in the diaspora."],
-  ahId1t: ["BLICPAY", "BLICPAY", "BLICPAY"],
-  ahId1d: ["Non komèsyal anrejistre nan MCI", "Nom commercial enregistré au MCI", "Trade name registered with MCI"],
-  ahId2t: ["BLICPAY LLC", "BLICPAY LLC", "BLICPAY LLC"],
-  ahId2d: ["Sosyete anrejistre nan New Mexico, Etazini", "Société enregistrée au Nouveau-Mexique, États-Unis", "Company registered in New Mexico, USA"],
+  ahId1t: ["Pou Ayiti ak dyaspora a", "Pour Haïti et la diaspora", "For Haiti and the diaspora"],
+  ahId1d: ["Kont, transfè, peman QR ak kat", "Compte, transferts, paiement QR et cartes", "Account, transfers, QR payments and cards"],
+  ahId2t: ["Kreyòl · Français · English", "Kreyòl · Français · English", "Kreyòl · Français · English"],
+  ahId2d: ["App la pale lang ou", "L’app parle votre langue", "The app speaks your language"],
   asEyebrow: ["Istwa nou", "Notre histoire", "Our story"],
   asTitle: ["Poukisa BLICPay egziste", "Pourquoi BLICPay existe", "Why BLICPay exists"],
   asP1: ["An Ayiti, peye ak resevwa lajan toujou twò konplike: monnen ki pa genyen, liy nan bank, kat entènasyonal ki prèske enposib pou jwenn.", "En Haïti, payer et se faire payer reste trop compliqué : pas de monnaie, des files à la banque, des cartes internationales presque impossibles à obtenir.", "In Haiti, paying and getting paid is still too hard: no change, bank queues, international cards that are nearly impossible to get."],
@@ -559,7 +559,7 @@ const D = {
   terms: ['Kondisyon itilizasyon', 'Conditions d’utilisation', 'Terms of use'],
   privacy: ['Konfidansyalite', 'Confidentialité', 'Privacy'],
   rights: ['Tout dwa rezève.', 'Tous droits réservés.', 'All rights reserved.'],
-  disclaimer: ['BLICPAY se yon non komèsyal anrejistre nan Ministè Kòmès ak Endistri Ayiti (MCI), epi BLICPAY LLC se yon sosyete anrejistre nan Nouvo Meksik (Etazini). BLICPay pa yon bank. Kat yo ap emèt pa yon emetè patnè ki gen otorizasyon, lè yo disponib.', 'BLICPAY est un nom commercial enregistré auprès du Ministère du Commerce et de l’Industrie d’Haïti (MCI), et BLICPAY LLC une société enregistrée au Nouveau-Mexique (États-Unis). BLICPay n’est pas une banque. Les cartes seront émises par un émetteur partenaire agréé lorsqu’elles seront disponibles.', 'BLICPAY is a trade name registered with the Haitian Ministry of Commerce and Industry (MCI), and BLICPAY LLC is a company registered in New Mexico (USA). BLICPay is not a bank. Cards will be issued by a licensed partner issuer once available.'],
+  disclaimer: ["BLICPay pa yon bank. Kat yo ap emèt pa yon emetè patnè ki gen otorizasyon, lè yo disponib.", "BLICPay n’est pas une banque. Les cartes seront émises par un émetteur partenaire agréé lorsqu’elles seront disponibles.", "BLICPay is not a bank. Cards will be issued by a licensed partner issuer once available."],
   aboutBody: ['BLICPay se yon platfòm fentèk ki fèt pou Ayisyen. Nou bay yon kont dijital ou ka rechaje fasilman, transfè imedyat ant kliyan BLICPay, peman pa QR pou moun ak antrepriz, epi byento kat vityèl ak fizik. Misyon nou: fè peman dijital vin senp, rapid e sekirize pou tout moun.', 'BLICPay est une plateforme fintech conçue pour les Haïtiens. Nous offrons un compte numérique facile à recharger, des transferts instantanés entre clients BLICPay, des paiements par QR pour particuliers et entreprises, et bientôt des cartes virtuelles et physiques. Notre mission : rendre le paiement numérique simple, rapide et sûr pour tous.', 'BLICPay is a fintech platform built for Haitians. We offer an easy-to-fund digital account, instant transfers between BLICPay users, QR payments for people and businesses, and soon virtual and physical cards. Our mission: make digital payments simple, fast and safe for everyone.'],
   supportBody: ['Ou gen yon kesyon oswa yon pwoblèm ak kont ou? Kontakte nou dirèkteman:', 'Une question ou un problème avec votre compte ? Contactez-nous directement :', 'A question or an issue with your account? Contact us directly:'],
   call: ['Rele nou', 'Appelez-nous', 'Call us'],
@@ -1994,7 +1994,7 @@ export default function Landing({ onStart, lang, setLang }) {
   const bizTrust = (
     <section className="bg-white border-b" style={{ borderColor: C.border }}>
       <div className="max-w-6xl mx-auto px-5 py-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[[Building2, 'btr1'], [ShieldCheck, 'btr2'], [Lock, 'btr3'], [Banknote, 'btr4']].map(([Icon, k]) => (
+        {[[BadgeCheck, 'btr1'], [KeyRound, 'btr2'], [Lock, 'btr3'], [Banknote, 'btr4']].map(([Icon, k]) => (
           <div key={k} className="flex items-center gap-3">
             <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#EAF6FA' }}><Icon size={18} color={C.sky} /></span>
             <div><p className="text-[13.5px] font-bold leading-tight" style={{ color: C.ink }}>{t(`${k}t`)}</p><p className="text-[12px] leading-snug" style={{ color: C.muted }}>{t(`${k}d`)}</p></div>
@@ -2292,7 +2292,7 @@ export default function Landing({ onStart, lang, setLang }) {
         <p className="mt-5 text-[22px]" style={{ ...display, fontWeight: 800 }}>BLICPay</p>
         <p className="text-[13px] text-white/60">Global · Secure · Digital</p>
         <div className="mt-6 space-y-3">
-          {[['🇭🇹', 'ahId1t', 'ahId1d'], ['🇺🇸', 'ahId2t', 'ahId2d']].map(([f, a, b]) => (
+          {[['🇭🇹', 'ahId1t', 'ahId1d'], ['🌐', 'ahId2t', 'ahId2d']].map(([f, a, b]) => (
             <div key={a} className="flex items-center gap-3 rounded-2xl px-4 py-3.5" style={{ background: 'rgba(255,255,255,.06)' }}>
               <span className="text-[22px]">{f}</span>
               <div><p className="text-[14px] font-bold">{t(a)}</p><p className="text-[12px] text-white/60">{t(b)}</p></div>
@@ -2542,7 +2542,7 @@ export default function Landing({ onStart, lang, setLang }) {
         <div className="border-t" style={{ borderColor: 'rgba(255,255,255,.1)' }}>
           <div className="max-w-6xl mx-auto px-5 py-6 text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,.55)' }}>
             <p>{t('disclaimer')}</p>
-            <p className="mt-2">© {new Date().getFullYear()} BLICPAY LLC. {t('rights')}</p>
+            <p className="mt-2">© {new Date().getFullYear()} BLICPay. {t('rights')}</p>
           </div>
         </div>
       </footer>
