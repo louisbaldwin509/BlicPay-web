@@ -344,6 +344,12 @@ const D = {
   a200_4: ["Non. Ou depanse sèlman lajan ki sou balans ou — pa gen dèt.", "Non. Vous dépensez uniquement l’argent de votre solde — aucune dette.", "No. You only spend what’s in your balance — no debt."],
   q200_5: ["Si mwen pèdi telefòn mwen?", "Et si je perds mon téléphone ?", "What if I lose my phone?"],
   a200_5: ["Ou ka bloke kat la nan app la nenpòt ki lè, oswa ekri nou sou WhatsApp.", "Vous pouvez bloquer la carte dans l’app à tout moment, ou nous écrire sur WhatsApp.", "You can block the card in the app anytime, or message us on WhatsApp."],
+  pnScanT: ["QR eskane", "QR scanné", "QR scanned"],
+  pnScanD: ["Bella Cosmétiques", "Bella Cosmétiques", "Bella Cosmétiques"],
+  pnFaceT: ["Face ID konfime", "Face ID confirmé", "Face ID confirmed"],
+  pnFaceD: ["Peman an sekirize", "Paiement sécurisé", "Payment secured"],
+  pnRecT: ["Resi disponib", "Reçu disponible", "Receipt ready"],
+  pnRecD: ["Sove nan istorik ou", "Enregistré dans votre historique", "Saved to your history"],
   navHome: ['Akèy', 'Accueil', 'Home'],
   navSecurity: ['Sekirite', 'Sécurité', 'Security'],
   navHelp: ['Èd', 'Aide', 'Help'],
@@ -971,6 +977,45 @@ function HeroPhone({ t, bare = false }) {
       </div>
       </>)}
     </div>
+  );
+}
+
+// Notifikasyon anime sou foto kliyan an (paj Antrepriz): QR → Face ID → peman voye → resi
+function PhotoNotifs({ t }) {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setStep(3); return undefined; }
+    const id = setInterval(() => setStep((s) => (s + 1) % 5), 2200);
+    return () => clearInterval(id);
+  }, []);
+  const toasts = [
+    [QrCode, 'pnScanT', 'pnScanD', '#0891B2'],
+    [Fingerprint, 'pnFaceT', 'pnFaceD', '#143A73'],
+    null,
+    [Check, 'pnRecT', 'pnRecD', '#0E9F6E'],
+  ];
+  const sent = step === 2 || step === 3;
+  return (
+    <>
+      {toasts.map((tt, i) => tt && (
+        <div key={i} className="absolute left-2.5 right-2.5 top-3 rounded-[18px] px-3 py-2.5 flex items-center gap-2.5" style={{ background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', boxShadow: '0 12px 28px -12px rgba(0,0,0,.45)', opacity: step === i ? 1 : 0, transform: step === i ? 'translateY(0) scale(1)' : step > i ? 'translateY(-14px) scale(.96)' : 'translateY(-26px) scale(.96)', transition: 'opacity .45s ease, transform .55s cubic-bezier(.22,1,.36,1)' }}>
+          <span className="w-8 h-8 rounded-[9px] flex items-center justify-center shrink-0" style={{ background: tt[3] }}>{React.createElement(tt[0], { size: 15, color: '#fff', strokeWidth: 2.5 })}</span>
+          <span className="flex-1 min-w-0">
+            <span className="flex items-center justify-between text-[10px] font-semibold" style={{ color: '#5D6B7E' }}>BLICPay<span>{t('bpNow')}</span></span>
+            <span className="block text-[11.5px] font-bold leading-tight truncate" style={{ color: '#0B1B33' }}>{t(tt[1])}</span>
+            <span className="block text-[10.5px] leading-tight truncate" style={{ color: '#5D6B7E' }}>{t(tt[2])}</span>
+          </span>
+        </div>
+      ))}
+      {/* montan k ap monte */}
+      <span className="absolute right-6 top-[46%] text-[15px] font-extrabold px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,.92)', color: '#0B1B33', opacity: step === 2 ? 1 : 0, transform: step === 2 ? 'translateY(-18px)' : 'translateY(10px)', transition: 'opacity .5s, transform 1.4s cubic-bezier(.22,1,.36,1)' }}>−1 250 HTG</span>
+      {/* ti pwen ki bat sou telefòn nan */}
+      <span className="absolute right-[34px] top-[57%] w-3 h-3 rounded-full" style={{ background: '#22D3EE', animation: 'lp2PulseC 1.6s infinite', opacity: step < 2 ? 1 : 0, transition: 'opacity .3s' }} />
+      <span className="absolute left-3 right-3 bottom-3 rounded-2xl bg-white/95 px-3 py-2.5 flex items-center gap-2" style={{ opacity: sent ? 1 : 0, transform: sent ? 'translateY(0) scale(1)' : 'translateY(16px) scale(.94)', transition: 'opacity .4s, transform .5s cubic-bezier(.34,1.56,.64,1)' }}>
+        <span className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(16,185,129,.16)' }}><Check size={14} color="#0E9F6E" strokeWidth={3} /></span>
+        <span className="text-[11.5px] font-bold leading-tight" style={{ color: '#0B1B33' }}>{t('bpSent')}</span>
+      </span>
+    </>
   );
 }
 
@@ -2048,10 +2093,7 @@ export default function Landing({ onStart, lang, setLang }) {
           <Reveal>
             <div className="relative mx-auto w-[230px] h-[481px] rounded-[40px] overflow-hidden" style={{ background: '#0F5E5E', boxShadow: '0 30px 60px -28px rgba(11,27,51,.45)' }}>
               <img src="/biz/phone.jpg" alt="" loading="lazy" className="w-full h-full object-cover" style={{ objectPosition: '50% 20%' }} />
-              <span className="absolute left-3 right-3 bottom-3 rounded-2xl bg-white/95 px-3 py-2.5 flex items-center gap-2">
-                <span className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(16,185,129,.16)' }}><Check size={14} color="#0E9F6E" strokeWidth={3} /></span>
-                <span className="text-[11.5px] font-bold leading-tight" style={{ color: C.ink }}>{t('bpSent')}</span>
-              </span>
+              <PhotoNotifs t={t} />
             </div>
             <p className="mt-7 text-center text-[13px] font-extrabold" style={{ color: C.sky }}>00</p>
             <h3 className="mt-1 text-center text-[19px]" style={{ ...display, fontWeight: 800 }}>{t('bp0t')}</h3>
@@ -2460,6 +2502,7 @@ export default function Landing({ onStart, lang, setLang }) {
         .lp2-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(11,27,51,.25); }
         @keyframes lp2Float { 0%,100% { transform: translateY(0) rotate(var(--r)); } 50% { transform: translateY(-12px) rotate(var(--r)); } }
         .lp2-float { animation: lp2Float 7s ease-in-out infinite; }
+        @keyframes lp2PulseC { 0% { box-shadow: 0 0 0 0 rgba(34,211,238,.8); } 80%,100% { box-shadow: 0 0 0 14px rgba(34,211,238,0); } }
         @keyframes lp2Bob { 0%,100% { transform: translate3d(0,0,0); } 50% { transform: translate3d(0,-10px,0); } }
         .lp2-bob { animation: lp2Bob 5.5s ease-in-out infinite; }
         @keyframes lp2GrowK { from { transform: scaleY(0); } to { transform: scaleY(1); } }
