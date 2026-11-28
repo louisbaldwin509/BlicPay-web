@@ -670,7 +670,7 @@ function HeroPhone({ t, bare = false }) {
                     <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover" />
                     <span className="absolute left-[16px] top-[92px] text-[13px] font-bold text-white tracking-[.12em]" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>4821 •••• •••• {['9010', '3374', '7702'][i]}</span>
                     <span className="absolute left-[16px] bottom-[12px] text-[8.5px] font-semibold text-white/85 tracking-wider" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>ISABELLE PIERRE</span>
-                    <span className="absolute left-[150px] bottom-[12px] text-[8.5px] font-bold text-white/90" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>12/29</span>
+                    <span className="absolute left-[128px] bottom-[12px] text-[8.5px] font-bold text-white/90" style={{ textShadow: '0 1px 1px rgba(0,0,0,.4)' }}>12/29</span>
                   </div>
                 ))}
               </div>
@@ -1228,7 +1228,6 @@ export default function Landing({ onStart, lang, setLang }) {
               {[['/cards/card-ocean.jpg', 'Basic'], ['/cards/card-world.jpg', 'Standard'], ['/cards/card-shield.jpg', 'Premium']].map(([src, name], n) => (
                 <div key={name} className="relative" style={{ marginLeft: `${n * 6}%` }}>
                   <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: '1.586', backgroundImage: `url(${src})`, backgroundSize: 'cover', boxShadow: '0 24px 50px -20px rgba(0,0,0,.6)' }}>
-                    <span className="absolute top-3 right-3 text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(0,0,0,.35)', color: '#fff' }}>{name}</span>
                   </div>
                 </div>
               ))}
@@ -1568,9 +1567,12 @@ export default function Landing({ onStart, lang, setLang }) {
           <p className="mt-3 text-lg" style={{ color: C.muted }}>{t('whereS')}</p>
         </Reveal>
         <Reveal delay={120}>
-          <div className="mt-10 flex flex-wrap gap-3">
-            {['Amazon', 'Netflix', 'Shein', 'Temu', 'eBay', 'Spotify', 'AliExpress', 'Google Play', 'App Store', 'YouTube Premium', 'Canva', 'ChatGPT'].map((m) => (
-              <span key={m} className="h-12 px-5 rounded-2xl bg-white border flex items-center text-[15px] font-bold" style={{ borderColor: C.border, ...display }}>{m}</span>
+          <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {[['Amazon', 'amazon'], ['Netflix', 'netflix'], ['Shein', 'shein'], ['eBay', 'ebay'], ['AliExpress', 'aliexpress'], ['Spotify', 'spotify'], ['YouTube Premium', 'youtube'], ['Canva', 'canva'], ['ChatGPT', 'chatgpt', true], ['Google Play', 'googleplay', true], ['App Store', 'apple', true], ['Temu', null]].map(([name, file, label]) => (
+              <div key={name} className="lp2-card h-[76px] rounded-2xl bg-white border flex items-center justify-center gap-2.5 px-4" style={{ borderColor: C.border }} title={name}>
+                {file ? <img src={`/brands/${file}.png`} alt={name} className={label ? 'h-[30px] w-auto' : file === 'youtube' ? 'h-[24px] w-auto max-w-[200px] object-contain' : 'h-[28px] w-auto max-w-[150px] object-contain'} loading="lazy" /> : null}
+                {(label || !file) && <span className="text-[16px] font-bold whitespace-nowrap" style={{ ...display, color: name === 'Temu' ? '#FB7701' : C.ink }}>{name}</span>}
+              </div>
             ))}
           </div>
           <p className="mt-5 text-xs" style={{ color: C.muted }}>{t('whereNote')}</p>
