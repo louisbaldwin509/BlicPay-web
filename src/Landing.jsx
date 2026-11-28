@@ -1575,7 +1575,6 @@ export default function Landing({ onStart, lang, setLang }) {
               </div>
             ))}
           </div>
-          <p className="mt-5 text-xs" style={{ color: C.muted }}>{t('whereNote')}</p>
         </Reveal>
       </div>
     </section>
