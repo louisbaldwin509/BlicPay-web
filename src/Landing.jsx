@@ -2,7 +2,7 @@
 // peman (QR), ak kat vityèl/fizik. (Sòl, prè ak epay yo retire nan BLICPay.)
 import React, { useEffect, useState } from 'react';
 import {
-  ArrowRight, ArrowLeftRight, BadgeCheck, Building2, Check, ChevronDown, CreditCard, Globe, Lock, Menu,
+  ArrowRight, ArrowLeftRight, BadgeCheck, Building2, Check, ChevronDown, CreditCard, Globe, Lock, Menu, KeyRound, Mail, AlertTriangle, MessageCircle, Target, Heart, Rocket, BookOpen,
   Phone, QrCode, ShieldCheck, Smartphone, Sparkles, Wallet, X, Fingerprint, Zap, ScanLine, Store,
   Briefcase, UserRound, ChevronRight, ArrowDownLeft, ArrowUpRight, Bell, Home, Clock, Banknote, LayoutGrid, Plus, Eye, Settings, Search, BarChart3, List, ChevronLeft, UtensilsCrossed, Wrench, Bus, Users, FileText, Download } from 'lucide-react';
 // Paj sit la ak adrès yo
@@ -234,6 +234,116 @@ const D = {
   bpSent: ["Peman voye · 1 250 HTG", "Paiement envoyé · 1 250 HTG", "Payment sent · 1,250 HTG"],
   bp0t: ["Kliyan ou gen BLICPay", "Votre client a BLICPay", "Your customer has BLICPay"],
   bp0d: ["Kont pèsonèl gratis, rechaje ak MonCash oswa NatCash.", "Compte personnel gratuit, rechargé avec MonCash ou NatCash.", "A free personal account, topped up with MonCash or NatCash."],
+  shBadge: ["Sekirite BLICPay", "Sécurité BLICPay", "BLICPay security"],
+  shTitleA: ["Lajan ou,", "Votre argent,", "Your money,"],
+  shTitleB: ["byen pwoteje.", "bien protégé.", "well protected."],
+  shCenter: ["Sant sekirite", "Centre de sécurité", "Security center"],
+  shAllOn: ["Tout pwoteksyon yo aktive", "Toutes les protections actives", "All protections on"],
+  shC1: ["Idantite verifye", "Identité vérifiée", "Identity verified"],
+  shC2: ["PIN 4 chif", "Code PIN à 4 chiffres", "4-digit PIN"],
+  shC3: ["Face ID / anprent", "Face ID / empreinte", "Face ID / fingerprint"],
+  shC4: ["Kòd pa imèl", "Code par e-mail", "Email code"],
+  shC5: ["Plafon aktif", "Plafonds actifs", "Limits active"],
+  slEyebrow: ["4 nivo pwoteksyon", "4 niveaux de protection", "4 layers of protection"],
+  slTitle: ["Pwoteje nan chak etap", "Protégé à chaque étape", "Protected at every step"],
+  slSub: ["Depi ou louvri kont lan jiska chak goud ki soti.", "De l’ouverture du compte à chaque gourde qui sort.", "From account opening to every gourde that leaves."],
+  sl1w: ["Lè w louvri kont", "À l’ouverture", "At sign-up"],
+  sl1t: ["Verifikasyon idantite", "Vérification d’identité", "Identity verification"],
+  sl1d: ["Pyès idantite + selfi an dirèk ak patnè nou Didit, epi yon admin valide.", "Pièce d’identité + selfie en direct avec notre partenaire Didit, puis validation par un admin.", "ID + live selfie with our partner Didit, then admin approval."],
+  sl2w: ["Lè w konekte", "À la connexion", "At login"],
+  sl2t: ["Doub verifikasyon", "Double vérification", "Two-step login"],
+  sl2d: ["Modpas, kòd pa imèl ak Face ID oswa anprent sou telefòn ou.", "Mot de passe, code par e-mail et Face ID ou empreinte sur votre téléphone.", "Password, email code and Face ID or fingerprint on your phone."],
+  sl3w: ["Nan chak operasyon", "À chaque opération", "On every operation"],
+  sl3t: ["Kòd PIN", "Code PIN", "PIN code"],
+  sl3d: ["Okenn transfè ni retrè san kòd PIN 4 chif ou.", "Aucun transfert ni retrait sans votre code PIN à 4 chiffres.", "No transfer or withdrawal without your 4-digit PIN."],
+  sl4w: ["Toutan", "En continu", "Always"],
+  sl4t: ["Siveyans ak plafon", "Surveillance et plafonds", "Monitoring and limits"],
+  sl4d: ["Plafon pa jou, semèn ak mwa, epi ekip nou verifye retrè yo alamen.", "Plafonds par jour, semaine et mois, et contrôle manuel des retraits par notre équipe.", "Daily, weekly and monthly limits, and manual review of withdrawals."],
+  stEyebrow: ["Bon reflèks", "Bons réflexes", "Good habits"],
+  stTitle: ["Pwoteje tèt ou kont fwod", "Protégez-vous contre la fraude", "Protect yourself from fraud"],
+  stAlertT: ["BLICPay p ap janm mande w PIN ou", "BLICPay ne vous demandera jamais votre PIN", "BLICPay will never ask for your PIN"],
+  stAlertD: ["Ni pa telefòn, ni sou WhatsApp, ni pa imèl. Si yon moun mande w li, se yon fwod.", "Ni par téléphone, ni sur WhatsApp, ni par e-mail. Si quelqu’un vous le demande, c’est une fraude.", "Not by phone, WhatsApp or email. If someone asks for it, it’s a scam."],
+  st1t: ["Kenbe PIN ak kòd ou pou ou sèl", "Gardez PIN et codes pour vous", "Keep your PIN and codes private"],
+  st1d: ["Pa pataje yo ak pèsonn, menm yon fanmi.", "Ne les partagez avec personne, même un proche.", "Don’t share them with anyone, even family."],
+  st2t: ["Verifye non an anvan ou peye", "Vérifiez le nom avant de payer", "Check the name before paying"],
+  st2d: ["Non benefisyè a parèt anvan ou konfime — gade si se bon moun lan.", "Le nom du destinataire s’affiche avant de confirmer — vérifiez que c’est le bon.", "The recipient’s name shows before you confirm — make sure it’s right."],
+  st3t: ["Telechaje app la nan bon kote", "Téléchargez l’app au bon endroit", "Get the app from the right place"],
+  st3d: ["Sèlman nan lyen ofisyèl ki sou blicpayht.com.", "Uniquement via les liens officiels de blicpayht.com.", "Only via the official links on blicpayht.com."],
+  st4t: ["Aktive Face ID oswa anprent", "Activez Face ID ou l’empreinte", "Turn on Face ID or fingerprint"],
+  st4d: ["Pou yon lòt moun pa ka louvri app la sou telefòn ou.", "Pour que personne d’autre ne puisse ouvrir l’app sur votre téléphone.", "So nobody else can open the app on your phone."],
+  st5t: ["Telefòn pèdi? Ekri nou touswit", "Téléphone perdu ? Écrivez-nous vite", "Lost your phone? Contact us fast"],
+  st5d: ["Kontakte nou san pèdi tan pou nou ede w sekirize kont ou.", "Contactez-nous sans attendre pour que nous vous aidions à sécuriser votre compte.", "Contact us right away so we can help secure your account."],
+  srTitle: ["Ou wè yon bagay ki pa nòmal?", "Vous avez remarqué quelque chose d’anormal ?", "Noticed something unusual?"],
+  srSub: ["Yon tranzaksyon ou pa rekonèt, yon mesaj sispèk oswa yon telefòn pèdi — kontakte nou touswit.", "Une transaction inconnue, un message suspect ou un téléphone perdu — contactez-nous immédiatement.", "An unknown transaction, a suspicious message or a lost phone — contact us right away."],
+  hhBadge: ["Sipò BLICPay", "Support BLICPay", "BLICPay support"],
+  hhTitleA: ["Nou la", "Nous sommes là", "We’re here"],
+  hhTitleB: ["pou ede w.", "pour vous aider.", "to help."],
+  hhM1: ["Bonjou, kijan pou m rechaje kont mwen?", "Bonjour, comment recharger mon compte ?", "Hi, how do I top up my account?"],
+  hhM2: ["Bonjou! Nan app la, peze « Rechaje », chwazi mwayen peman an epi swiv etap yo.", "Bonjour ! Dans l’app, touchez « Recharger », choisissez votre moyen de paiement et suivez les étapes.", "Hi! In the app, tap “Top up”, pick your payment method and follow the steps."],
+  hhM3: ["Mèsi anpil, li mache!", "Merci beaucoup, c’est fait !", "Thanks a lot, done!"],
+  htEyebrow: ["Sijè", "Sujets", "Topics"],
+  htTitle: ["Ki sa w ap chèche?", "Que cherchez-vous ?", "What are you looking for?"],
+  ht1t: ["Kont ak frè", "Comptes et frais", "Accounts & fees"],
+  ht1d: ["Pèsonèl, Pwo, Antrepriz ak sa yo koute.", "Personnel, Pro, Entreprise et leurs tarifs.", "Personal, Pro, Business and pricing."],
+  ht2t: ["Kat BLICPay", "Cartes BLICPay", "BLICPay cards"],
+  ht2d: ["Basic, Standard, Premium ak kote pou itilize yo.", "Basic, Standard, Premium et où les utiliser.", "Basic, Standard, Premium and where to use them."],
+  ht3t: ["Biznis", "Entreprises", "Business"],
+  ht3d: ["Peman QR, tablo lavant ak dokiman.", "Paiements QR, tableau de bord et documents.", "QR payments, dashboard and documents."],
+  ht4t: ["Sekirite", "Sécurité", "Security"],
+  ht4d: ["Kijan nou pwoteje kont ou ak bon reflèks.", "Comment nous protégeons votre compte, et les bons réflexes.", "How we protect your account, and good habits."],
+  htSee: ["Gade", "Voir", "See"],
+  hqTitle: ["Kesyon moun poze plis", "Les questions les plus posées", "Most asked questions"],
+  ahBadge: ["Konsènan nou", "À propos", "About us"],
+  ahTitleA: ["Peman dijital,", "Le paiement numérique,", "Digital payments,"],
+  ahTitleB: ["fèt pou Ayiti.", "pensé pour Haïti.", "built for Haiti."],
+  ahSub: ["BLICPay ap fè peman yo pi senp, pi rapid e pi an sekirite pou tout Ayisyen — an Ayiti kou nan dyaspora.", "BLICPay rend le paiement plus simple, plus rapide et plus sûr pour tous les Haïtiens — en Haïti comme dans la diaspora.", "BLICPay makes payments simpler, faster and safer for every Haitian — at home and in the diaspora."],
+  ahId1t: ["BLICPAY", "BLICPAY", "BLICPAY"],
+  ahId1d: ["Non komèsyal anrejistre nan MCI", "Nom commercial enregistré au MCI", "Trade name registered with MCI"],
+  ahId2t: ["BLICPAY LLC", "BLICPAY LLC", "BLICPAY LLC"],
+  ahId2d: ["Sosyete anrejistre nan New Mexico, Etazini", "Société enregistrée au Nouveau-Mexique, États-Unis", "Company registered in New Mexico, USA"],
+  asEyebrow: ["Istwa nou", "Notre histoire", "Our story"],
+  asTitle: ["Poukisa BLICPay egziste", "Pourquoi BLICPay existe", "Why BLICPay exists"],
+  asP1: ["An Ayiti, peye ak resevwa lajan toujou twò konplike: monnen ki pa genyen, liy nan bank, kat entènasyonal ki prèske enposib pou jwenn.", "En Haïti, payer et se faire payer reste trop compliqué : pas de monnaie, des files à la banque, des cartes internationales presque impossibles à obtenir.", "In Haiti, paying and getting paid is still too hard: no change, bank queues, international cards that are nearly impossible to get."],
+  asP2: ["BLICPay bay yon kont dijital ou rechaje fasil, transfè gratis e imedyat ant kliyan, peman QR pou moun ak biznis — epi byento kat vityèl ak fizik pou achte sou entènèt.", "BLICPay offre un compte numérique facile à recharger, des transferts gratuits et instantanés entre clients, le paiement par QR pour particuliers et entreprises — et bientôt des cartes virtuelles et physiques pour acheter en ligne.", "BLICPay offers an easy-to-top-up digital account, free instant transfers between users, QR payments for people and businesses — and soon virtual and physical cards to shop online."],
+  avEyebrow: ["Valè nou", "Nos valeurs", "Our values"],
+  avTitle: ["Sa ki gide nou", "Ce qui nous guide", "What guides us"],
+  av1t: ["Senplisite", "Simplicité", "Simplicity"],
+  av1d: ["Yon app klè, an kreyòl, franse ak anglè.", "Une app claire, en créole, français et anglais.", "A clear app, in Creole, French and English."],
+  av2t: ["Konfyans", "Confiance", "Trust"],
+  av2d: ["Kont verifye, PIN, chifreman ak siveyans.", "Comptes vérifiés, PIN, chiffrement et surveillance.", "Verified accounts, PIN, encryption and monitoring."],
+  av3t: ["Pou Ayiti", "Pour Haïti", "For Haiti"],
+  av3d: ["Fèt pou reyalite ti komès, travayè ak fanmi ayisyen.", "Pensé pour la réalité des commerces, travailleurs et familles haïtiennes.", "Built for the reality of Haitian shops, workers and families."],
+  av4t: ["Transparans", "Transparence", "Transparency"],
+  av4d: ["Frè yo toujou afiche anvan ou konfime.", "Les frais sont toujours affichés avant de confirmer.", "Fees are always shown before you confirm."],
+  arEyebrow: ["Sa n ap bati", "Ce que nous construisons", "What we’re building"],
+  arTitle: ["Jodi a, epi demen", "Aujourd’hui, et demain", "Today, and tomorrow"],
+  arNow: ["Disponib kounye a", "Disponible maintenant", "Available now"],
+  arSoon: ["Byento", "Bientôt", "Coming soon"],
+  ar1: ["Kont dijital rechajab (MonCash, NatCash, kach)", "Compte numérique rechargeable (MonCash, NatCash, espèces)", "Rechargeable digital account (MonCash, NatCash, cash)"],
+  ar2: ["Transfè gratis e imedyat ant kliyan BLICPay", "Transferts gratuits et instantanés entre clients BLICPay", "Free instant transfers between BLICPay users"],
+  ar3: ["Peman QR pou moun ak biznis", "Paiement QR pour particuliers et commerces", "QR payments for people and businesses"],
+  ar4: ["Kont Pwo ak Antrepriz ak tablo lavant", "Comptes Pro et Entreprise avec tableau de bord", "Pro and Business accounts with dashboard"],
+  ar5: ["Kat vityèl Basic, Standard ak Premium", "Cartes virtuelles Basic, Standard et Premium", "Basic, Standard and Premium virtual cards"],
+  ar6: ["Kat fizik", "Cartes physiques", "Physical cards"],
+  chEyebrow: ["Kijan sa mache", "Comment ça marche", "How it works"],
+  chTitle: ["Kat ou an 3 etap", "Votre carte en 3 étapes", "Your card in 3 steps"],
+  ch1t: ["Chwazi kat ou", "Choisissez votre carte", "Choose your card"],
+  ch1d: ["Basic, Standard oswa Premium dirèkteman nan app la.", "Basic, Standard ou Premium, directement dans l’app.", "Basic, Standard or Premium, right in the app."],
+  ch2t: ["Rechaje balans ou", "Rechargez votre solde", "Top up your balance"],
+  ch2d: ["Kat la sèvi ak balans BLICPay ou — pa gen kredi, pa gen sipriz.", "La carte utilise votre solde BLICPay — pas de crédit, pas de surprise.", "The card uses your BLICPay balance — no credit, no surprises."],
+  ch3t: ["Peye toupatou sou entènèt", "Payez partout en ligne", "Pay anywhere online"],
+  ch3d: ["Sou sit ak app ki aksepte kat entènasyonal yo.", "Sur les sites et applications qui acceptent les cartes internationales.", "On sites and apps that accept international cards."],
+  cqTitle: ["Tout sa pou konnen sou kat yo", "Tout savoir sur les cartes", "All about the cards"],
+  q200_1: ["Kilè kat yo ap disponib?", "Quand les cartes seront-elles disponibles ?", "When will the cards be available?"],
+  a200_1: ["N ap lanse yo byento ak yon emetè patnè. Kliyan ki gen yon kont verifye ap premye resevwa yo.", "Elles seront lancées prochainement avec un émetteur partenaire. Les clients au compte vérifié seront les premiers servis.", "They’ll launch soon with a partner issuer. Verified customers will be first."],
+  q200_2: ["Ki rezo chak kat?", "Quel réseau pour chaque carte ?", "Which network is each card on?"],
+  a200_2: ["Basic ak Standard se Visa. Premium se Mastercard.", "Basic et Standard sont des cartes Visa. Premium est une carte Mastercard.", "Basic and Standard are Visa cards. Premium is a Mastercard."],
+  q200_3: ["Èske mwen bezwen yon kont labank?", "Ai-je besoin d’un compte bancaire ?", "Do I need a bank account?"],
+  a200_3: ["Non. Kat la konekte ak kont BLICPay ou, ou rechaje ak MonCash, NatCash oswa kach.", "Non. La carte est liée à votre compte BLICPay, que vous rechargez par MonCash, NatCash ou en espèces.", "No. The card is linked to your BLICPay account, topped up with MonCash, NatCash or cash."],
+  q200_4: ["Èske se yon kat kredi?", "Est-ce une carte de crédit ?", "Is it a credit card?"],
+  a200_4: ["Non. Ou depanse sèlman lajan ki sou balans ou — pa gen dèt.", "Non. Vous dépensez uniquement l’argent de votre solde — aucune dette.", "No. You only spend what’s in your balance — no debt."],
+  q200_5: ["Si mwen pèdi telefòn mwen?", "Et si je perds mon téléphone ?", "What if I lose my phone?"],
+  a200_5: ["Ou ka bloke kat la nan app la nenpòt ki lè, oswa ekri nou sou WhatsApp.", "Vous pouvez bloquer la carte dans l’app à tout moment, ou nous écrire sur WhatsApp.", "You can block the card in the app anytime, or message us on WhatsApp."],
   navHome: ['Akèy', 'Accueil', 'Home'],
   navSecurity: ['Sekirite', 'Sécurité', 'Security'],
   navHelp: ['Èd', 'Aide', 'Help'],
@@ -2027,14 +2137,286 @@ export default function Landing({ onStart, lang, setLang }) {
     </section>
   );
 
+
+  // ================= PAJ SEKIRITE / ÈD / KONSÈNAN NOU / KAT (nivo pwo) =================
+  const DarkHero = ({ crumb, badge, BadgeIcon, titleA, titleB, sub, children, accent = C.cyan }) => (
+    <section className="relative overflow-hidden" style={{ background: `radial-gradient(900px 520px at 90% -10%, rgba(34,211,238,.16), transparent 60%), radial-gradient(800px 500px at 0% 110%, rgba(34,211,238,.10), transparent 60%), linear-gradient(165deg, ${C.night} 0%, ${C.navyDeep} 60%, #0E2E66 100%)`, color: '#fff' }}>
+      <div className="absolute inset-0 lp2-grid opacity-50" style={{ filter: 'invert(1)', maskImage: 'linear-gradient(180deg, #000 20%, transparent 85%)' }} />
+      <div className="relative max-w-6xl mx-auto px-5 pt-12 pb-20 lg:pt-16 lg:pb-24 grid lg:grid-cols-[1.05fr_1fr] gap-12 items-center">
+        <Reveal>
+          <div className="flex items-center gap-2 text-[13px]" style={{ color: 'rgba(255,255,255,.65)' }}>
+            <button onClick={() => nav('home')} className="hover:text-white">{t('navHome')}</button><ChevronRight size={14} /><span className="text-white font-semibold">{crumb}</span>
+          </div>
+          <span className="mt-6 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold" style={{ background: 'rgba(34,211,238,.12)', color: accent, border: '1px solid rgba(34,211,238,.3)' }}><BadgeIcon size={14} />{badge}</span>
+          <h1 className="mt-5 text-[38px] sm:text-[54px] leading-[1.05] tracking-tight" style={{ ...display, fontWeight: 800 }}>{titleA} <span style={{ background: `linear-gradient(90deg, ${C.cyan}, #7DD3FC)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{titleB}</span></h1>
+          <p className="mt-5 text-lg leading-relaxed max-w-xl" style={{ color: 'rgba(255,255,255,.74)' }}>{sub}</p>
+        </Reveal>
+        <Reveal delay={150}>{children}</Reveal>
+      </div>
+    </section>
+  );
+
+  const glass = { background: 'linear-gradient(160deg, rgba(255,255,255,.10), rgba(255,255,255,.04))', border: '1px solid rgba(255,255,255,.12)', boxShadow: '0 40px 80px -30px rgba(0,0,0,.7)', backdropFilter: 'blur(10px)' };
+
+  // ---------- SEKIRITE ----------
+  const secHero = (
+    <DarkHero crumb={t('navSecurity')} badge={t('shBadge')} BadgeIcon={ShieldCheck} titleA={t('shTitleA')} titleB={t('shTitleB')} sub={t('phSecS')}>
+      <div className="relative mx-auto lg:mr-0 max-w-[400px] rounded-[28px] p-6 text-white" style={glass}>
+        <div className="flex items-center gap-3">
+          <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><ShieldCheck size={24} color="#fff" /></span>
+          <div><p className="text-[16px] font-bold" style={display}>{t('shCenter')}</p><p className="text-[12px] text-white/60">{t('shAllOn')}</p></div>
+          <span className="ml-auto text-[22px] font-extrabold" style={{ ...display, color: '#6EE7B7' }}>5/5</span>
+        </div>
+        <div className="mt-6 space-y-2.5">
+          {[[BadgeCheck, 'shC1'], [Lock, 'shC2'], [Fingerprint, 'shC3'], [Mail, 'shC4'], [BarChart3, 'shC5']].map(([Icon, k]) => (
+            <div key={k} className="flex items-center gap-3 rounded-2xl px-3.5 py-3" style={{ background: 'rgba(255,255,255,.06)' }}>
+              <Icon size={17} color={C.cyan} />
+              <span className="flex-1 text-[13.5px] font-semibold">{t(k)}</span>
+              <span className="w-9 h-5 rounded-full relative" style={{ background: '#10B981' }}><span className="absolute right-0.5 top-0.5 w-4 h-4 rounded-full bg-white" /></span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </DarkHero>
+  );
+
+  const secLayers = (
+    <section className="py-20 lg:py-28 bg-white">
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="text-center max-w-2xl mx-auto"><Eyebrow k="slEyebrow" /><H2 k="slTitle" /><p className="mt-5 text-lg leading-relaxed" style={{ color: C.muted }}>{t('slSub')}</p></Reveal>
+        <div className="mt-14 grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[[BadgeCheck, 'sl1'], [KeyRound, 'sl2'], [Lock, 'sl3'], [Eye, 'sl4']].map(([Icon, k], n) => (
+            <Reveal key={k} delay={n * 80}>
+              <div className="lp2-card relative h-full rounded-[24px] p-7 border bg-white" style={{ borderColor: C.border }}>
+                <span className="absolute top-6 right-6 text-[40px] leading-none font-extrabold" style={{ ...display, color: '#EEF2F7' }}>0{n + 1}</span>
+                <span className="relative w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Icon size={22} color="#fff" /></span>
+                <p className="relative mt-5 text-[12px] font-bold uppercase tracking-wider" style={{ color: C.sky }}>{t(`${k}w`)}</p>
+                <h3 className="relative mt-1 text-[19px]" style={{ ...display, fontWeight: 800 }}>{t(`${k}t`)}</h3>
+                <p className="relative mt-2 text-[14.5px] leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+
+  const secTips = (
+    <section className="py-20 lg:py-28" style={{ background: C.bg }}>
+      <div className="max-w-6xl mx-auto px-5 grid lg:grid-cols-[1fr_1.1fr] gap-12 items-start">
+        <Reveal>
+          <Eyebrow k="stEyebrow" /><H2 k="stTitle" />
+          <div className="mt-8 rounded-[24px] p-6 flex gap-4" style={{ background: '#FFF7ED', border: '1px solid #FED7AA' }}>
+            <AlertTriangle size={24} color="#EA580C" className="shrink-0 mt-0.5" />
+            <div><p className="text-[16px] font-extrabold" style={{ ...display, color: '#9A3412' }}>{t('stAlertT')}</p><p className="mt-1 text-[14.5px] leading-relaxed" style={{ color: '#9A3412' }}>{t('stAlertD')}</p></div>
+          </div>
+        </Reveal>
+        <Reveal delay={120}>
+          <ul className="space-y-3">
+            {['st1', 'st2', 'st3', 'st4', 'st5'].map((k) => (
+              <li key={k} className="flex gap-4 rounded-2xl bg-white border p-5" style={{ borderColor: C.border }}>
+                <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(16,185,129,.12)' }}><Check size={16} color="#0E9F6E" strokeWidth={3} /></span>
+                <div><p className="text-[15.5px] font-bold" style={{ ...display, color: C.ink }}>{t(`${k}t`)}</p><p className="mt-0.5 text-[14px] leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p></div>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
+      </div>
+    </section>
+  );
+
+  const reportSec = (
+    <section className="py-20 bg-white">
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal>
+          <div className="rounded-[32px] p-8 sm:p-12 grid lg:grid-cols-[1.3fr_1fr] gap-8 items-center" style={{ background: `linear-gradient(135deg, ${C.night}, ${C.navyDeep})`, color: '#fff' }}>
+            <div><h2 className="text-[28px] sm:text-[36px] tracking-tight leading-tight" style={{ ...display, fontWeight: 800 }}>{t('srTitle')}</h2><p className="mt-3 text-white/70 text-[15.5px] leading-relaxed">{t('srSub')}</p></div>
+            <div className="grid gap-3">
+              <a href="https://wa.me/13073460474" target="_blank" rel="noopener noreferrer" className="lp2-btn flex items-center gap-3 rounded-2xl p-4" style={{ background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.14)' }}>
+                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#25D366' }}><MessageCircle size={20} color="#fff" /></span>
+                <span><span className="block text-[15px] font-bold">{t('whatsapp')}</span><span className="block text-xs text-white/60">+1 307 346 0474</span></span>
+              </a>
+              <a href="tel:+13073460474" className="lp2-btn flex items-center gap-3 rounded-2xl p-4" style={{ background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.14)' }}>
+                <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Phone size={19} color="#fff" /></span>
+                <span><span className="block text-[15px] font-bold">{t('call')}</span><span className="block text-xs text-white/60">+1 307 346 0474</span></span>
+              </a>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+
+  // ---------- ÈD ----------
+  const helpHero = (
+    <DarkHero crumb={t('navHelp')} badge={t('hhBadge')} BadgeIcon={MessageCircle} titleA={t('hhTitleA')} titleB={t('hhTitleB')} sub={t('phHelpS')}>
+      <div className="relative mx-auto lg:mr-0 max-w-[400px] rounded-[28px] overflow-hidden" style={{ ...glass, background: '#0B141A' }}>
+        <div className="flex items-center gap-3 px-5 py-4" style={{ background: '#1F2C33' }}>
+          <img src="/brand/logo-symbol.png" alt="" className="w-10 h-10 rounded-full bg-white object-contain p-1" />
+          <div><p className="text-[14.5px] font-bold text-white">BLICPay Support</p><p className="text-[11.5px]" style={{ color: '#8FA3AD' }}>WhatsApp · +1 307 346 0474</p></div>
+        </div>
+        <div className="p-4 space-y-2.5 text-[13.5px]" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px)', backgroundSize: '14px 14px' }}>
+          <div className="max-w-[80%] rounded-2xl rounded-tl-md px-3.5 py-2.5 text-white" style={{ background: '#1F2C33' }}>{t('hhM1')}<span className="block text-right text-[10px] mt-1" style={{ color: '#8FA3AD' }}>10:02</span></div>
+          <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-md px-3.5 py-2.5 text-white" style={{ background: '#005C4B' }}>{t('hhM2')}<span className="block text-right text-[10px] mt-1" style={{ color: '#9FD8CB' }}>10:03 ✓✓</span></div>
+          <div className="max-w-[80%] rounded-2xl rounded-tl-md px-3.5 py-2.5 text-white" style={{ background: '#1F2C33' }}>{t('hhM3')} 🙏<span className="block text-right text-[10px] mt-1" style={{ color: '#8FA3AD' }}>10:05</span></div>
+        </div>
+      </div>
+    </DarkHero>
+  );
+
+  const helpTopics = (
+    <section className="py-20 bg-white">
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="text-center max-w-2xl mx-auto"><Eyebrow k="htEyebrow" /><H2 k="htTitle" /></Reveal>
+        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[[Wallet, 'ht1', 'plans'], [CreditCard, 'ht2', 'card'], [Store, 'ht3', 'business'], [ShieldCheck, 'ht4', 'security']].map(([Icon, k, pg], n) => (
+            <Reveal key={k} delay={n * 60}>
+              <button onClick={() => nav(pg)} className="lp2-card group text-left w-full h-full rounded-[22px] p-6 border bg-white" style={{ borderColor: C.border }}>
+                <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: n === 2 ? PLAN_GRAD.pro : `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Icon size={22} color="#fff" /></span>
+                <p className="mt-5 text-[17px]" style={{ ...display, fontWeight: 800, color: C.ink }}>{t(`${k}t`)}</p>
+                <p className="mt-1 text-[14px] leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-[13.5px] font-bold" style={{ color: C.sky }}>{t('htSee')}<ArrowRight size={15} /></span>
+              </button>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+
+  // ---------- KONSÈNAN NOU ----------
+  const aboutHero = (
+    <DarkHero crumb={t('about')} badge={t('ahBadge')} BadgeIcon={Heart} titleA={t('ahTitleA')} titleB={t('ahTitleB')} sub={t('ahSub')}>
+      <div className="relative mx-auto lg:mr-0 max-w-[400px] rounded-[28px] p-7 text-white" style={glass}>
+        <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center"><img src="/brand/logo-symbol.png" alt="" className="w-11 h-11 object-contain" /></div>
+        <p className="mt-5 text-[22px]" style={{ ...display, fontWeight: 800 }}>BLICPay</p>
+        <p className="text-[13px] text-white/60">Global · Secure · Digital</p>
+        <div className="mt-6 space-y-3">
+          {[['🇭🇹', 'ahId1t', 'ahId1d'], ['🇺🇸', 'ahId2t', 'ahId2d']].map(([f, a, b]) => (
+            <div key={a} className="flex items-center gap-3 rounded-2xl px-4 py-3.5" style={{ background: 'rgba(255,255,255,.06)' }}>
+              <span className="text-[22px]">{f}</span>
+              <div><p className="text-[14px] font-bold">{t(a)}</p><p className="text-[12px] text-white/60">{t(b)}</p></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </DarkHero>
+  );
+
+  const aboutStory = (
+    <section className="py-20 lg:py-28 bg-white">
+      <div className="max-w-6xl mx-auto px-5 grid lg:grid-cols-2 gap-12 items-start">
+        <Reveal><Eyebrow k="asEyebrow" /><H2 k="asTitle" /></Reveal>
+        <Reveal delay={120}>
+          <p className="text-[17px] leading-relaxed" style={{ color: C.ink }}>{t('asP1')}</p>
+          <p className="mt-4 text-[17px] leading-relaxed" style={{ color: C.muted }}>{t('asP2')}</p>
+        </Reveal>
+      </div>
+    </section>
+  );
+
+  const aboutValues = (
+    <section className="py-20 lg:py-28" style={{ background: C.bg }}>
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="text-center max-w-2xl mx-auto"><Eyebrow k="avEyebrow" /><H2 k="avTitle" /></Reveal>
+        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[[Zap, 'av1'], [ShieldCheck, 'av2'], [Heart, 'av3'], [Target, 'av4']].map(([Icon, k], n) => (
+            <Reveal key={k} delay={n * 60}>
+              <div className="lp2-card h-full rounded-[24px] bg-white p-7 border" style={{ borderColor: C.border }}>
+                <span className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Icon size={22} color="#fff" /></span>
+                <h3 className="mt-5 text-[19px]" style={{ ...display, fontWeight: 800 }}>{t(`${k}t`)}</h3>
+                <p className="mt-2 text-[14.5px] leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+
+  const aboutRoadmap = (
+    <section className="py-20 lg:py-28 bg-white">
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="max-w-2xl"><Eyebrow k="arEyebrow" /><H2 k="arTitle" /></Reveal>
+        <div className="mt-12 grid md:grid-cols-2 gap-5">
+          {[['now', 'arNow', ['ar1', 'ar2', 'ar3', 'ar4'], Check], ['soon', 'arSoon', ['ar5', 'ar6'], Rocket]].map(([k, title, items, Icon]) => (
+            <Reveal key={k}>
+              <div className="h-full rounded-[26px] p-7" style={k === 'now' ? { background: C.bg, border: `1px solid ${C.border}` } : { background: `linear-gradient(160deg, ${C.night}, ${C.navyDeep})`, color: '#fff' }}>
+                <span className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[12px] font-bold" style={k === 'now' ? { background: 'rgba(16,185,129,.12)', color: '#0E9F6E' } : { background: 'rgba(34,211,238,.14)', color: C.cyan }}><span className="w-2 h-2 rounded-full" style={{ background: k === 'now' ? '#10B981' : C.cyan }} />{t(title)}</span>
+                <ul className="mt-6 space-y-3.5">
+                  {items.map((i) => <li key={i} className="flex items-start gap-3 text-[15px]"><Icon size={18} className="mt-0.5 shrink-0" color={k === 'now' ? '#0E9F6E' : C.cyan} />{t(i)}</li>)}
+                </ul>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal><p className="mt-8 text-[13px] leading-relaxed max-w-3xl" style={{ color: C.muted }}>{t('disclaimer')}</p></Reveal>
+      </div>
+    </section>
+  );
+
+  // ---------- KAT ----------
+  const cardHow = (
+    <section className="py-20 lg:py-28" style={{ background: C.bg }}>
+      <div className="max-w-6xl mx-auto px-5">
+        <Reveal className="text-center max-w-2xl mx-auto"><Eyebrow k="chEyebrow" /><H2 k="chTitle" /></Reveal>
+        <div className="mt-14 grid md:grid-cols-3 gap-5">
+          {[[CreditCard, 'ch1'], [Wallet, 'ch2'], [Globe, 'ch3']].map(([Icon, k], n) => (
+            <Reveal key={k} delay={n * 80}>
+              <div className="lp2-card relative h-full rounded-[24px] bg-white p-7 border" style={{ borderColor: C.border }}>
+                <span className="absolute top-6 right-6 text-[40px] leading-none font-extrabold" style={{ ...display, color: '#EEF2F7' }}>0{n + 1}</span>
+                <span className="relative w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${C.cyan}, ${C.navy})` }}><Icon size={22} color="#fff" /></span>
+                <h3 className="relative mt-5 text-[19px]" style={{ ...display, fontWeight: 800 }}>{t(`${k}t`)}</h3>
+                <p className="relative mt-2 text-[14.5px] leading-relaxed" style={{ color: C.muted }}>{t(`${k}d`)}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+
+  const QaSec = ({ base, n, eyebrow, title, img }) => (
+    <section className="py-20 lg:py-24 bg-white">
+      <div className={`max-w-${img ? '6xl' : '3xl'} mx-auto px-5 ${img ? 'grid lg:grid-cols-[0.8fr_1.2fr] gap-12 items-start' : ''}`}>
+        {img}
+        <div>
+          <Reveal className={img ? '' : 'text-center'}><Eyebrow k={eyebrow} /><H2 k={title} /></Reveal>
+          <div className="mt-10 space-y-3">
+            {Array.from({ length: n }, (_, i) => i + 1).map((i) => {
+              const id = base + i;
+              return (
+                <div key={i} className="rounded-2xl border bg-white" style={{ borderColor: faq === id ? C.sky : C.border }}>
+                  <button onClick={() => setFaq(faq === id ? 0 : id)} className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left font-semibold" style={{ color: C.ink }}>
+                    {t(`${eyebrow === 'faqTitle' && base === 0 ? 'q' : `q${base}_`}${i}`)}
+                    <ChevronDown size={18} className="shrink-0" style={{ transform: faq === id ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+                  </button>
+                  {faq === id && <p className="px-5 pb-5 text-[14.5px] leading-relaxed" style={{ color: C.muted }}>{t(`${eyebrow === 'faqTitle' && base === 0 ? 'a' : `a${base}_`}${i}`)}</p>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+  const bubbleImg = (
+    <Reveal className="hidden lg:block">
+      <div className="relative rounded-[30px] overflow-hidden aspect-[736/1104]" style={{ background: '#E9E6E3' }}>
+        <img src="/biz/bubble.jpg" alt="" className="w-full h-full object-cover" />
+        <span className="absolute flex items-center justify-center text-[64px] leading-none" style={{ left: '48%', top: '23%', width: '43%', height: '20%', ...display, fontWeight: 800, color: C.navyDeep }}>?</span>
+      </div>
+    </Reveal>
+  );
+
   const PAGE_CONTENT = {
     home: <>{heroSec}{statsBand}{servicesSec}{howSec}{plansTeaser}{cardTeaser}{securityTeaser}{bizTeaser}{ctaSec}</>,
     plans: <><PageHero title={t('phPlansT')} sub={t('phPlansS')} eyebrow={t('navPlans')} />{plansSec}{ctaSec}</>,
-    card: <>{cardSec}{whereSec}{ctaSec}</>,
+    card: <>{cardSec}{whereSec}{cardHow}<QaSec base={200} n={5} eyebrow="faqTitle" title="cqTitle" />{ctaSec}</>,
     business: <>{bizHero}{bizTrust}{bizWho}{bizPayFlow}{bizFeatures}{bizSteps}{plansSec}{bizFaq}{bizCta}</>,
-    security: <><PageHero title={t('phSecT')} sub={t('phSecS')} eyebrow={t('navSecurity')} />{securitySec}{ctaSec}</>,
-    help: <><PageHero title={t('phHelpT')} sub={t('phHelpS')} eyebrow={t('navHelp')} />{faqSec}{contactSec}</>,
-    about: <><PageHero title={t('about')} sub={t('phAboutS')} /><DocSec body={t('aboutBody') + '\n\n' + t('disclaimer')} />{ctaSec}</>,
+    security: <>{secHero}{secLayers}{secTips}{reportSec}{ctaSec}</>,
+    help: <>{helpHero}{helpTopics}<QaSec base={0} n={5} eyebrow="faqTitle" title="hqTitle" img={bubbleImg} />{reportSec}</>,
+    about: <>{aboutHero}{aboutStory}{aboutValues}{aboutRoadmap}{ctaSec}</>,
     terms: <><PageHero title={t('terms')} sub={t('phLegalS')} /><DocSec body={t('termsBody')} /></>,
     privacy: <><PageHero title={t('privacy')} sub={t('phLegalS')} /><DocSec body={t('privacyBody')} /></>,
   };
