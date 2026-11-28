@@ -974,6 +974,39 @@ function HeroPhone({ t, bare = false }) {
   );
 }
 
+// Menm kad iPhone titàn ak paj akèy la, men nan nenpòt gwosè (tout mezi yo pwopòsyonèl, san transform → tèks yo rete klè)
+function IPhoneFrame({ w = 220, dark = false, screenBg = '#fff', children }) {
+  const k = w / 330, px = (v) => Math.round(v * k * 10) / 10;
+  const SW = Math.round(w - px(22)), SH = Math.round(SW * 852 / 393);
+  const ink = dark ? '#fff' : '#0B1B33';
+  const btn = (side, top, h) => <span className={`absolute ${side === 'l' ? 'rounded-l-[3px]' : 'rounded-r-[3px]'}`} style={{ [side === 'l' ? 'left' : 'right']: -px(3), top: px(top), width: px(4), height: px(h), background: `linear-gradient(${side === 'l' ? 90 : 270}deg, #9EA2A8, #E6E8EB 60%, #C4C7CB)`, boxShadow: '0 0 0 .5px rgba(0,0,0,.25)' }} />;
+  return (
+    <div className="lp2-crisp relative mx-auto" style={{ width: w, fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif" }}>
+      {btn('l', 118, 30)}{btn('l', 172, 56)}{btn('l', 240, 56)}{btn('r', 196, 88)}
+      <div className="relative" style={{ borderRadius: px(58), padding: px(5), background: 'linear-gradient(150deg, #FFFFFF 0%, #D9DBDF 18%, #A7ABB1 38%, #F4F5F6 55%, #B9BCC1 76%, #EEF0F2 100%)', boxShadow: '0 40px 70px -30px rgba(11,27,51,.55), 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.7)' }}>
+        <div style={{ borderRadius: px(53), padding: px(6), background: '#0A0B0D', boxShadow: '0 0 0 1px rgba(0,0,0,.5)' }}>
+          <div className="relative overflow-hidden" style={{ borderRadius: px(47), width: SW, height: SH, background: screenBg }}>
+            <div className="absolute left-1/2 -translate-x-1/2 rounded-full bg-black z-20 flex items-center justify-end" style={{ top: px(11), width: px(104), height: px(30), paddingRight: px(12) }}>
+              <span className="rounded-full" style={{ width: px(9), height: px(9), background: 'radial-gradient(circle at 35% 35%, #2B3A55, #0A0F18 70%)' }} />
+            </div>
+            <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between font-semibold" style={{ height: px(50), padding: `${px(3)}px ${px(26)}px 0`, color: ink, fontSize: px(14) }}>
+              <span>9:41</span>
+              <span className="flex items-center" style={{ gap: px(5) }}>
+                <svg width={px(17)} height={px(11)} viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx=".8" fill="currentColor"/><rect x="4.6" y="5" width="3" height="6" rx=".8" fill="currentColor"/><rect x="9.2" y="2.6" width="3" height="8.4" rx=".8" fill="currentColor"/><rect x="13.8" y="0" width="3" height="11" rx=".8" fill="currentColor"/></svg>
+                <svg width={px(15)} height={px(11)} viewBox="0 0 15 11"><path d="M7.5 2.3c2.1 0 4 .8 5.5 2.1l1.1-1.1A9.4 9.4 0 0 0 7.5.7 9.4 9.4 0 0 0 .9 3.3L2 4.4a7.8 7.8 0 0 1 5.5-2.1Zm0 3.2c1.2 0 2.3.4 3.2 1.2l1.1-1.1a6.4 6.4 0 0 0-8.6 0l1.1 1.1c.9-.8 2-1.2 3.2-1.2Zm0 3.2c.4 0 .8.2 1.1.4L7.5 10.2 6.4 9.1c.3-.2.7-.4 1.1-.4Z" fill="currentColor"/></svg>
+                <span className="relative border" style={{ width: px(25), height: px(12), borderRadius: px(4), borderColor: dark ? 'rgba(255,255,255,.5)' : 'rgba(11,27,51,.4)' }}>
+                  <span className="absolute" style={{ inset: px(1.5), right: px(5), borderRadius: px(2), background: ink }} />
+                </span>
+              </span>
+            </div>
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // MacBook Pro ak tablo bò Pwo a (desine an kòd)
 function HeroLaptop({ t }) {
   const P = { bg: '#F7F5F0', line: '#ECE6DA', ink: '#16181D', muted: '#7A7468', char: '#1F2329', gold: 'linear-gradient(135deg, #FFC85A, #E8901C)', goldSoft: '#FFF1D6', goldInk: '#9A5B00' };
@@ -2004,14 +2037,7 @@ export default function Landing({ onStart, lang, setLang }) {
     </section>
   );
 
-  const miniPhone = (children) => (
-    <div className="mx-auto w-[200px] h-[400px] rounded-[38px] p-[7px]" style={{ background: 'linear-gradient(145deg,#D9DCE1,#9EA3AB)', boxShadow: '0 30px 60px -28px rgba(11,27,51,.45)' }}>
-      <div className="relative w-full h-full rounded-[32px] overflow-hidden bg-white">
-        <span className="absolute top-2 left-1/2 -translate-x-1/2 w-[62px] h-[18px] rounded-full bg-black z-10" />
-        {children}
-      </div>
-    </div>
-  );
+  const miniPhone = (children, dark = false, bg = '#fff') => <IPhoneFrame w={230} dark={dark} screenBg={bg}>{children}</IPhoneFrame>;
 
   const bizPayFlow = (
     <section className="py-20 lg:py-28" style={{ background: C.bg }}>
@@ -2020,7 +2046,7 @@ export default function Landing({ onStart, lang, setLang }) {
         <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* 0. foto kliyan */}
           <Reveal>
-            <div className="relative mx-auto w-[220px] h-[400px] rounded-[32px] overflow-hidden" style={{ background: '#0F5E5E', boxShadow: '0 30px 60px -28px rgba(11,27,51,.45)' }}>
+            <div className="relative mx-auto w-[230px] h-[481px] rounded-[40px] overflow-hidden" style={{ background: '#0F5E5E', boxShadow: '0 30px 60px -28px rgba(11,27,51,.45)' }}>
               <img src="/biz/phone.jpg" alt="" loading="lazy" className="w-full h-full object-cover" style={{ objectPosition: '50% 20%' }} />
               <span className="absolute left-3 right-3 bottom-3 rounded-2xl bg-white/95 px-3 py-2.5 flex items-center gap-2">
                 <span className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(16,185,129,.16)' }}><Check size={14} color="#0E9F6E" strokeWidth={3} /></span>
@@ -2042,7 +2068,7 @@ export default function Landing({ onStart, lang, setLang }) {
                 </div>
                 <p className="mt-5 text-white text-[12px] font-bold">Bella Cosmétiques</p>
               </div>
-            )}
+            , true)}
             <p className="mt-7 text-center text-[13px] font-extrabold" style={{ color: C.sky }}>01</p>
             <h3 className="mt-1 text-center text-[19px]" style={{ ...display, fontWeight: 800 }}>{t('bp1t')}</h3>
             <p className="mt-2 text-center text-[14.5px] leading-relaxed max-w-[300px] mx-auto" style={{ color: C.muted }}>{t('bp1d')}</p>
@@ -2071,7 +2097,7 @@ export default function Landing({ onStart, lang, setLang }) {
           <Reveal delay={240}>
             {miniPhone(
               <div className="absolute inset-0 px-3 pt-12" style={{ background: `linear-gradient(170deg, ${C.navyDeep}, #0E2E66)` }}>
-                <p className="text-center text-white text-[40px] leading-none mt-3" style={{ ...display, fontWeight: 300 }}>14:32</p>
+                <p className="text-center text-white text-[40px] leading-none mt-3" style={{ ...display, fontWeight: 300 }}>9:41</p>
                 <p className="text-center text-white/60 text-[10px] mt-1">{t('bpDate')}</p>
                 <div className="mt-7 rounded-2xl p-3 flex gap-2.5" style={{ background: 'rgba(255,255,255,.92)' }}>
                   <img src="/brand/logo-symbol.png" alt="" className="w-8 h-8 rounded-lg object-contain bg-white" />
@@ -2082,7 +2108,7 @@ export default function Landing({ onStart, lang, setLang }) {
                   <p className="text-[10.5px] text-white/85 leading-snug">{t('bpReceipt')}</p>
                 </div>
               </div>
-            )}
+            , true)}
             <p className="mt-7 text-center text-[13px] font-extrabold" style={{ color: C.sky }}>03</p>
             <h3 className="mt-1 text-center text-[19px]" style={{ ...display, fontWeight: 800 }}>{t('bp3t')}</h3>
             <p className="mt-2 text-center text-[14.5px] leading-relaxed max-w-[300px] mx-auto" style={{ color: C.muted }}>{t('bp3d')}</p>
