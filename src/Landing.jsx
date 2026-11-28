@@ -345,11 +345,16 @@ const D = {
   q200_5: ["Si mwen pèdi telefòn mwen?", "Et si je perds mon téléphone ?", "What if I lose my phone?"],
   a200_5: ["Ou ka bloke kat la nan app la nenpòt ki lè, oswa ekri nou sou WhatsApp.", "Vous pouvez bloquer la carte dans l’app à tout moment, ou nous écrire sur WhatsApp.", "You can block the card in the app anytime, or message us on WhatsApp."],
   pnScanT: ["QR eskane", "QR scanné", "QR scanned"],
-  pnScanD: ["Bella Cosmétiques", "Bella Cosmétiques", "Bella Cosmétiques"],
+  pnScanD: ["Bella Cosmétiques · 1 250 HTG", "Bella Cosmétiques · 1 250 HTG", "Bella Cosmétiques · 1,250 HTG"],
   pnFaceT: ["Face ID konfime", "Face ID confirmé", "Face ID confirmed"],
   pnFaceD: ["Peman an sekirize", "Paiement sécurisé", "Payment secured"],
   pnRecT: ["Resi disponib", "Reçu disponible", "Receipt ready"],
   pnRecD: ["Sove nan istorik ou", "Enregistré dans votre historique", "Saved to your history"],
+  pnSentT: ["Peman voye ✓", "Paiement envoyé ✓", "Payment sent ✓"],
+  pnSentD: ["1 250 HTG bay Bella Cosmétiques", "1 250 HTG à Bella Cosmétiques", "1,250 HTG to Bella Cosmétiques"],
+  pnMailT: ["Resi peman BLICPay", "Reçu de paiement BLICPay", "BLICPay payment receipt"],
+  pnMailD: ["Resi peman: 1 250 HTG bay Bella Cosmétiques", "Reçu de paiement : 1 250 HTG à Bella Cosmétiques", "Payment receipt: 1,250 HTG to Bella Cosmétiques"],
+  pnMailFrom: ["BLICPay", "BLICPay", "BLICPay"],
   navHome: ['Akèy', 'Accueil', 'Home'],
   navSecurity: ['Sekirite', 'Sécurité', 'Security'],
   navHelp: ['Èd', 'Aide', 'Help'],
@@ -980,42 +985,45 @@ function HeroPhone({ t, bare = false }) {
   );
 }
 
-// Notifikasyon anime sou foto kliyan an (paj Antrepriz): QR → Face ID → peman voye → resi
+// Notifikasyon stil iPhone sou foto kliyan an (paj Antrepriz): BLICPay QR → BLICPay peman → Gmail resi
 function PhotoNotifs({ t }) {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(-1);
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setStep(3); return undefined; }
-    const id = setInterval(() => setStep((s) => (s + 1) % 5), 2200);
-    return () => clearInterval(id);
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setStep(2); return undefined; }
+    const seq = [600, 2800, 5000, 8400]; let T = [];
+    const run = () => { setStep(-1); T = seq.map((ms, n) => setTimeout(() => (n < 3 ? setStep(n) : run()), ms)); };
+    run();
+    return () => T.forEach(clearTimeout);
   }, []);
-  const toasts = [
-    [QrCode, 'pnScanT', 'pnScanD', '#0891B2'],
-    [Fingerprint, 'pnFaceT', 'pnFaceD', '#143A73'],
-    null,
-    [Check, 'pnRecT', 'pnRecD', '#0E9F6E'],
+  const items = [
+    ['blic', 'BLICPay', 'pnScanT', 'pnScanD'],
+    ['blic', 'BLICPay', 'pnSentT', 'pnSentD'],
+    ['gmail', 'Gmail', 'pnMailFrom', 'pnMailD'],
   ];
-  const sent = step === 2 || step === 3;
   return (
-    <>
-      {toasts.map((tt, i) => tt && (
-        <div key={i} className="absolute left-2.5 right-2.5 top-3 rounded-[18px] px-3 py-2.5 flex items-center gap-2.5" style={{ background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', boxShadow: '0 12px 28px -12px rgba(0,0,0,.45)', opacity: step === i ? 1 : 0, transform: step === i ? 'translateY(0) scale(1)' : step > i ? 'translateY(-14px) scale(.96)' : 'translateY(-26px) scale(.96)', transition: 'opacity .45s ease, transform .55s cubic-bezier(.22,1,.36,1)' }}>
-          <span className="w-8 h-8 rounded-[9px] flex items-center justify-center shrink-0" style={{ background: tt[3] }}>{React.createElement(tt[0], { size: 15, color: '#fff', strokeWidth: 2.5 })}</span>
-          <span className="flex-1 min-w-0">
-            <span className="flex items-center justify-between text-[10px] font-semibold" style={{ color: '#5D6B7E' }}>BLICPay<span>{t('bpNow')}</span></span>
-            <span className="block text-[11.5px] font-bold leading-tight truncate" style={{ color: '#0B1B33' }}>{t(tt[1])}</span>
-            <span className="block text-[10.5px] leading-tight truncate" style={{ color: '#5D6B7E' }}>{t(tt[2])}</span>
-          </span>
-        </div>
-      ))}
-      {/* montan k ap monte */}
-      <span className="absolute right-6 top-[46%] text-[15px] font-extrabold px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,.92)', color: '#0B1B33', opacity: step === 2 ? 1 : 0, transform: step === 2 ? 'translateY(-18px)' : 'translateY(10px)', transition: 'opacity .5s, transform 1.4s cubic-bezier(.22,1,.36,1)' }}>−1 250 HTG</span>
-      {/* ti pwen ki bat sou telefòn nan */}
-      <span className="absolute right-[34px] top-[57%] w-3 h-3 rounded-full" style={{ background: '#22D3EE', animation: 'lp2PulseC 1.6s infinite', opacity: step < 2 ? 1 : 0, transition: 'opacity .3s' }} />
-      <span className="absolute left-3 right-3 bottom-3 rounded-2xl bg-white/95 px-3 py-2.5 flex items-center gap-2" style={{ opacity: sent ? 1 : 0, transform: sent ? 'translateY(0) scale(1)' : 'translateY(16px) scale(.94)', transition: 'opacity .4s, transform .5s cubic-bezier(.34,1.56,.64,1)' }}>
-        <span className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(16,185,129,.16)' }}><Check size={14} color="#0E9F6E" strokeWidth={3} /></span>
-        <span className="text-[11.5px] font-bold leading-tight" style={{ color: '#0B1B33' }}>{t('bpSent')}</span>
-      </span>
-    </>
+    <div className="absolute left-2 right-2" style={{ top: '63%' }}>
+      {items.map(([ic, app, ti, bo], i) => {
+        const d = step - i; // 0 = nouvo a, 1 = anba l, <0 = poko rive
+        const st = d < 0 ? { opacity: 0, visibility: 'hidden', transform: 'translateY(-22px) scale(.97)', zIndex: 5 }
+          : d === 0 ? { opacity: 1, transform: 'translateY(0) scale(1)', zIndex: 4 }
+          : d === 1 ? { opacity: 1, transform: 'translateY(13px) scale(.93)', zIndex: 3, filter: 'brightness(.97)' }
+          : { opacity: 0, visibility: 'hidden', transform: 'translateY(22px) scale(.86)', zIndex: 2 };
+        return (
+          <div key={i} className="absolute inset-x-0 top-0 rounded-[20px] px-3 py-2.5 flex items-start gap-2.5" style={{ background: '#F6F6F8', boxShadow: '0 10px 30px -10px rgba(0,0,0,.45)', transition: 'opacity .45s ease, transform .6s cubic-bezier(.22,1,.36,1), visibility .45s', ...st }}>
+            <span className="w-[34px] h-[34px] rounded-[9px] bg-white flex items-center justify-center shrink-0 overflow-hidden" style={{ boxShadow: '0 0 0 .5px rgba(0,0,0,.12)' }}>
+              {ic === 'gmail' ? <img src="/brands/gmail.png" alt="" className="w-[22px] h-auto" /> : <img src="/brand/logo-symbol.png" alt="" className="w-[28px] h-[28px] object-contain" />}
+            </span>
+            <span className="flex-1 min-w-0" style={{ fontFamily: "-apple-system, 'SF Pro Text', 'Inter', sans-serif" }}>
+              <span className="flex items-baseline justify-between gap-2">
+                <span className="text-[11.5px] font-semibold truncate" style={{ color: '#111' }}>{t(ti)}</span>
+                <span className="text-[10px] shrink-0" style={{ color: 'rgba(60,60,67,.6)' }}>{t('bpNow')}</span>
+              </span>
+              <span className="block text-[11px] leading-snug" style={{ color: '#1c1c1e' }}>{t(bo)}</span>
+            </span>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
